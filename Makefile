@@ -12,11 +12,7 @@ LDLIBS =
 
 SRC = $(shell find src -name *.cpp)
 OBJ = $(SRC:%.cpp=%.o)
-BIN = ${APPLICATION}_${VERSION}
-
-TEST_SRC = $(shell find tests -name *.cpp)
-TEST_OBJ = $(TEST_SRC:%.cpp=%.o)
-TEST_BIN = all_tests
+BIN = ${APPLICATION}_${VERSION}.exe
 
 app: ${OBJ}
 	g++ ${LDFLAGS} -o ${BIN} $^
@@ -24,7 +20,7 @@ app: ${OBJ}
 
 TEST_SRC = $(shell find tests -name *.cpp)
 TEST_OBJ = $(TEST_SRC:%.cpp=%.o)
-TEST_BIN = all_tests
+TEST_BIN = all_tests.exe
 
 
 test: all_tests

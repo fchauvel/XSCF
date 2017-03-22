@@ -8,6 +8,7 @@ class Controller
 {
  public:
   Controller(Actuator& actuator, Agent&  agent);
+  ~Controller();
   
   void select_action(const Context& context) const;
   

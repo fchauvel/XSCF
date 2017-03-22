@@ -34,22 +34,28 @@ public:
 
 TEST_GROUP(TestController)
 {
-  Population population;
+  Action* action;
+  Population* population;
   Agent* agent;
   Actuator* actuator;
   Controller* controller;
 
   void setup(void)
   {
+    population = new Population();
+    action = new Action(4);
+    population->add_classifier(*action);
     actuator = new FakeActuator();
-    agent = new FakeAgent(population);
+    agent = new FakeAgent(*population);
     controller = new Controller(*actuator, *agent);
   }
 
   void teardown(void) {
-    delete actuator;
+    delete action;
     delete controller;
     delete agent;
+    delete actuator;
+    delete population;
     mock().clear();
   }
   

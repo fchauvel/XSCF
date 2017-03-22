@@ -13,6 +13,5 @@ Agent::~Agent()
 const Action* const
 Agent::select_action(const Context& context)
 {
-  Action* selection = new Action(4);
-  return selection;
+  return &(_classifiers.first()->action());
 }
