@@ -12,7 +12,7 @@ TEST_GROUP(TestAgent)
 
 
 TEST(TestAgent, test_action){
-  Context context;
+  Context context(0);
   Action expected(4);
   Population population = Population();
   
@@ -24,6 +24,6 @@ TEST(TestAgent, test_action){
 
   CHECK(expected == *actual);
   
-  //delete actual;
+  delete actual;
 }
 

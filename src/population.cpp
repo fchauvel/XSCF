@@ -21,7 +21,7 @@ Population::~Population()
 void
 Population::add_classifier(Action& action)
 {
-  Classifier* classifier = new Classifier(action);
+  Classifier* classifier = new Classifier(1, 1);
   _classifiers.push_back(classifier);
 }
 

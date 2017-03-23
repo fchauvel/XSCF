@@ -65,7 +65,7 @@ TEST_GROUP(TestController)
 TEST(TestController, test_invoke_agent){
   mock().expectOneCall("set");
   mock().expectOneCall("select_action");
-  Context context;
+  Context context(0);
   controller->select_action(context);
   mock().checkExpectations();
 }
