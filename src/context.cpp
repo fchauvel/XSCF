@@ -79,6 +79,13 @@ Value::to_unsigned_int(void) const
 }
 
 
+std::ostream&
+operator << (std::ostream& out, const Value& value) {
+  out << value._value;
+  return out;
+}
+
+
 Vector::Vector(unsigned int dimension_count):
   _values(dimension_count, 0)
 {}
@@ -147,4 +154,26 @@ const Value&
 Vector::operator [] (unsigned int index) const
 {
   return _values[index];
+}
+
+
+bool
+Vector::operator < (const Vector& other) const
+{
+  for (unsigned int index=0 ; index<_values.size() ; ++index) {
+    if (_values[index] == other._values[index]) continue;
+    return _values[index] < other._values[index];
+  }
+  return false;
+}
+
+
+std::ostream&
+operator << (ostream& out, const Vector& vector) {
+  out << "[";
+  for(unsigned int index=0 ; index<vector._values.size()-1 ; ++index) {
+    out << vector._values[index] << ", ";
+  }
+  out << vector._values.back() <<  "]" << std::endl;
+  return out;
 }

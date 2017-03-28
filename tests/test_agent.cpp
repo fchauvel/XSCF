@@ -19,7 +19,7 @@ TEST_GROUP(TestAgent)
 TEST(TestAgent, test_predict_the_single_active_rule)
 {
   vector<int> predictions = {4};
-  factory.define(Rule({Interval(0, 100)}, predictions, 0.75));
+  factory.define(Rule({Interval(0, 100)}, predictions, 0.75, 0.5));
 
   Agent agent(factory);
   const Vector& actual = agent.select_action(Vector({1}));
@@ -30,10 +30,23 @@ TEST(TestAgent, test_predict_the_single_active_rule)
 
 TEST(TestAgent, test_predict_the_fittest_active_rule)
 {
-  factory.define(Rule({Interval(0, 100)}, { 3 }, 0.5));
+  factory.define(Rule({Interval(0, 100)}, { 3 }, 0.5, 0.5));
 
   vector<int> predictions = { 4 };
-  factory.define(Rule({Interval(0, 100)}, predictions, 0.75));
+  factory.define(Rule({Interval(0, 100)}, predictions, 0.75, 0.6));
+  
+  Agent agent(factory);
+  const Vector& actual = agent.select_action(Vector({50}));
+  
+  CHECK(Vector(predictions) == actual);
+}
+
+TEST(TestAgent, test_predict_the_most_interesting)
+{
+  vector<int> predictions = { 4 };
+  factory.define(Rule({Interval(0, 100)}, predictions, 0.25, 0.6));
+  factory.define(Rule({Interval(10, 90)}, predictions, 0.25, 0.9));
+  factory.define(Rule({Interval(0, 100)}, { 3 }, 0.3, 0.2));
   
   Agent agent(factory);
   const Vector& actual = agent.select_action(Vector({50}));

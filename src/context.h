@@ -32,6 +32,8 @@ class Value
   static const unsigned int MAXIMUM = 100;
   
  private:
+  friend std::ostream& operator << (std::ostream& out, const Value& value);
+  
   unsigned int _value;
   
 };
@@ -48,13 +50,21 @@ class Vector
 
   void operator = (const Vector& other);
   bool operator == (const Vector& other) const;
+  bool operator < (const Vector& other) const;
   
   unsigned int size(void) const;
   const Value& operator [] (unsigned int index) const;
   
  private:
+  friend std::ostream& operator << (std::ostream& out, const Vector& vector);
+  
   vector<Value> _values;
   
 };
+
+
+
+
+
 
 #endif

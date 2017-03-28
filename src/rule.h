@@ -3,6 +3,7 @@
 
 
 #include <vector>
+#include <map>
 
 #include "context.h"
 #include "actions.h"
@@ -28,13 +29,16 @@ class Interval
 };
 
 
-class Rule {
-
+class Rule
+{
  public:
-  Rule(const vector<Interval>& constraints, Vector prediction, double fitness);
+  Rule(const vector<Interval>& constraints, Vector prediction, double fitness, double payoff);
   Rule(const Rule& prototype);
   ~Rule();
 
+  double fitness(void) const;
+  double weighted_payoff(void) const;
+  
   void operator = (const Rule& prototype);
   bool fits_better_than(const Rule& other) const;
   Interval& operator [](unsigned int index);
@@ -45,6 +49,7 @@ class Rule {
   vector<Interval> _intervals;
   Vector _outputs;
   double _fitness;
+  double _payoff;
 
 };
 
@@ -61,7 +66,10 @@ class Population
   const Rule& operator [] (unsigned int index) const;
   const Rule& first(void);
   void add(const Rule& rule);
-
+  map<Vector, Population*>& groupByPredictions(void) const;
+  bool rewards_more_than(const Population& other) const;
+  double average_payoff(void) const;
+  
   const Rule& fittest(void) const;
   
  private:

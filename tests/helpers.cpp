@@ -40,7 +40,9 @@ TestRuleFactory::define(const Rule& rule)
 RuleFactory&
 Helper::one_rule(std::vector<int> predictions) {
   TestRuleFactory *factory = new TestRuleFactory();
-  Rule single_rule({Interval(0, 100)}, predictions, 0.75);
+  const double fitness = 0.75;
+  const double payoff = 0.75;
+  Rule single_rule({Interval(0, 100)}, predictions, fitness, payoff);
   factory->define(single_rule);
   return *factory;
 }

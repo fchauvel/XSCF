@@ -32,22 +32,37 @@ Interval::contains(const Value value) const
 
 
 
-Rule::Rule(const vector<Interval>& constraints, Vector prediction, double fitness):
+Rule::Rule(const vector<Interval>& constraints, Vector prediction, double fitness, double payoff):
   _intervals(constraints),
   _outputs(prediction),
-  _fitness(fitness)
+  _fitness(fitness),
+  _payoff(payoff)
 {}
 
 
 Rule::Rule(const Rule& prototype)
   :_intervals(prototype._intervals),
    _outputs(prototype._outputs),
-   _fitness(prototype._fitness)
+   _fitness(prototype._fitness),
+   _payoff(prototype._payoff)
 {}
 
 
 Rule::~Rule()
 {}
+
+
+double
+Rule::fitness(void) const
+{
+  return _fitness;
+}
+
+double
+Rule::weighted_payoff(void) const
+{
+  return _fitness * _payoff;
+}
 
 
 void
@@ -56,6 +71,7 @@ Rule::operator = (const Rule& prototype)
   _intervals = prototype._intervals;
   _outputs = prototype._outputs;
   _fitness = prototype._fitness;
+  _payoff = prototype._payoff;
 }
 
 
@@ -114,8 +130,7 @@ Population::Population(const Population& prototype)
 
 
 Population::~Population()
-{
-}
+{}
 
 
 void
@@ -164,6 +179,42 @@ Population::fittest(void) const
   return *fittest_rule;
 }
 
+
+std::map<Vector, Population*>&
+Population::groupByPredictions(void) const
+{
+  std::map<Vector, Population*>& byPrediction = *new std::map<Vector, Population*>();
+  for(unsigned int index=0 ; index<_rules.size() ; index++){
+    const Vector& prediction = _rules[index]->outputs();
+    if (byPrediction.count(prediction) == 0) {
+      Population* group = new Population();
+      byPrediction[prediction] = group;
+    }
+    byPrediction[prediction]->add(*_rules[index]);
+  }
+  return byPrediction;
+}
+
+
+bool
+Population::rewards_more_than(const Population& other) const
+{
+  return average_payoff() > other.average_payoff();
+}
+
+double
+Population::average_payoff(void) const
+{
+  double total_fitness = 0;
+  double total_weighted_payoff = 0;
+  for(vector<const Rule*>::const_iterator each_rule = _rules.begin();
+      each_rule != _rules.end();
+      ++each_rule) {
+    total_fitness += (*each_rule)->fitness();
+    total_weighted_payoff += (*each_rule)->weighted_payoff();
+  }
+  return total_weighted_payoff / total_fitness;
+}
 
 
 RuleFactory::RuleFactory()
