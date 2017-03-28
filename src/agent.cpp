@@ -2,16 +2,35 @@
 #include "agent.h"
 
 
-Agent::Agent(Population& classifiers):
-  _classifiers(classifiers)
-{}
-
-Agent::~Agent()
-{}
-
-
-const Action* const
-Agent::select_action(const Context& context)
+Agent::Agent(const RuleFactory& factory)
+  :_factory(factory),
+   _rules(*new Population())
 {
-  return new Action(_classifiers.first()->outputs()[0].to_unsigned_int());
+  _factory.initialise(_rules);
+}
+
+
+Agent::Agent(const Agent& prototype)
+  :_factory(prototype._factory),
+   _rules(prototype._rules)
+{}
+   
+	    
+Agent::~Agent()
+{
+  delete &_rules;
+}
+
+
+void
+Agent::operator = (const Agent& prototype)
+{
+  
+}
+
+
+const Vector&
+Agent::select_action(const Vector& input)
+{
+  return _rules.fittest().outputs();
 }

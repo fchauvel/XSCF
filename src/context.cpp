@@ -1,5 +1,9 @@
 
+
 #include "context.h"
+
+#include <iostream>
+
 
 Value::Value(int value):
   Value(static_cast<unsigned>(value))
@@ -7,8 +11,15 @@ Value::Value(int value):
 
 Value::Value(unsigned int value)
 {
-  if (value > MAXIMUM) throw std::invalid_argument("A value cannot exceed the maximum");
+  if (value > MAXIMUM)
+    throw std::invalid_argument("A value cannot exceed the maximum");
+  
   _value = value;
+}
+
+Value::Value(const Value& prototype)
+{
+  _value = prototype._value;
 }
 
 Value::~Value()
@@ -68,12 +79,12 @@ Value::to_unsigned_int(void) const
 }
 
 
-Context::Context(unsigned int dimension_count):
+Vector::Vector(unsigned int dimension_count):
   _values(dimension_count, 0)
 {}
 
 
-Context::Context(vector<int>& values):
+Vector::Vector(vector<int>& values):
   _values(values.size(), 0)
 {
   for (unsigned int index=0 ; index<values.size() ; index++)
@@ -82,15 +93,58 @@ Context::Context(vector<int>& values):
     }
 }
 
+
+Vector::Vector(initializer_list<int> values):
+  _values(values.size(), 0)
+{
+  for (initializer_list<int>::iterator each = values.begin() ;
+       each != values.end();
+       ++each)
+    {
+      unsigned int index = each - values.begin();
+      _values[index] = *each;
+    }
+}
+
+
+Vector::Vector(const Vector& prototype)
+  :_values(prototype._values)
+{}
+  
+
+Vector::~Vector()
+{}
+
+
+void
+Vector::operator = (const Vector& other)
+{
+  _values = other._values;
+}  
+
+
 unsigned int
-Context::size(void) const
+Vector::size(void) const
 {
   return _values.size();
 }
 
 
+bool
+Vector::operator == (const Vector& other) const
+{
+  if (_values.size() != other._values.size()) return false;
+  
+  for(unsigned int index=0 ; index<_values.size() ; index++) {
+    if (_values[index] != other._values[index]) return false;
+  }
+  
+  return true;
+}
+
+
 const Value&
-Context::operator [] (unsigned int index) const
+Vector::operator [] (unsigned int index) const
 {
   return _values[index];
 }

@@ -14,10 +14,10 @@ Controller::~Controller()
 
 
 void
-Controller::select_action(const Context& context) const
+Controller::select_action(const Vector& inputs) const
 {
-  const Action* const action = _agent.select_action(context);
-  action->execute_on(_actuator);
-  delete action;
+  const Vector& prediction = _agent.select_action(inputs);
+  Action action(prediction[0].to_unsigned_int());
+  action.execute_on(_actuator);
 };
 

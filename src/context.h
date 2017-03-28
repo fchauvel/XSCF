@@ -15,6 +15,7 @@ class Value
  public:
   Value(int value);
   Value(unsigned int value);
+  Value(const Value& prototype);
   ~Value();
 
   void operator = (const Value& other);
@@ -36,12 +37,18 @@ class Value
 };
 
 
-class Context
+class Vector
 {
  public:
-  Context(unsigned int dimension_count);
-  Context(vector<int>& values);
+  Vector(unsigned int dimension_count);
+  Vector(initializer_list<int> values);
+  Vector(vector<int>& values);
+  Vector(const Vector& other);
+  ~Vector();
 
+  void operator = (const Vector& other);
+  bool operator == (const Vector& other) const;
+  
   unsigned int size(void) const;
   const Value& operator [] (unsigned int index) const;
   

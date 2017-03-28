@@ -5,20 +5,23 @@
 
 
 #include "context.h"
-#include "population.h"
-#include "actions.h"
+#include "rule.h"
 
 
 class Agent
 {
  public:
-  Agent(Population& classifiers);
+  Agent(const RuleFactory& factory);
+  Agent(const Agent& prototype);
   virtual ~Agent();
+
+  void operator = (const Agent& prototype);
   
-  virtual const Action* const select_action(const Context& context);
+  virtual const Vector& select_action(const Vector& input);
   
  private:
-  Population& _classifiers;
+  const RuleFactory& _factory;
+  Population& _rules;
   
 };
 

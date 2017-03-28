@@ -4,6 +4,7 @@
 #include "CppUTestExt/MockSupport.h"
 
 #include "controller.h"
+#include "helpers.h"
 
 
 class FakeActuator: public Actuator
@@ -22,11 +23,13 @@ public:
 class FakeAgent: public Agent
 {
 public:
-  FakeAgent(Population& classifiers):Agent(classifiers){}
+  FakeAgent(const RuleFactory& factory):
+    Agent(factory)
+  {}
 
-  const Action* const select_action(const Context& context) {
+  const Vector& select_action(const Vector& inputs) {
     mock().actualCall("select_action");
-    return Agent::select_action(context);
+    return Agent::select_action(inputs);
   }
   
 };
@@ -34,28 +37,23 @@ public:
 
 TEST_GROUP(TestController)
 {
-  Action* action;
-  Population* population;
   Agent* agent;
   Actuator* actuator;
   Controller* controller;
-
+  const RuleFactory& factory = Helper::one_rule({ 4 });
+ 
   void setup(void)
   {
-    population = new Population();
-    action = new Action(4);
-    population->add_classifier(*action);
+    agent = new FakeAgent(factory);
     actuator = new FakeActuator();
-    agent = new FakeAgent(*population);
     controller = new Controller(*actuator, *agent);
   }
 
   void teardown(void) {
-    delete action;
     delete controller;
     delete agent;
     delete actuator;
-    delete population;
+    delete &factory;
     mock().clear();
   }
   
@@ -65,7 +63,7 @@ TEST_GROUP(TestController)
 TEST(TestController, test_invoke_agent){
   mock().expectOneCall("set");
   mock().expectOneCall("select_action");
-  Context context(0);
-  controller->select_action(context);
+  Vector inputs(1);
+  controller->select_action(inputs);
   mock().checkExpectations();
 }

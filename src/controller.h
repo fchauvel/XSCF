@@ -10,7 +10,7 @@ class Controller
   Controller(Actuator& actuator, Agent&  agent);
   ~Controller();
   
-  void select_action(const Context& context) const;
+  void select_action(const Vector& input) const;
   
  private:
   Actuator& _actuator;
