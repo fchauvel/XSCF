@@ -78,6 +78,22 @@ class Population
 };
 
 
+class PredictionGroup
+{
+ public:
+  PredictionGroup(const Population& rules);
+  //PredictionGroup(const PredictionGroup& other);
+  ~PredictionGroup();
+  
+  //PredictionGroup& operator = (const PredictionGroup& other);
+  const Vector& most_rewarding(void) const;
+  
+ private:
+  map<const Vector*, Population*> _predictions;
+
+};
+
+
 class RuleFactory
 {
  public:

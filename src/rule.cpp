@@ -217,6 +217,44 @@ Population::average_payoff(void) const
 }
 
 
+PredictionGroup::PredictionGroup(const Population& rules)
+  :_predictions()
+{
+  for(unsigned int index=0 ; index<rules.size() ; index++){
+    const Vector& prediction = rules[index].outputs();
+    if (_predictions.count(&prediction) == 0) {
+      Population* group = new Population();
+      _predictions[&prediction] = group;
+    }
+    _predictions[&prediction]->add(rules[index]);
+  }
+}
+
+
+PredictionGroup::~PredictionGroup()
+{
+  for(std::map<const Vector*, Population*>::iterator each = _predictions.begin() ;
+      each != _predictions.end() ;
+      ++each) {
+    delete each->second;
+  }
+}
+
+
+const Vector&
+PredictionGroup::most_rewarding(void) const {
+  std::map<const Vector*, Population*>::const_iterator most_rewarding = _predictions.begin();
+  for(std::map<const Vector*, Population*>::const_iterator any = _predictions.begin() ;
+      any != _predictions.end() ;
+      ++any) {
+    if (any->second->rewards_more_than(*(most_rewarding->second))) {
+      most_rewarding = any;
+    }
+  }
+  return *(most_rewarding->first);
+}
+
+
 RuleFactory::RuleFactory()
 {}
 
