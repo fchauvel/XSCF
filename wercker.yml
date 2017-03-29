@@ -20,6 +20,12 @@ build:
     # Read more about steps on our dev center:
     # http://devcenter.wercker.com/docs/steps/index.html
   steps:
+    - install-packages:
+        packages:
+          - make
+          - g++
+          - cpputest
+          - lcov
     - script:
         name: run tests
         code: |
