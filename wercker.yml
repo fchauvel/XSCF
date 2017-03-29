@@ -23,6 +23,11 @@ build:
     - install-packages:
         packages: make g++ cpputest lcov
     - script:
+        name: show environment
+        code: |
+          pwd
+          ls -l
+    - script:
         name: run tests
         code: |
           make clean test
