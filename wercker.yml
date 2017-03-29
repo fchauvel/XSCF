@@ -21,11 +21,7 @@ build:
     # http://devcenter.wercker.com/docs/steps/index.html
   steps:
     - install-packages:
-        packages:
-          - make
-          - g++
-          - cpputest
-          - lcov
+        packages: make g++ cpputest lcov
     - script:
         name: run tests
         code: |
