@@ -28,6 +28,10 @@
 *.out
 *.app
 
+# Gcov outputs
+*.gcda
+*.gcno
+
 # Some Emacs files
 *~
 \#*\#
