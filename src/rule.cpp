@@ -4,25 +4,30 @@
 #include "rule.h"
 
 
-Interval::Interval(Value lower, Value upper)
+Interval::Interval(const Value& lower, const Value& upper)
   :_lower_bound(lower),
    _upper_bound(upper)
 {}
+
 
 Interval::Interval(const Interval& prototype)
   :_lower_bound(prototype._lower_bound),
    _upper_bound(prototype._upper_bound)
 {}
-  
+
+
 Interval::~Interval()
 {}
 
-void
+
+Interval&
 Interval::operator = (const Interval& prototype)
 {
   _lower_bound = prototype._lower_bound;
   _upper_bound = prototype._upper_bound;
+  return *this;
 }
+
 
 bool
 Interval::contains(const Value value) const
@@ -32,7 +37,7 @@ Interval::contains(const Value value) const
 
 
 
-Rule::Rule(const vector<Interval>& constraints, Vector prediction, double fitness, double payoff):
+Rule::Rule(const vector<Interval>& constraints, const Vector& prediction, double fitness, double payoff):
   _intervals(constraints),
   _outputs(prediction),
   _fitness(fitness),
@@ -65,27 +70,14 @@ Rule::weighted_payoff(void) const
 }
 
 
-void
+Rule&
 Rule::operator = (const Rule& prototype)
 {
   _intervals = prototype._intervals;
   _outputs = prototype._outputs;
   _fitness = prototype._fitness;
   _payoff = prototype._payoff;
-}
-
-
-Interval&
-Rule::operator [](unsigned int index)
-{
-  return _intervals[index];
-}
-
-
-bool
-Rule::fits_better_than(const Rule& other) const
-{
-  return _fitness > other._fitness;
+  return *this;
 }
 
 

@@ -15,11 +15,12 @@ using namespace std;
 class Interval
 {
  public:
-  Interval(Value lower, Value upper);
+  Interval(const Value& lower, const Value& upper);
   Interval(const Interval& prototype);
   ~Interval();
 
-  void operator = (const Interval& prototype);
+  Interval& operator = (const Interval& prototype);
+
   bool contains(const Value value) const;
   
  private:
@@ -32,16 +33,14 @@ class Interval
 class Rule
 {
  public:
-  Rule(const vector<Interval>& constraints, Vector prediction, double fitness, double payoff);
+  Rule(const vector<Interval>& constraints, const Vector& prediction, double fitness, double payoff);
   Rule(const Rule& prototype);
   ~Rule();
 
+  Rule& operator = (const Rule& prototype);
+
   double fitness(void) const;
   double weighted_payoff(void) const;
-  
-  void operator = (const Rule& prototype);
-  bool fits_better_than(const Rule& other) const;
-  Interval& operator [](unsigned int index);
   bool match(const Vector& input) const;
   const Vector& outputs(void) const;
   
@@ -62,8 +61,10 @@ class Population
   virtual ~Population(void);
 
   Population& operator = (const Population& population);
-  std::size_t size(void) const;
   const Rule& operator [] (unsigned int index) const;
+ 
+  size_t size(void) const;
+  
   Population& add(const Rule& rule);
   bool rewards_more_than(const Population& other) const;
   double average_payoff(void) const;
