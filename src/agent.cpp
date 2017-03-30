@@ -26,6 +26,7 @@ Agent::~Agent()
 const Vector&
 Agent::select_action(const Vector& input)
 {
-  PredictionGroup predictions(_rules);
+  ActivationGroup active_rules(_rules, input);
+  PredictionGroup predictions(active_rules);
   return predictions.most_rewarding();
 }

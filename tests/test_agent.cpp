@@ -54,4 +54,14 @@ TEST(TestAgent, test_predict_the_most_interesting)
   CHECK(Vector(predictions) == actual);
 }
 
+TEST(TestAgent, test_predict_only_active_rule)
+{
+  vector<int> expected_prediction = { 4 };
+  factory.define(Rule({Interval(0, 50)}, expected_prediction, 0.25, 0.25));
+  factory.define(Rule({Interval(50, 100)}, { 3 }, 0.90, 0.90));
 
+  Agent agent(factory);
+  const Vector& actual_prediction = agent.select_action(Vector({ 25 }));
+
+  CHECK(Vector(expected_prediction) == actual_prediction);
+}

@@ -133,10 +133,11 @@ Population::~Population()
 {}
 
 
-void
+Population&
 Population::operator = (const Population& prototype)
 {
   _rules = prototype._rules;
+  return *this;
 }
 
 
@@ -151,48 +152,13 @@ Population::size(void) const
 {
   return _rules.size();
 }
-  
 
-const Rule&
-Population::first(void)
-{
-  if (_rules.empty()) throw "Error, the population is empty!";
-  return *_rules[0];
-}
 
-void
+Population&
 Population::add(const Rule& rule)
 {
   _rules.push_back(&rule);
-}
-
-const Rule&
-Population::fittest(void) const
-{
-  const Rule* fittest_rule = _rules[0];
-  for (std::size_t index=0 ; index<_rules.size() ; ++index) {
-    const Rule* any_rule = _rules[index];
-    if (any_rule->fits_better_than(*fittest_rule)) {
-      fittest_rule = any_rule;
-    }
-  }
-  return *fittest_rule;
-}
-
-
-std::map<Vector, Population*>&
-Population::groupByPredictions(void) const
-{
-  std::map<Vector, Population*>& byPrediction = *new std::map<Vector, Population*>();
-  for(unsigned int index=0 ; index<_rules.size() ; index++){
-    const Vector& prediction = _rules[index]->outputs();
-    if (byPrediction.count(prediction) == 0) {
-      Population* group = new Population();
-      byPrediction[prediction] = group;
-    }
-    byPrediction[prediction]->add(*_rules[index]);
-  }
-  return byPrediction;
+  return *this;
 }
 
 
@@ -201,6 +167,7 @@ Population::rewards_more_than(const Population& other) const
 {
   return average_payoff() > other.average_payoff();
 }
+
 
 double
 Population::average_payoff(void) const
@@ -215,6 +182,24 @@ Population::average_payoff(void) const
   }
   return total_weighted_payoff / total_fitness;
 }
+
+
+
+ActivationGroup::ActivationGroup(const Population& rules, const Vector& context)
+  :Population()
+{
+  for(unsigned int index=0 ; index<rules.size() ; ++index) {
+    const Rule& any_rule = rules[index];
+    if (any_rule.match(context)) {
+      add(any_rule);
+    }
+  }
+}
+
+
+ActivationGroup::~ActivationGroup()
+{}
+
 
 
 PredictionGroup::PredictionGroup(const Population& rules)

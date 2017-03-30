@@ -59,22 +59,27 @@ class Population
  public:
   Population(void);
   Population(const Population& prototype);
-  ~Population(void);
+  virtual ~Population(void);
 
-  void operator = (const Population& population);
+  Population& operator = (const Population& population);
   std::size_t size(void) const;
   const Rule& operator [] (unsigned int index) const;
-  const Rule& first(void);
-  void add(const Rule& rule);
-  map<Vector, Population*>& groupByPredictions(void) const;
+  Population& add(const Rule& rule);
   bool rewards_more_than(const Population& other) const;
   double average_payoff(void) const;
-  
-  const Rule& fittest(void) const;
-  
+
  private:
   vector<const Rule*> _rules;
   
+};
+
+
+class ActivationGroup: public Population
+{
+ public:
+  ActivationGroup(const Population& rules, const Vector& context);
+  ~ActivationGroup();
+
 };
 
 
