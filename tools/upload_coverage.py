@@ -138,6 +138,8 @@ class CodacityJsonFormatter:
         
     @property
     def _overall_coverage(self):
+        if self._total_line_count == 0:
+            return 0
         return int(100 * self._total_hit_count / self._total_line_count)
 
     def visit_record(self, record):
