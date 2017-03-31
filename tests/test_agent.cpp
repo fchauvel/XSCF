@@ -8,6 +8,50 @@
 #include "helpers.h"
 
 
+TEST_GROUP(SingleRuleAgent)
+{
+  TestRuleFactory factory;
+  Agent* agent;
+  vector<int> predictions = { 4 };
+  double fitness = 0.75;
+  double payoff = 0.5;
+  Rule rule = Rule({Interval(0, 100)}, predictions, fitness, payoff);
+
+  void setup(void)
+  {
+    factory.define(rule);
+    agent = new Agent(factory);
+  }
+
+  void teardown(void)
+  {
+    delete agent;
+  }
+
+};
+
+
+TEST(SingleRuleAgent, test_predict_the_single_active_rule)
+{
+  factory.define(Rule({Interval(0, 100)}, predictions, 0.75, 0.5));
+
+  Agent agent(factory);
+  const Vector& actual = agent.select_action(Vector({ 1 }));
+
+  CHECK(Vector(predictions) == actual);
+}
+
+
+TEST(SingleRuleAgent, test_reward)
+{
+  agent->select_action({ 1 });
+  agent->reward(10);
+
+  DOUBLES_EQUAL(0.375, rule.weighted_payoff(), 1e-6);
+}
+  
+
+
 
 TEST_GROUP(TestAgent)
 {

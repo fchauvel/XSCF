@@ -57,6 +57,23 @@ Rule::~Rule()
 {}
 
 
+Rule&
+Rule::operator = (const Rule& prototype)
+{
+  _intervals = prototype._intervals;
+  _outputs = prototype._outputs;
+  _fitness = prototype._fitness;
+  _payoff = prototype._payoff;
+  return *this;
+}
+
+
+void
+Rule::reward(double reward) {
+  const double BETA = 0.25;
+  _payoff = _payoff + BETA * (reward - _payoff);
+}
+
 double
 Rule::fitness(void) const
 {
@@ -67,17 +84,6 @@ double
 Rule::weighted_payoff(void) const
 {
   return _fitness * _payoff;
-}
-
-
-Rule&
-Rule::operator = (const Rule& prototype)
-{
-  _intervals = prototype._intervals;
-  _outputs = prototype._outputs;
-  _fitness = prototype._fitness;
-  _payoff = prototype._payoff;
-  return *this;
 }
 
 
@@ -133,11 +139,14 @@ Population::operator = (const Population& prototype)
 }
 
 
-const Rule&
+Rule&
 Population::operator [] (unsigned int index) const
 {
   return *_rules[index];
 }
+
+
+
 
 std::size_t
 Population::size(void) const
@@ -147,7 +156,7 @@ Population::size(void) const
 
 
 Population&
-Population::add(const Rule& rule)
+Population::add(Rule& rule)
 {
   _rules.push_back(&rule);
   return *this;
@@ -166,22 +175,28 @@ Population::average_payoff(void) const
 {
   double total_fitness = 0;
   double total_weighted_payoff = 0;
-  for(vector<const Rule*>::const_iterator each_rule = _rules.begin();
-      each_rule != _rules.end();
-      ++each_rule) {
-    total_fitness += (*each_rule)->fitness();
-    total_weighted_payoff += (*each_rule)->weighted_payoff();
+  for(auto each_rule : _rules) {
+    total_fitness += each_rule->fitness();
+    total_weighted_payoff += each_rule->weighted_payoff();
   }
   return total_weighted_payoff / total_fitness;
 }
 
 
+void
+Population::reward(double reward)
+{
+  for (auto each_rule: _rules) {
+    each_rule->reward(reward);
+  }
+}
 
-ActivationGroup::ActivationGroup(const Population& rules, const Vector& context)
+
+ActivationGroup::ActivationGroup(Population& rules, const Vector& context)
   :Population()
 {
   for(unsigned int index=0 ; index<rules.size() ; ++index) {
-    const Rule& any_rule = rules[index];
+    Rule& any_rule = rules[index];
     if (any_rule.match(context)) {
       add(any_rule);
     }
@@ -229,6 +244,13 @@ PredictionGroup::most_rewarding(void) const {
     }
   }
   return *(most_rewarding->first);
+}
+
+
+Population&
+PredictionGroup::rules_to_reward(void) const {
+  const Vector& selected = most_rewarding();
+  return *(_predictions.at(&selected));
 }
 
 

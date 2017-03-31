@@ -43,6 +43,14 @@ TEST(TestSimpleRule, test_mismatch){
   CHECK_FALSE(rule->match(context));
 }
 
+TEST(TestSimpleRule, test_reward){
+  const double reward(10);
+  rule->reward(10);
+
+  const double expected = fitness * (payoff + 0.25 * (reward - payoff));
+  DOUBLES_EQUAL(expected, rule->weighted_payoff(), 1e-6)
+}
+
 
 TEST_GROUP(Test3DRule)
 {

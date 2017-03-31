@@ -28,11 +28,10 @@ TEST_BIN = all_tests.exe
 
 REPORT_DIR = reports
 
-coverage-report: all-tests
+coverage-report: ${TEST_BIN}
 	mkdir -p ${REPORT_DIR}
 	./${TEST_BIN}
 	lcov --base-directory . --directory . --capture --output-file i3.info
-	genhtml -o report/i3-coverage i3.info
 
 test: all_tests
 	./${TEST_BIN}

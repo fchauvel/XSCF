@@ -20,7 +20,7 @@ public:
   void define(const Rule& rule);
 
 private:
-  mutable vector<const Rule*> _rules;
+  mutable vector<Rule*> _rules;
   
 };
 

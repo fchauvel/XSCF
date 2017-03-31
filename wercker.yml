@@ -21,13 +21,14 @@ build:
     # http://devcenter.wercker.com/docs/steps/index.html
   steps:
     - install-packages:
-        packages: make g++ cpputest lcov
-    - script:
-        name: show environment
-        code: |
-          pwd
-          ls -l
+        packages: make g++ cpputest lcov python3
     - script:
         name: run tests
         code: |
           make clean test
+    - script:
+        name: Compute Code Coverage
+        code: |
+          make coverage
+          python3 tools/upload_coverage.py --user fchauvel --project XSCF --input-file i3.info
+          

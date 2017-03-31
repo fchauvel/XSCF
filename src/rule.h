@@ -39,6 +39,7 @@ class Rule
 
   Rule& operator = (const Rule& prototype);
 
+  void reward(double reward);
   double fitness(void) const;
   double weighted_payoff(void) const;
   bool match(const Vector& input) const;
@@ -61,16 +62,18 @@ class Population
   virtual ~Population(void);
 
   Population& operator = (const Population& population);
-  const Rule& operator [] (unsigned int index) const;
- 
-  size_t size(void) const;
+  Rule& operator [] (unsigned int index) const;
   
-  Population& add(const Rule& rule);
+  Population& add(Rule& rule);
+  
+  size_t size(void) const;
   bool rewards_more_than(const Population& other) const;
   double average_payoff(void) const;
 
+  void reward(double reward);
+  
  private:
-  vector<const Rule*> _rules;
+  vector<Rule*> _rules;
   
 };
 
@@ -78,7 +81,7 @@ class Population
 class ActivationGroup: public Population
 {
  public:
-  ActivationGroup(const Population& rules, const Vector& context);
+  ActivationGroup(Population& rules, const Vector& context);
   ~ActivationGroup();
 
 };
@@ -93,6 +96,7 @@ class PredictionGroup
   
   //PredictionGroup& operator = (const PredictionGroup& other);
   const Vector& most_rewarding(void) const;
+  Population& rules_to_reward(void) const;
   
  private:
   map<const Vector*, Population*> _predictions;

@@ -18,11 +18,12 @@ class Agent
   void operator = (const Agent& prototype);
   
   virtual const Vector& select_action(const Vector& input);
+  void reward(double reward);
   
  private:
   const RuleFactory& _factory;
-  Population& _rules;
-  
+  Population _rules;
+  Population _rules_to_reward;
 };
 
 

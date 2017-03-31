@@ -21,7 +21,7 @@ TestRuleFactory::~TestRuleFactory()
 void
 TestRuleFactory::initialise(Population& rule_set) const
 {
-  for (vector<const Rule*>::const_iterator each_rule = _rules.begin();
+  for (vector<Rule*>::const_iterator each_rule = _rules.begin();
        each_rule != _rules.end();
        ++each_rule){
     rule_set.add(**each_rule);
