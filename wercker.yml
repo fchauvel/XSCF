@@ -21,7 +21,7 @@ build:
     # http://devcenter.wercker.com/docs/steps/index.html
   steps:
     - install-packages:
-        packages: make g++ cpputest lcov python3
+        packages: make g++ cpputest lcov python3 python3-pip
     - script:
         name: Install Python Packages
         code: |
