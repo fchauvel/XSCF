@@ -23,6 +23,10 @@ build:
     - install-packages:
         packages: make g++ cpputest lcov python3
     - script:
+        name: Install Python Packages
+        code: |
+          pip3 install requests          
+    - script:
         name: run tests
         code: |
           make clean test
