@@ -17,7 +17,7 @@ public:
   
   virtual void initialise(Population& rule_set) const;
 
-  void define(const Rule& rule);
+  void define(Rule& rule);
 
 private:
   mutable vector<Rule*> _rules;

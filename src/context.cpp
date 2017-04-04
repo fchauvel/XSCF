@@ -174,6 +174,6 @@ operator << (ostream& out, const Vector& vector) {
   for(unsigned int index=0 ; index<vector._values.size()-1 ; ++index) {
     out << vector._values[index] << ", ";
   }
-  out << vector._values.back() <<  "]" << std::endl;
+  out << vector._values.back() <<  "]";
   return out;
 }

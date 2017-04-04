@@ -7,10 +7,11 @@ TEST_GROUP(TestSimpleRule)
 {
   const double fitness = 0.75;
   const double payoff = 0.75;
+  const double error = 1.0;
   Rule* rule;
 
   void setup() {
-    rule = new Rule({ Interval(0, 50) }, { 50 }, fitness, payoff);
+    rule = new Rule({ Interval(0, 50) }, { 50 }, fitness, payoff, error);
   }
   
   void teardown() {
@@ -56,9 +57,10 @@ TEST_GROUP(Test3DRule)
 {
   const double fitness = 0.75;
   const double payoff = 0.75;
+  const double error = 0.1;
   const Rule& rule = * new Rule({Interval(20, 30), Interval(10, 15), Interval(80, 99)},
 				{ 1 },
-				fitness, payoff);
+				fitness, payoff, error);
   
   void teardown() {
     delete &rule;

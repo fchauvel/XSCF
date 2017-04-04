@@ -1,5 +1,7 @@
 
 #include <sstream>
+#include <cmath>
+
 
 #include "rule.h"
 
@@ -36,12 +38,12 @@ Interval::contains(const Value value) const
 }
 
 
-
-Rule::Rule(const vector<Interval>& constraints, const Vector& prediction, double fitness, double payoff):
+Rule::Rule(const vector<Interval>& constraints, const Vector& prediction, double fitness, double payoff, double error):
   _intervals(constraints),
   _outputs(prediction),
   _fitness(fitness),
-  _payoff(payoff)
+  _payoff(payoff),
+  _error(error)
 {}
 
 
@@ -49,7 +51,8 @@ Rule::Rule(const Rule& prototype)
   :_intervals(prototype._intervals),
    _outputs(prototype._outputs),
    _fitness(prototype._fitness),
-   _payoff(prototype._payoff)
+   _payoff(prototype._payoff),
+   _error(prototype._error)
 {}
 
 
@@ -64,6 +67,7 @@ Rule::operator = (const Rule& prototype)
   _outputs = prototype._outputs;
   _fitness = prototype._fitness;
   _payoff = prototype._payoff;
+  _error = prototype._error;
   return *this;
 }
 
@@ -74,11 +78,35 @@ Rule::reward(double reward) {
   _payoff = _payoff + BETA * (reward - _payoff);
 }
 
+
+void
+Rule::update(double payoff, double error, double fitness) {
+  _payoff = payoff;
+  _error = error;
+  _fitness = fitness;
+}
+
+
 double
 Rule::fitness(void) const
 {
   return _fitness;
 }
+
+
+double
+Rule::error(void) const
+{
+  return _error;
+}
+
+
+double
+Rule::payoff(void) const
+{
+  return _payoff;
+}
+
 
 double
 Rule::weighted_payoff(void) const
@@ -146,8 +174,6 @@ Population::operator [] (unsigned int index) const
 }
 
 
-
-
 std::size_t
 Population::size(void) const
 {
@@ -186,8 +212,32 @@ Population::average_payoff(void) const
 void
 Population::reward(double reward)
 {
-  for (auto each_rule: _rules) {
-    each_rule->reward(reward);
+  const double BETA = 0.25;
+  const double ERROR_THRESHOLD = 500;
+  const unsigned int V_PARAM = 2;
+
+  double error[_rules.size()];
+  double payoff[_rules.size()];
+  double accuracy[_rules.size()];
+  double total_accuracy(0);
+
+  for (unsigned int index=0 ; index<_rules.size() ; ++index){
+    Rule& each_rule = *_rules[index];
+    payoff[index] = each_rule.payoff() + BETA * (reward - each_rule.payoff());
+    error[index] = each_rule.error() + BETA * abs(reward - payoff[index]);
+    
+    accuracy[index] = 1.0;
+    if (error[index] > ERROR_THRESHOLD) {
+      accuracy[index] = 0.1 * pow(error[index] / ERROR_THRESHOLD, -V_PARAM);
+    }
+    total_accuracy += accuracy[index];
+  }
+
+  for(unsigned int index=0 ; index<_rules.size() ; ++index) {
+    Rule& each_rule = *_rules[index];
+    double relative_accuracy = accuracy[index] / total_accuracy;
+    double fitness = each_rule.fitness() + BETA * (relative_accuracy - each_rule.fitness());
+    each_rule.update(payoff[index], error[index], fitness);
   }
 }
 
@@ -214,18 +264,18 @@ PredictionGroup::PredictionGroup(const Population& rules)
 {
   for(unsigned int index=0 ; index<rules.size() ; index++){
     const Vector& prediction = rules[index].outputs();
-    if (_predictions.count(&prediction) == 0) {
+    if (_predictions.count(prediction) == 0) {
       Population* group = new Population();
-      _predictions[&prediction] = group;
+      _predictions[prediction] = group;
     }
-    _predictions[&prediction]->add(rules[index]);
+    _predictions[prediction]->add(rules[index]);
   }
 }
 
 
 PredictionGroup::~PredictionGroup()
 {
-  for(std::map<const Vector*, Population*>::iterator each = _predictions.begin() ;
+  for(std::map<Vector, Population*>::iterator each = _predictions.begin() ;
       each != _predictions.end() ;
       ++each) {
     delete each->second;
@@ -235,22 +285,22 @@ PredictionGroup::~PredictionGroup()
 
 const Vector&
 PredictionGroup::most_rewarding(void) const {
-  std::map<const Vector*, Population*>::const_iterator most_rewarding = _predictions.begin();
-  for(std::map<const Vector*, Population*>::const_iterator any = _predictions.begin() ;
+  std::map<Vector, Population*>::const_iterator most_rewarding = _predictions.begin();
+  for(std::map<Vector, Population*>::const_iterator any = _predictions.begin() ;
       any != _predictions.end() ;
       ++any) {
     if (any->second->rewards_more_than(*(most_rewarding->second))) {
       most_rewarding = any;
     }
   }
-  return *(most_rewarding->first);
+  return most_rewarding->second->operator[](0).outputs();
 }
 
 
 Population&
 PredictionGroup::rules_to_reward(void) const {
   const Vector& selected = most_rewarding();
-  return *(_predictions.at(&selected));
+  return *(_predictions.at(selected));
 }
 
 

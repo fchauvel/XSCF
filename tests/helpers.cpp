@@ -30,9 +30,9 @@ TestRuleFactory::initialise(Population& rule_set) const
 
 
 void
-TestRuleFactory::define(const Rule& rule)
+TestRuleFactory::define(Rule& rule)
 {
-  _rules.push_back(new Rule(rule));
+  _rules.push_back(&rule);
 }
 
 
@@ -42,7 +42,8 @@ Helper::one_rule(std::vector<int> predictions) {
   TestRuleFactory *factory = new TestRuleFactory();
   const double fitness = 0.75;
   const double payoff = 0.75;
-  Rule single_rule({Interval(0, 100)}, predictions, fitness, payoff);
-  factory->define(single_rule);
+  const double error = 1.0;
+  Rule *single_rule = new Rule({Interval(0, 100)}, predictions, fitness, payoff, error);
+  factory->define(*single_rule);
   return *factory;
 }

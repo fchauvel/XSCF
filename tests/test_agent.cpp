@@ -8,18 +8,17 @@
 #include "helpers.h"
 
 
-TEST_GROUP(SingleRuleAgent)
+TEST_GROUP(OneRuleAgent)
 {
   TestRuleFactory factory;
   Agent* agent;
   vector<int> predictions = { 4 };
-  double fitness = 0.75;
-  double payoff = 0.5;
-  Rule rule = Rule({Interval(0, 100)}, predictions, fitness, payoff);
+  Rule *rule;
 
   void setup(void)
   {
-    factory.define(rule);
+    rule = new Rule({Interval(0, 100)}, predictions, 1.0, 1.0, 1.0);
+    factory.define(*rule);
     agent = new Agent(factory);
   }
 
@@ -31,81 +30,105 @@ TEST_GROUP(SingleRuleAgent)
 };
 
 
-TEST(SingleRuleAgent, test_predict_the_single_active_rule)
+TEST(OneRuleAgent, test_predict_the_single_active_rule)
 {
-  factory.define(Rule({Interval(0, 100)}, predictions, 0.75, 0.5));
-
-  Agent agent(factory);
-  const Vector& actual = agent.select_action(Vector({ 1 }));
-
+  const Vector& actual = agent->select_action(Vector({ 1 }));
+  
   CHECK(Vector(predictions) == actual);
 }
 
 
-TEST(SingleRuleAgent, test_reward)
+TEST(OneRuleAgent, test_reward)
 {
-  agent->select_action({ 1 });
+  agent->select_action(Vector({ 1 }));
   agent->reward(10);
-
-  DOUBLES_EQUAL(0.375, rule.weighted_payoff(), 1e-6);
-}
   
+  DOUBLES_EQUAL(3.25, rule->weighted_payoff(), 1e-6);
+}
 
 
 
-TEST_GROUP(TestAgent)
+TEST_GROUP(TwoRulesAgent)
 {
   TestRuleFactory factory;
-  
+  Agent* agent;
+  Rule *rule_1, *rule_2;
+
+  void setup(void)
+  {
+    rule_1 = new Rule({Interval(0, 49)}, { 4 }, 1.0, 1.0, 1.0);
+    factory.define(*rule_1);
+    
+    rule_2 = new Rule({Interval(40, 100)}, { 3 }, 1.0, 1.0, 1.0);
+    factory.define(*rule_2);
+    
+    agent = new Agent(factory);
+  }
+
+  void teardown(void)
+  {
+    delete agent;
+  }
+
 };
 
 
-TEST(TestAgent, test_predict_the_single_active_rule)
+TEST(TwoRulesAgent, test_predict_active_rule)
 {
-  vector<int> predictions = {4};
-  factory.define(Rule({Interval(0, 100)}, predictions, 0.75, 0.5));
+  const Vector& actual = agent->select_action(Vector({ 25 }));
 
-  Agent agent(factory);
-  const Vector& actual = agent.select_action(Vector({1}));
-
-  CHECK(Vector(predictions) == actual);
+  CHECK(Vector({ 4 }) == actual);
 }
 
 
-TEST(TestAgent, test_predict_the_fittest_active_rule)
-{
-  factory.define(Rule({Interval(0, 100)}, { 3 }, 0.5, 0.5));
 
-  vector<int> predictions = { 4 };
-  factory.define(Rule({Interval(0, 100)}, predictions, 0.75, 0.6));
+TEST_GROUP(OverlappingRulesAgent)
+{
+  TestRuleFactory factory;
+  Agent *agent;
+  Rule *rule_1, *rule_2, *rule_3;
+
+  void setup(void)
+  {
+    rule_1 = new Rule({Interval(0, 100)}, { 4 }, 1.0, 1.0, 1.0);
+    rule_2 = new Rule({Interval(0, 100)}, { 4 }, 0.8, 0.8, 1.0);
+    rule_3 = new Rule({Interval(0, 100)}, { 3 }, 0.5, 0.5, 1.0);
+    factory.define(*rule_1);
+    factory.define(*rule_2);
+    factory.define(*rule_3);
+    agent = new Agent(factory);
+  }
+
+  void teardown(void)
+  {
+    delete agent;
+  }
+
+};
+
+
+TEST(OverlappingRulesAgent, test_predict_the_most_relevant_rule)
+{
+  const Vector& actual = agent->select_action(Vector({ 50 }));
   
-  Agent agent(factory);
-  const Vector& actual = agent.select_action(Vector({50}));
-  
-  CHECK(Vector(predictions) == actual);
+  CHECK(Vector({ 4 }) == actual);
 }
 
-TEST(TestAgent, test_predict_the_most_interesting)
-{
-  vector<int> predictions = { 4 };
-  factory.define(Rule({Interval(0, 100)}, predictions, 0.25, 0.6));
-  factory.define(Rule({Interval(10, 90)}, predictions, 0.25, 0.9));
-  factory.define(Rule({Interval(0, 100)}, { 3 }, 0.3, 0.2));
+
+TEST(OverlappingRulesAgent, test_reward)
+{ 
+  agent->select_action(Vector({ 50 }));
+  agent->reward(10);
   
-  Agent agent(factory);
-  const Vector& actual = agent.select_action(Vector({50}));
-  
-  CHECK(Vector(predictions) == actual);
+  DOUBLES_EQUAL(2.84375, rule_1->weighted_payoff(), 1e-6);
+  DOUBLES_EQUAL(2.2475, rule_2->weighted_payoff(), 1e-6);
 }
 
-TEST(TestAgent, test_predict_only_active_rule)
-{
-  vector<int> expected_prediction = { 4 };
-  factory.define(Rule({Interval(0, 50)}, expected_prediction, 0.25, 0.25));
-  factory.define(Rule({Interval(50, 100)}, { 3 }, 0.90, 0.90));
 
-  Agent agent(factory);
-  const Vector& actual_prediction = agent.select_action(Vector({ 25 }));
 
-  CHECK(Vector(expected_prediction) == actual_prediction);
-}
+
+
+
+
+
+

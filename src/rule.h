@@ -33,15 +33,21 @@ class Interval
 class Rule
 {
  public:
-  Rule(const vector<Interval>& constraints, const Vector& prediction, double fitness, double payoff);
+  Rule(const vector<Interval>& constraints, const Vector& prediction, double fitness, double payoff, double error);
   Rule(const Rule& prototype);
   ~Rule();
 
   Rule& operator = (const Rule& prototype);
 
-  void reward(double reward);
+
   double fitness(void) const;
+  double error(void) const;
+  double payoff(void) const;
   double weighted_payoff(void) const;
+  
+  void reward(double reward);
+  void update(double payoff, double error, double fitness);
+
   bool match(const Vector& input) const;
   const Vector& outputs(void) const;
   
@@ -50,6 +56,7 @@ class Rule
   Vector _outputs;
   double _fitness;
   double _payoff;
+  double _error;
 
 };
 
@@ -99,7 +106,7 @@ class PredictionGroup
   Population& rules_to_reward(void) const;
   
  private:
-  map<const Vector*, Population*> _predictions;
+  map<const Vector, Population*> _predictions;
 
 };
 
