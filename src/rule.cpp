@@ -260,8 +260,29 @@ ActivationGroup::~ActivationGroup()
 
 
 PredictionGroup::PredictionGroup(const Population& rules)
-  :_predictions()
+  :_predictions(),
+   _most_rewarding()
 {
+  group_rules_by_prediction(rules);
+  _most_rewarding = find_most_rewarding_rules();
+}
+
+Population&
+PredictionGroup::find_most_rewarding_rules(void) const {
+ std::map<Vector, Population*>::const_iterator most_rewarding = _predictions.begin();
+  for(std::map<Vector, Population*>::const_iterator any = _predictions.begin() ;
+      any != _predictions.end() ;
+      ++any) {
+    if (any->second->rewards_more_than(*(most_rewarding->second))) {
+      most_rewarding = any;
+    }
+  }
+  return *most_rewarding->second;
+}
+
+
+void
+PredictionGroup::group_rules_by_prediction(const Population& rules) {
   for(unsigned int index=0 ; index<rules.size() ; index++){
     const Vector& prediction = rules[index].outputs();
     if (_predictions.count(prediction) == 0) {
@@ -285,22 +306,16 @@ PredictionGroup::~PredictionGroup()
 
 const Vector&
 PredictionGroup::most_rewarding(void) const {
-  std::map<Vector, Population*>::const_iterator most_rewarding = _predictions.begin();
-  for(std::map<Vector, Population*>::const_iterator any = _predictions.begin() ;
-      any != _predictions.end() ;
-      ++any) {
-    if (any->second->rewards_more_than(*(most_rewarding->second))) {
-      most_rewarding = any;
-    }
-  }
-  return most_rewarding->second->operator[](0).outputs();
+  return _most_rewarding[0].outputs();
 }
+
+
+
 
 
 Population&
 PredictionGroup::rules_to_reward(void) const {
-  const Vector& selected = most_rewarding();
-  return *(_predictions.at(selected));
+  return _most_rewarding;
 }
 
 

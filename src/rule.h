@@ -106,8 +106,11 @@ class PredictionGroup
   Population& rules_to_reward(void) const;
   
  private:
-  map<const Vector, Population*> _predictions;
-
+  void group_rules_by_prediction(const Population& rules);
+  Population& find_most_rewarding_rules(void) const;
+  
+  map<Vector, Population*> _predictions;
+  mutable Population _most_rewarding;
 };
 
 
