@@ -62,20 +62,20 @@ namespace xcsf {
   };
   
   
-  class Population
+  class RuleSet
   {
   public:
-    Population(void);
-    Population(const Population& prototype);
-    virtual ~Population(void);
+    RuleSet(void);
+    RuleSet(const RuleSet& prototype);
+    virtual ~RuleSet(void);
     
-    Population& operator = (const Population& population);
+    RuleSet& operator = (const RuleSet& population);
     Rule& operator [] (unsigned int index) const;
     
-    Population& add(Rule& rule);
+    RuleSet& add(Rule& rule);
     
     size_t size(void) const;
-    bool rewards_more_than(const Population& other) const;
+    bool rewards_more_than(const RuleSet& other) const;
     double average_payoff(void) const;
 
     void reward(double reward);
@@ -86,10 +86,10 @@ namespace xcsf {
   };
 
 
-  class ActivationGroup: public Population
+  class ActivationGroup: public RuleSet
   {
   public:
-    ActivationGroup(Population& rules, const Vector& context);
+    ActivationGroup(RuleSet& rules, const Vector& context);
     ~ActivationGroup();
 
   };
@@ -98,20 +98,20 @@ namespace xcsf {
   class PredictionGroup
   {
   public:
-    PredictionGroup(const Population& rules);
+    PredictionGroup(const RuleSet& rules);
     //PredictionGroup(const PredictionGroup& other);
     ~PredictionGroup();
 
     //PredictionGroup& operator = (const PredictionGroup& other);
     const Vector& most_rewarding(void) const;
-    Population& rules_to_reward(void) const;
+    RuleSet& rules_to_reward(void) const;
 
   private:
-    void _group_rules_by_prediction(const Population& rules);
-    Population& _find_most_rewarding_rules(void) const;
+    void _group_rules_by_prediction(const RuleSet& rules);
+    RuleSet& _find_most_rewarding_rules(void) const;
 
-    map<Vector, Population*> _predictions;
-    mutable Population _most_rewarding;
+    map<Vector, RuleSet*> _predictions;
+    mutable RuleSet _most_rewarding;
   };
 
 
@@ -121,7 +121,7 @@ namespace xcsf {
     RuleFactory(void);
     virtual ~RuleFactory();
   
-    virtual void initialise(Population& rule_set) const = 0;
+    virtual void initialise(RuleSet& rule_set) const = 0;
   
   };
 

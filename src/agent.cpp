@@ -16,10 +16,10 @@ Agent::Agent(const RuleFactory& factory)
 }
 
 
-Agent::Agent(const Agent& prototype)
-  :_factory(prototype._factory),
-   _rules(prototype._rules),
-   _rules_to_reward(prototype._rules_to_reward)
+Agent::Agent(const Agent& other)
+  :_factory(other._factory),
+   _rules(other._rules),
+   _rules_to_reward(other._rules_to_reward)
 {}
    
 	    

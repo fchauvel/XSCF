@@ -148,22 +148,22 @@ Rule::outputs(void) const
 
 
 
-Population::Population():
+RuleSet::RuleSet():
   _rules()
 {}
 
 
-Population::Population(const Population& prototype)
+RuleSet::RuleSet(const RuleSet& prototype)
   :_rules(prototype._rules)
 {}
 
 
-Population::~Population()
+RuleSet::~RuleSet()
 {}
 
 
-Population&
-Population::operator = (const Population& prototype)
+RuleSet&
+RuleSet::operator = (const RuleSet& prototype)
 {
   _rules = prototype._rules;
   return *this;
@@ -171,21 +171,21 @@ Population::operator = (const Population& prototype)
 
 
 Rule&
-Population::operator [] (unsigned int index) const
+RuleSet::operator [] (unsigned int index) const
 {
   return *_rules[index];
 }
 
 
 std::size_t
-Population::size(void) const
+RuleSet::size(void) const
 {
   return _rules.size();
 }
 
 
-Population&
-Population::add(Rule& rule)
+RuleSet&
+RuleSet::add(Rule& rule)
 {
   _rules.push_back(&rule);
   return *this;
@@ -193,14 +193,14 @@ Population::add(Rule& rule)
 
 
 bool
-Population::rewards_more_than(const Population& other) const
+RuleSet::rewards_more_than(const RuleSet& other) const
 {
   return average_payoff() > other.average_payoff();
 }
 
 
 double
-Population::average_payoff(void) const
+RuleSet::average_payoff(void) const
 {
   double total_fitness = 0;
   double total_weighted_payoff = 0;
@@ -213,7 +213,7 @@ Population::average_payoff(void) const
 
 
 void
-Population::reward(double reward)
+RuleSet::reward(double reward)
 {
   const double BETA = 0.25;
   const double ERROR_THRESHOLD = 500;
@@ -245,8 +245,8 @@ Population::reward(double reward)
 }
 
 
-ActivationGroup::ActivationGroup(Population& rules, const Vector& context)
-  :Population()
+ActivationGroup::ActivationGroup(RuleSet& rules, const Vector& context)
+  :RuleSet()
 {
   for(unsigned int index=0 ; index<rules.size() ; ++index) {
     Rule& any_rule = rules[index];
@@ -262,7 +262,7 @@ ActivationGroup::~ActivationGroup()
 
 
 
-PredictionGroup::PredictionGroup(const Population& rules)
+PredictionGroup::PredictionGroup(const RuleSet& rules)
   :_predictions(),
    _most_rewarding()
 {
@@ -270,9 +270,9 @@ PredictionGroup::PredictionGroup(const Population& rules)
   _most_rewarding = _find_most_rewarding_rules();
 }
 
-Population&
+RuleSet&
 PredictionGroup::_find_most_rewarding_rules(void) const {
- std::pair<Vector, Population*> most_rewarding = *_predictions.begin();
+ std::pair<Vector, RuleSet*> most_rewarding = *_predictions.begin();
  for(auto any: _predictions) {
     if (any.second->rewards_more_than(*most_rewarding.second)) {
       most_rewarding = any;
@@ -283,11 +283,11 @@ PredictionGroup::_find_most_rewarding_rules(void) const {
 
 
 void
-PredictionGroup::_group_rules_by_prediction(const Population& rules) {
+PredictionGroup::_group_rules_by_prediction(const RuleSet& rules) {
   for(unsigned int index=0 ; index<rules.size() ; index++){
     const Vector& prediction = rules[index].outputs();
     if (_predictions.count(prediction) == 0) {
-      Population* group = new Population();
+      RuleSet* group = new RuleSet();
       _predictions[prediction] = group;
     }
     _predictions[prediction]->add(rules[index]);
@@ -309,7 +309,7 @@ PredictionGroup::most_rewarding(void) const {
 }
 
 
-Population&
+RuleSet&
 PredictionGroup::rules_to_reward(void) const {
   return _most_rewarding;
 }

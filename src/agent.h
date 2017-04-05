@@ -23,8 +23,8 @@ namespace xcsf {
   
   private:
     const RuleFactory& _factory;
-    Population _rules;
-    Population _rules_to_reward;
+    RuleSet _rules;
+    RuleSet _rules_to_reward;
   };
 
 }

@@ -18,7 +18,7 @@ public:
   TestRuleFactory();
   virtual ~TestRuleFactory();
   
-  virtual void initialise(Population& rule_set) const;
+  virtual void initialise(RuleSet& rule_set) const;
 
   void define(Rule& rule);
 
