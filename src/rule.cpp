@@ -263,26 +263,24 @@ PredictionGroup::PredictionGroup(const Population& rules)
   :_predictions(),
    _most_rewarding()
 {
-  group_rules_by_prediction(rules);
-  _most_rewarding = find_most_rewarding_rules();
+  _group_rules_by_prediction(rules);
+  _most_rewarding = _find_most_rewarding_rules();
 }
 
 Population&
-PredictionGroup::find_most_rewarding_rules(void) const {
- std::map<Vector, Population*>::const_iterator most_rewarding = _predictions.begin();
-  for(std::map<Vector, Population*>::const_iterator any = _predictions.begin() ;
-      any != _predictions.end() ;
-      ++any) {
-    if (any->second->rewards_more_than(*(most_rewarding->second))) {
+PredictionGroup::_find_most_rewarding_rules(void) const {
+ std::pair<Vector, Population*> most_rewarding = *_predictions.begin();
+ for(auto any: _predictions) {
+    if (any.second->rewards_more_than(*most_rewarding.second)) {
       most_rewarding = any;
     }
   }
-  return *most_rewarding->second;
+  return *most_rewarding.second;
 }
 
 
 void
-PredictionGroup::group_rules_by_prediction(const Population& rules) {
+PredictionGroup::_group_rules_by_prediction(const Population& rules) {
   for(unsigned int index=0 ; index<rules.size() ; index++){
     const Vector& prediction = rules[index].outputs();
     if (_predictions.count(prediction) == 0) {
@@ -296,10 +294,8 @@ PredictionGroup::group_rules_by_prediction(const Population& rules) {
 
 PredictionGroup::~PredictionGroup()
 {
-  for(std::map<Vector, Population*>::iterator each = _predictions.begin() ;
-      each != _predictions.end() ;
-      ++each) {
-    delete each->second;
+  for(auto each : _predictions) {
+    delete each.second;
   }
 }
 
