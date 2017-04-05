@@ -1,6 +1,10 @@
 
+
+
 #include "agent.h"
-#include <map>
+
+
+using namespace xcsf;
 
 
 Agent::Agent(const RuleFactory& factory)

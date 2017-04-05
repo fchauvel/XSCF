@@ -4,18 +4,24 @@
 
 #include "agent.h"
 
-class Controller
-{
- public:
-  Controller(Actuator& actuator, Agent&  agent);
-  ~Controller();
-  
-  void select_action(const Vector& input) const;
-  
- private:
-  Actuator& _actuator;
-  Agent& _agent;
-};
 
+namespace xcsf {
+
+  
+  class Controller
+  {
+  public:
+    Controller(Actuator& actuator, Agent&  agent);
+    ~Controller();
+  
+    void select_action(const Vector& input) const;
+  
+  private:
+    Actuator& _actuator;
+    Agent& _agent;
+  };
+
+
+}
 
 #endif

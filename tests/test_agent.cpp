@@ -8,6 +8,9 @@
 #include "helpers.h"
 
 
+using namespace xcsf;
+
+
 TEST_GROUP(OneRuleAgent)
 {
   TestRuleFactory factory;

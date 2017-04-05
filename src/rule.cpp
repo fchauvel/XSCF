@@ -6,6 +6,9 @@
 #include "rule.h"
 
 
+using namespace xcsf;
+
+
 Interval::Interval(const Value& lower, const Value& upper)
   :_lower_bound(lower),
    _upper_bound(upper)
@@ -304,9 +307,6 @@ const Vector&
 PredictionGroup::most_rewarding(void) const {
   return _most_rewarding[0].outputs();
 }
-
-
-
 
 
 Population&

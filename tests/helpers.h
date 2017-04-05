@@ -9,6 +9,9 @@
 #include "rule.h"
 
 
+using namespace xcsf;
+
+
 class TestRuleFactory: public RuleFactory
 {
 public:

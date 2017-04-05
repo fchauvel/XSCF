@@ -3,6 +3,9 @@
 #include "controller.h"
 
 
+using namespace xcsf;
+
+
 Controller::Controller(Actuator& actuator, Agent& agent):
   _actuator(actuator),
   _agent(agent)    

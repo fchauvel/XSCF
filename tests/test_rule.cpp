@@ -1,7 +1,10 @@
 #include "CppUTest/TestHarness.h"
 
-
 #include "rule.h"
+
+
+using namespace xcsf;
+
 
 TEST_GROUP(TestSimpleRule)
 {

@@ -7,6 +7,9 @@
 #include "helpers.h"
 
 
+using namespace xcsf;
+
+
 class FakeActuator: public Actuator
 {
 public:
