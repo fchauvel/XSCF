@@ -253,7 +253,7 @@ if __name__ == "__main__":
     user = arguments.user
     project = arguments.project
     store_json = arguments.output
-    commit = fetch_commit()
+    commit = fetch_commit().strip()
     project_token = default_for("PROJECT_TOKEN")
     
     uploader = GcovUploader(

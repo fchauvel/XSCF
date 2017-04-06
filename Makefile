@@ -24,17 +24,19 @@ TEST_SRC = $(shell find tests -name *.cpp)
 TEST_OBJ = $(TEST_SRC:%.cpp=%.o)
 TEST_BIN = all_tests.exe
 
+COVERAGE_DATA = i3.info
 
 
-REPORT_DIR = reports
+upload-coverage: ${COVERAGE_DATA}
+	python3 tools/upload_coverage.py -u fchauvel -p XSCF --input-file ${COVERAGE_DATA}
 
-coverage-report: ${TEST_BIN}
-	mkdir -p ${REPORT_DIR}
-	./${TEST_BIN}
-	lcov --base-directory . --directory . --capture --output-file i3.info
+
+${COVERAGE_DATA}: ${TEST_BIN}
+	./${TEST_BIN} ${TESTS}
+	lcov --base-directory . --directory . --capture --output-file $@
 
 test: all_tests
-	./${TEST_BIN}
+	./${TEST_BIN} ${TESTS}
 
 all_tests: LDLIBS := -lCppUTest -lCppUTestExt	
 
@@ -48,6 +50,6 @@ $(TEST_OBJ): CXXFLAGS := -std=c++11 -Wall -I/usr/include/CppUTest -I./src -I/tes
 
 
 clean:
-	${RM} ${OBJ} ${OBJ_COVA} ${OBJ_COVO} ${BIN} ${TEST_OBJ} ${TEST_BIN}
+	${RM} ${OBJ} ${OBJ_COVA} ${OBJ_COVO} ${BIN} ${TEST_OBJ} ${TEST_BIN} ${COVERAGE_DATA}
 
 

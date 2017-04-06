@@ -33,6 +33,5 @@ build:
     - script:
         name: Compute Code Coverage
         code: |
-          make coverage-report
-          python3 tools/upload_coverage.py --user fchauvel --project XSCF --input-file i3.info
+          make upload-coverage
           
