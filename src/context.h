@@ -18,7 +18,7 @@ class Value
   Value(const Value& prototype);
   ~Value();
 
-  void operator = (const Value& other);
+  Value& operator = (const Value& other);
   
   bool operator == (const Value& other) const;
   bool operator != (const Value& other) const;
@@ -27,12 +27,12 @@ class Value
   bool operator < (const Value& other) const;
   bool operator <= (const Value& other) const;
 
-  unsigned int to_unsigned_int(void) const;
+  unsigned int unsigned_int(void) const;
   
   static const unsigned int MAXIMUM = 100;
   
  private:
-  friend std::ostream& operator << (std::ostream& out, const Value& value);
+  friend ostream& operator << (ostream& out, const Value& value);
   
   unsigned int _value;
   
@@ -44,7 +44,8 @@ class Vector
  public:
   Vector(unsigned int dimension_count);
   Vector(initializer_list<int> values);
-  Vector(vector<int>& values);
+  Vector(const vector<int>& values);
+  Vector(const vector<unsigned int>& values);
   Vector(const Vector& other);
   ~Vector();
 

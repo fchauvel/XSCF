@@ -23,6 +23,9 @@ namespace xcsf {
     Interval& operator = (const Interval& prototype);
     bool operator == (const Interval& other_interval) const;
     bool operator != (const Interval& other_interval) const;
+
+    const Value& lower() const;
+    const Value& upper() const;
     
     bool contains(const Value value) const;
     
@@ -46,13 +49,14 @@ namespace xcsf {
     bool operator == (const Rule& other_rule) const;
     bool operator != (const Rule& other_rule) const;
 
+    // Conversions
+    vector<unsigned int> as_vector(void) const;
     
     double fitness(void) const;
     double error(void) const;
     double payoff(void) const;
     double weighted_payoff(void) const;
     
-    void reward(double reward);
     void update(double payoff, double error, double fitness);
     
     bool match(const Vector& input) const;

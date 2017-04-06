@@ -26,26 +26,40 @@ Interval::~Interval()
 
 
 Interval&
-Interval::operator = (const Interval& prototype)
+Interval::operator = (const Interval& other)
 {
-  _lower_bound = prototype._lower_bound;
-  _upper_bound = prototype._upper_bound;
+  _lower_bound = other._lower_bound;
+  _upper_bound = other._upper_bound;
   return *this;
 }
 
 
 bool
-Interval::operator == (const Interval& other_interval) const
+Interval::operator == (const Interval& other) const
 {
-  return _lower_bound == other_interval._lower_bound
-    and _upper_bound == other_interval._upper_bound;
+  return _lower_bound == other._lower_bound
+    and _upper_bound == other._upper_bound;
 }
 
 
 bool
-Interval::operator != (const Interval& other_interval) const
+Interval::operator != (const Interval& other) const
 {
-  return not (*this == other_interval);
+  return not (*this == other);
+}
+
+
+const Value&
+Interval::lower(void) const
+{
+  return _lower_bound;
+}
+
+
+const Value&
+Interval::upper(void) const
+{
+  return _upper_bound;
 }
 
 
@@ -115,10 +129,17 @@ Rule::operator != (const Rule& other_rule) const
 }
 
 
-void
-Rule::reward(double reward) {
-  const double BETA = 0.25;
-  _payoff = _payoff + BETA * (reward - _payoff);
+vector<unsigned int>
+Rule::as_vector(void) const {
+  vector<unsigned int> result;
+  for (auto each_constraint: _intervals) {
+    result.push_back(each_constraint.lower().unsigned_int());
+    result.push_back(each_constraint.upper().unsigned_int());
+  }
+  for (unsigned int index=0 ; index<_outputs.size() ; ++index) {
+    result.push_back(_outputs[index].unsigned_int());
+  }
+  return result;
 }
 
 

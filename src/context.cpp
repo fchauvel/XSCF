@@ -26,10 +26,11 @@ Value::~Value()
 {}
 
 
-void
+Value&
 Value::operator = (const Value& other)
 {
   _value = other._value;
+  return *this;
 }
 
 bool
@@ -73,7 +74,7 @@ Value::operator <= (const Value& other) const
 }
 
 unsigned int
-Value::to_unsigned_int(void) const
+Value::unsigned_int(void) const
 {
   return _value;
 }
@@ -91,7 +92,15 @@ Vector::Vector(unsigned int dimension_count):
 {}
 
 
-Vector::Vector(vector<int>& values):
+Vector::Vector(const vector<int>& values)
+  :_values(values.size(), 0)
+{
+  for (unsigned int index=0 ; index<values.size() ; ++index) {
+    _values[index] = values[index];
+  }   
+}
+
+Vector::Vector(const vector<unsigned int>& values):
   _values(values.size(), 0)
 {
   for (unsigned int index=0 ; index<values.size() ; index++)

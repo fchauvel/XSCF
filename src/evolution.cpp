@@ -23,6 +23,7 @@
 using namespace xcsf;
 
 
+
 Evolution::Evolution()
   :_rules()
 {}
@@ -36,20 +37,65 @@ Evolution::~Evolution()
 }
 
 
+Rule*
+create_rule_from(vector<unsigned int> values, unsigned int input_count, unsigned int output_count) {
+  using namespace std;
+
+  if (values.size() != 2 * input_count + output_count) {
+    throw invalid_argument("Input and output size do not match the given vector size!");
+  }
+
+  vector<Interval> constraints;
+  for (unsigned int index=0 ; index < input_count ; ++index) {
+    unsigned int lower_bound = values[index * 2];
+    unsigned int upper_bound = values[index * 2 + 1];
+    constraints.push_back(Interval(lower_bound, upper_bound));
+  }
+
+  vector<unsigned int> prediction;
+  for (unsigned int index=input_count*2 ; index<values.size() ; ++index) {
+    prediction.push_back(values[index]);
+  }
+
+  Vector p = Vector(prediction);
+  Rule *result = new Rule(constraints, p, 1.0, 1.0, 1.0);
+  return result;
+}  
+
+
 vector<Rule*>
 Evolution::breed(const Rule& father, const Rule& mother, unsigned int cut_point_A, unsigned int cut_point_B)
 {
   vector<Rule*> children;
   
-  Rule *child_A = new Rule({Interval(0, 100)}, { 4}, 1.0, 1.0, 1.0);
+  vector<unsigned int> v_father(father.as_vector());
+  vector<unsigned int> v_mother(mother.as_vector());
+
+  if (v_father.size() != v_mother.size()) {
+    throw invalid_argument("Parents are of different length!");
+  }
+  
+  vector<unsigned int> v_child_A;
+  vector<unsigned int> v_child_B;
+  
+  for(unsigned int index=0 ; index<v_father.size() ; ++index) {
+    if (cut_point_A <= index and index < cut_point_B) {
+      v_child_A.push_back(v_mother[index]);
+      v_child_B.push_back(v_father[index]);
+    } else {
+      v_child_A.push_back(v_father[index]);
+      v_child_B.push_back(v_mother[index]);
+    }
+  }
+
+  Rule *child_A = create_rule_from(v_child_A, 1, 1);
   _rules.push_back(child_A);
   children.push_back(child_A);
 
-  Rule *child_B = new Rule({Interval(50, 50)}, {2}, 1.0, 1.0, 1.0);
+  Rule *child_B = create_rule_from(v_child_B, 1, 1);
   _rules.push_back(child_B);
   children.push_back(child_B);
-  
+
   return children;
 }
-  
-  
+
