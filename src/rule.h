@@ -21,10 +21,14 @@ namespace xcsf {
     ~Interval();
     
     Interval& operator = (const Interval& prototype);
+    bool operator == (const Interval& other_interval) const;
+    bool operator != (const Interval& other_interval) const;
     
     bool contains(const Value value) const;
     
   private:
+    friend ostream& operator << (ostream& out, const Interval& interval);
+    
     Value _lower_bound;
     Value _upper_bound;
     
@@ -39,7 +43,9 @@ namespace xcsf {
     ~Rule();
     
     Rule& operator = (const Rule& prototype);
-    
+    bool operator == (const Rule& other_rule) const;
+    bool operator != (const Rule& other_rule) const;
+
     
     double fitness(void) const;
     double error(void) const;
@@ -53,6 +59,8 @@ namespace xcsf {
     const Vector& outputs(void) const;
     
   private:
+    friend ostream& operator << (ostream& out, const Rule& rule);
+
     vector<Interval> _intervals;
     Vector _outputs;
     double _fitness;

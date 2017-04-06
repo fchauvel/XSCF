@@ -12,8 +12,8 @@ TestRuleFactory::TestRuleFactory()
 
 TestRuleFactory::~TestRuleFactory()
 {
-  for (std::size_t index=0 ; index<_rules.size() ; ++index) {
-    delete _rules[index];
+  for (auto each_rule: _rules) {
+    delete each_rule;
   }
 }
 
@@ -21,10 +21,8 @@ TestRuleFactory::~TestRuleFactory()
 void
 TestRuleFactory::initialise(RuleSet& rule_set) const
 {
-  for (vector<Rule*>::const_iterator each_rule = _rules.begin();
-       each_rule != _rules.end();
-       ++each_rule){
-    rule_set.add(**each_rule);
+  for (auto each_predefined_rule: _rules) {
+    rule_set.add(*each_predefined_rule);
   }
 };
 

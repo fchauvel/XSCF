@@ -5,7 +5,7 @@
 
 #include "rule.h"
 
-
+using namespace std;
 using namespace xcsf;
 
 
@@ -35,9 +35,34 @@ Interval::operator = (const Interval& prototype)
 
 
 bool
+Interval::operator == (const Interval& other_interval) const
+{
+  return _lower_bound == other_interval._lower_bound
+    and _upper_bound == other_interval._upper_bound;
+}
+
+
+bool
+Interval::operator != (const Interval& other_interval) const
+{
+  return not (*this == other_interval);
+}
+
+
+bool
 Interval::contains(const Value value) const
 {
   return _lower_bound <= value and _upper_bound >= value;
+}
+
+
+ostream&
+xcsf::operator << (ostream& out, const Interval& interval)
+{
+  out << "[" << interval._lower_bound
+      << "," << interval._upper_bound
+      << "]";
+  return out;
 }
 
 
@@ -72,6 +97,21 @@ Rule::operator = (const Rule& prototype)
   _payoff = prototype._payoff;
   _error = prototype._error;
   return *this;
+}
+
+
+bool
+Rule::operator == (const Rule& other_rule) const
+{
+  return _intervals == other_rule._intervals
+    and _outputs == other_rule._outputs;
+}
+
+
+bool
+Rule::operator != (const Rule& other_rule) const
+{
+  return not (*this == other_rule);
 }
 
 
@@ -145,6 +185,16 @@ Rule::outputs(void) const
   return _outputs;
 }
 
+ostream&
+xcsf::operator << (ostream& out, const Rule& rule)
+{
+  out << "{";
+  for (auto each_constraint: rule._intervals) {
+    out << each_constraint << " " ;
+  }
+  out << "} => " << rule._outputs;
+  return out;
+}
 
 
 
