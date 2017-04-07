@@ -30,20 +30,18 @@ COVERAGE_DATA = i3.info
 upload-coverage: ${COVERAGE_DATA}
 	python3 tools/upload_coverage.py -u fchauvel -p XSCF --input-file ${COVERAGE_DATA}
 
-
-${COVERAGE_DATA}: ${TEST_BIN}
-	./${TEST_BIN} ${TESTS}
+${COVERAGE_DATA}: test
 	lcov --base-directory . --directory . --capture --output-file $@
 
-test: all_tests
+test: ${TEST_BIN}
 	./${TEST_BIN} ${TESTS}
 
-all_tests: LDLIBS := -lCppUTest -lCppUTestExt	
+${TEST_BIN}: LDLIBS := -lCppUTest -lCppUTestExt	
 
-all_tests: $(filter-out src/main.o,${OBJ}) ${TEST_OBJ}
+${TEST_BIN}: $(filter-out src/main.o,${OBJ}) ${TEST_OBJ}
 	${LD} $(LDFLAGS) -fprofile-arcs -o ${TEST_BIN} $^ $(LDLIBS) 
 
-$(TEST_OBJ): CXXFLAGS := -std=c++11 -Wall -I/usr/include/CppUTest -I./src -I/test
+$(TEST_OBJ): CXXFLAGS := -std=c++11 -Wall -fprofile-arcs -ftest-coverage -I/usr/include/CppUTest -I./src -I/test
 
 %.o: %.cpp
 	${CXX} ${CXXFLAGS} -c $< -o $@

@@ -145,9 +145,9 @@ class CodacityJsonFormatter:
     def visit_record(self, record):
         self._print("{{")
         self._print("\"filename\": \"{source_file}\",", source_file=self._local_path(record))
-        self._print("\"total\": {total},", total=record["LF"].as_integer)
+        self._print("\"total\": {total},", total=self._file_coverage(record))
         self._total_line_count += record["LF"].as_integer
-        self._print("\"codeLines\": {hit},", hit=record["LH"].as_integer)
+        #self._print("\"codeLines\": {hit},", hit=record["LH"].as_integer)
         self._total_hit_count += record["LH"].as_integer
         self._print("\"coverage\": {{")
         for index, each_line in enumerate(record["DA"]):
@@ -160,6 +160,13 @@ class CodacityJsonFormatter:
         self._print("}}")
         self._print("}}")
 
+    def _file_coverage(self, record):
+        line_count = record["LF"].as_integer
+        hit_count = record["LH"].as_integer
+        if line_count == 0:
+            return 0
+        return int(100 * hit_count / line_count)
+
     def _local_path(self, record):
         _, resource = record["SF"].as_text.split("XSCF/")
         return resource
@@ -171,7 +178,8 @@ class CodacityJsonFormatter:
 
 class CodacyService:
 
-    DEFAULT_URL = "https://api.codacy.com/2.0/{user}/{repository}/commit/{commit}/coverage/cpp"
+    DEFAULT_URL = "https://api.codacy.com/2.0/coverage/{commit}/cpp"
+    DEFAULT_URL2 = "https://api.codacy.com/2.0/{user}/{repository}/commit/{commit}/coverage/cpp"
     
     def __init__(self, user, repository, commit, project_token, codacy_url=None, store_json=False):
         self._user = user
