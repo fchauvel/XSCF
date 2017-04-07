@@ -24,6 +24,22 @@
 using namespace xcsf;
 
 
+Mutation::Mutation(const Allele& target, int update)
+  : _target(target)
+  , _update(update)
+{}
+
+
+void
+Mutation::apply_to(Chromosome& subject) const
+{
+  int value = subject[_target] + _update;
+  if (value > 100) { value = 100; }
+  if (value < 0) { value = 0; }
+  subject[_target] = value;
+}
+
+
 Crossover::Crossover(unsigned int cut_point_A, unsigned int cut_point_B)
   : _cut_point_A(cut_point_A)
   , _cut_point_B(cut_point_B)

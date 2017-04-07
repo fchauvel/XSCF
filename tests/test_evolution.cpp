@@ -11,6 +11,57 @@
 using namespace xcsf;
 
 
+TEST_GROUP(TestMutation)
+{
+  Chromosome *chromosome;
+
+  void setup(void)
+  {
+    chromosome = new Chromosome({50, 50, 50});
+  }
+
+
+  void teardown(void)
+  {
+    delete chromosome;
+  }
+  
+};
+
+
+TEST(TestMutation, simple_mutation)
+{
+  Mutation mutation(1, 10);
+
+  mutation.apply_to(*chromosome);
+
+  Chromosome expected = { 50, 60, 50 }; 
+  CHECK(*chromosome == expected);
+}
+
+
+TEST(TestMutation, test_excessive_positive_mutation)
+{
+  Mutation mutation(1, 200);
+
+  mutation.apply_to(*chromosome);
+
+  Chromosome expected = { 50, 100, 50 }; 
+  CHECK(*chromosome == expected);
+}
+
+
+TEST(TestMutation, test_excessive_negative_mutation)
+{
+  Mutation mutation(1, -200);
+
+  mutation.apply_to(*chromosome);
+
+  Chromosome expected = { 50, 0, 50 }; 
+  CHECK(*chromosome == expected);
+}
+
+
 TEST_GROUP(TestCrossover)
 {
   Rule *rule_1, *rule_2;
@@ -28,7 +79,6 @@ TEST_GROUP(TestCrossover)
   }
   
 };
-
 
 
 TEST(TestCrossover, simple_test)

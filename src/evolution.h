@@ -29,7 +29,21 @@ using namespace std;
 
 namespace xcsf {
 
+  typedef unsigned int Allele;
   typedef vector<unsigned int> Chromosome;
+
+  class Mutation
+  {
+  public:
+    Mutation(const Allele& target, int update);
+
+    void apply_to(Chromosome& subject) const;
+    
+  private:
+    Allele _target;
+    int _update;
+  };
+
   
   class Crossover
   {
