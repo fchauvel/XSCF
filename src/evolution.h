@@ -29,15 +29,41 @@ using namespace std;
 
 namespace xcsf {
 
+  typedef vector<unsigned int> Chromosome;
+  
+  class Crossover
+  {
+  public:
+    Crossover(unsigned int cut_point_A, unsigned int cut_point_B);
+    Crossover(const Crossover& other);
+    ~Crossover();
+
+    Crossover& operator = (const Crossover& other);
+    bool operator == (const Crossover& other) const;
+
+    void breed(const Chromosome& father, const Chromosome& mother, vector<Chromosome>& children) const;
+
+  private: 
+    unsigned int _cut_point_A;
+    unsigned int _cut_point_B;
+
+  };
+
+  
   class Evolution
   {
   public:
-    Evolution(void);
+    Evolution(const Crossover& crossover, unsigned int input=1, unsigned int output=1);
     ~Evolution(void);
     
-    vector<Rule*> breed(const Rule& father, const Rule& mother, unsigned int cut_point_A, unsigned int cut_point_B);
-
+    vector<Rule*> breed(const Rule& father, const Rule& mother);
+    Rule* decode(const Chromosome&) const;
+    Chromosome encode(const Rule& rule) const;
+    
   private:
+    const Crossover& _crossover;
+    unsigned int _input_count;
+    unsigned int _output_count;
     vector<Rule*> _rules;
   };
 

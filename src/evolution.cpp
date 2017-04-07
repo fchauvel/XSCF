@@ -18,14 +18,94 @@
 
 
 #include "evolution.h"
+#include <sstream>
 
 
 using namespace xcsf;
 
 
+Crossover::Crossover(unsigned int cut_point_A, unsigned int cut_point_B)
+  : _cut_point_A(cut_point_A)
+  , _cut_point_B(cut_point_B)
+{
+  if (_cut_point_A >= _cut_point_B) {
+    ostringstream error;
+    error << "Invalid cut-points! Left cut-point must be smaller than the right one";
+    throw invalid_argument(error.str());
+  }
+}
 
-Evolution::Evolution()
-  :_rules()
+
+Crossover::Crossover(const Crossover& other)
+  : _cut_point_A(other._cut_point_A)
+  , _cut_point_B(other._cut_point_B)
+{}
+
+
+Crossover::~Crossover()
+{}
+
+
+Crossover& 
+Crossover::operator = (const Crossover& other)
+{
+  _cut_point_A = other._cut_point_A;
+  _cut_point_B = other._cut_point_B;
+  return *this;
+}
+
+
+bool
+Crossover::operator == (const Crossover& other) const
+{
+  return _cut_point_A == other._cut_point_A
+    and _cut_point_B == other._cut_point_B;
+}
+
+
+void
+validate(const Chromosome father, const Chromosome& mother)
+{ 
+  if (father.size() != mother.size()) {
+    ostringstream error;
+    error << "Parents chromosomes have different length!"
+	  << "(father=" << father.size() << ", but mother="
+	  << mother.size() << ")";
+    throw invalid_argument(error.str());
+  }  
+}
+
+
+void
+Crossover::breed(const Chromosome& father, const Chromosome& mother, vector<Chromosome>& children) const
+{
+  validate(father, mother);
+
+  if (_cut_point_B >= father.size()) {
+    throw invalid_argument("The chromosomes are too short for the selected cut_points");
+  }
+  
+  if (children.size() < 2) {
+    throw invalid_argument("Crossovers generates at two children!");
+  }
+  
+  for(unsigned int index=0 ; index<father.size() ; ++index) {
+    if (_cut_point_A <= index and index < _cut_point_B) {
+      children[0].push_back(mother[index]);
+      children[1].push_back(father[index]);
+    } else {
+      children[0].push_back(father[index]);
+      children[1].push_back(mother[index]);
+    }
+  }
+}
+
+
+Evolution::Evolution(const Crossover& crossover, unsigned int input_count, unsigned int output_count)
+  : _crossover(crossover)
+  , _input_count(input_count)
+  , _output_count(output_count)
+  , _rules()
 {}
 
 
@@ -37,23 +117,34 @@ Evolution::~Evolution()
 }
 
 
+Chromosome
+Evolution::encode(const Rule& rule) const {
+  return Chromosome(rule.as_vector());
+}
+
+
 Rule*
-create_rule_from(vector<unsigned int> values, unsigned int input_count, unsigned int output_count) {
+Evolution::decode(const Chromosome& values) const {
   using namespace std;
 
-  if (values.size() != 2 * input_count + output_count) {
-    throw invalid_argument("Input and output size do not match the given vector size!");
+  if (values.size() != 2 * _input_count + _output_count) {
+    ostringstream error;
+    error << "Input and output size ("
+	  << _input_count << " & " << _output_count
+	  << ") do not match the given vector size ("
+	  << values.size() << ")!";
+    throw invalid_argument(error.str());
   }
 
   vector<Interval> constraints;
-  for (unsigned int index=0 ; index < input_count ; ++index) {
+  for (unsigned int index=0 ; index < _input_count ; ++index) {
     unsigned int lower_bound = values[index * 2];
     unsigned int upper_bound = values[index * 2 + 1];
     constraints.push_back(Interval(lower_bound, upper_bound));
   }
 
   vector<unsigned int> prediction;
-  for (unsigned int index=input_count*2 ; index<values.size() ; ++index) {
+  for (unsigned int index=_input_count*2 ; index<values.size() ; ++index) {
     prediction.push_back(values[index]);
   }
 
@@ -64,38 +155,19 @@ create_rule_from(vector<unsigned int> values, unsigned int input_count, unsigned
 
 
 vector<Rule*>
-Evolution::breed(const Rule& father, const Rule& mother, unsigned int cut_point_A, unsigned int cut_point_B)
+Evolution::breed(const Rule& father, const Rule& mother)
 {
-  vector<Rule*> children;
   
-  vector<unsigned int> v_father(father.as_vector());
-  vector<unsigned int> v_mother(mother.as_vector());
+  vector<Chromosome> children(2);
+  _crossover.breed(encode(father), encode(mother), children);
 
-  if (v_father.size() != v_mother.size()) {
-    throw invalid_argument("Parents are of different length!");
+  vector<Rule*> children_rules;
+  for (auto each_child: children) {
+      Rule *rule = decode(each_child);
+      children_rules.push_back(rule);
+      _rules.push_back(rule);
   }
   
-  vector<unsigned int> v_child_A;
-  vector<unsigned int> v_child_B;
-  
-  for(unsigned int index=0 ; index<v_father.size() ; ++index) {
-    if (cut_point_A <= index and index < cut_point_B) {
-      v_child_A.push_back(v_mother[index]);
-      v_child_B.push_back(v_father[index]);
-    } else {
-      v_child_A.push_back(v_father[index]);
-      v_child_B.push_back(v_mother[index]);
-    }
-  }
-
-  Rule *child_A = create_rule_from(v_child_A, 1, 1);
-  _rules.push_back(child_A);
-  children.push_back(child_A);
-
-  Rule *child_B = create_rule_from(v_child_B, 1, 1);
-  _rules.push_back(child_B);
-  children.push_back(child_B);
-
-  return children;
+  return children_rules;
 }
 
