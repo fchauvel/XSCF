@@ -16,44 +16,33 @@
  *
  */
 
-
-#ifndef XCSF_DECODER_H
-#define XCSF_DECODER_H
+#ifndef XCSF_APPLICATION_H
+#define XCSF_APPLICATION_H
 
 
 #include <iostream>
 
-#include "context.h"
-
-using namespace std;
+#include "controller.h"
 
 
 namespace xcsf {
 
-  class Controllable
+  class Application
   {
   public:
-    virtual ~Controllable() = 0;
-       
-    virtual void reward(double value) = 0;
-    virtual void predict(const Vector& context) = 0;
-  };
-  
-
-  class Decoder
-  {
-  public:
-    Decoder(istream& source, Controllable& target);
+    Application(istream& input, ostream& output);
+    ~Application();
     
-    void decode(void);
-    
+    void run(void) const;
     
   private:
-    istream& _source;
-    Controllable& _target;
-    
+    Encoder* const _encoder;
+    Controller* const _controller;
+    Decoder* const _decoder;
   };
+  
+  
+}
 
-};
 
 #endif

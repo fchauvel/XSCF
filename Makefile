@@ -17,7 +17,7 @@ OBJ_COVO = $(TEST_SRC:%.cpp=%.gcdo)
 BIN = ${APPLICATION}_${VERSION}.exe
 
 app: ${OBJ}
-	g++ ${LDFLAGS} -o ${BIN} $^
+	${CXX} ${CXXFLAGS} ${LDFLAGS} -o ${BIN} $^
 
 
 TEST_SRC = $(shell find tests -name *.cpp)

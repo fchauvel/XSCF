@@ -20,17 +20,26 @@
 #include "application.h"
 
 
-using namespace std;
 using namespace xcsf;
 
 
-int
-main(int argc, char** argv)
+Application::Application(istream& input, ostream& output)
+  :_encoder(new Encoder(output))
+  ,_controller(new AgentController(*_encoder))
+  ,_decoder(new Decoder(input, *_controller))
 {
-  cout << APPLICATION << " v" << VERSION << endl; 
+}
 
-  Application application(cin, cout);
-  application.run();
 
-  return 0;
+Application::~Application()
+{
+  delete _encoder;
+  delete _decoder;
+  delete _controller;
+}
+
+
+void
+Application::run(void) const {
+  _decoder->decode();
 }

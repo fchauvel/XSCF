@@ -25,16 +25,16 @@
 #include <stdexcept>
 
 #include "context.h"
-#include "decoder.h"
+#include "controller.h"
 
 
 using namespace std;
 using namespace xcsf;
 
 
-class TestControllable: public Controllable
+class TestController: public Controller
 {
-  virtual ~TestControllable()
+  virtual ~TestController()
   {};
 
   virtual void reward(double value)
@@ -77,13 +77,13 @@ TEST_GROUP(TestReader)
 {
   VectorComparator comparator;
   stringstream input;
-  Controllable *target;
+  Controller *target;
   Decoder *reader;
   
   void setup(void) {
     mock().installComparator("Vector", comparator);
     
-    target = new TestControllable();
+    target = new TestController();
     reader = new Decoder(input, *target);
   }
 
@@ -153,3 +153,30 @@ TEST(TestReader, test_reading_input)
   mock().checkExpectations();
 }
 
+
+
+TEST_GROUP(TestEncoder)
+{
+  stringstream text;
+  Encoder *encoder;
+
+  void setup(void) {
+    encoder = new Encoder(text);
+  }
+
+  void teardown(void) {
+    delete encoder;
+  }
+  
+};
+
+
+
+TEST(TestEncoder, test_show_prediction)
+{
+  Vector prediction = { 10, 20, 30 };
+
+  encoder->show_prediction(prediction);
+
+  CHECK(text.str() == "[10, 20, 30]\n");
+}
