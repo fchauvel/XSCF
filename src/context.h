@@ -4,6 +4,7 @@
 
 
 #include <vector>
+#include <iostream>
 #include <stdexcept>
 
 
@@ -55,9 +56,12 @@ class Vector
   
   unsigned int size(void) const;
   const Value& operator [] (unsigned int index) const;
+
+
+  static Vector parse(const string& text);
   
  private:
-  friend std::ostream& operator << (std::ostream& out, const Vector& vector);
+  friend ostream& operator << (ostream& out, const Vector& vector);
   
   vector<Value> _values;
   

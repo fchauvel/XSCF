@@ -23,6 +23,7 @@
 
 #include <iostream>
 
+#include "context.h"
 
 using namespace std;
 
@@ -35,6 +36,7 @@ namespace xcsf {
     virtual ~Controllable() = 0;
        
     virtual void reward(double value) = 0;
+    virtual void predict(const Vector& context) = 0;
   };
   
 

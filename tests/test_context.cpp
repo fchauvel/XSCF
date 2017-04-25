@@ -4,6 +4,27 @@
 #include "context.h"
 
 
+TEST_GROUP(TestVector)
+{};
+
+
+TEST(TestVector, test_parsing)
+{
+  Vector expected = {1, 2, 3};
+  Vector actual = Vector::parse("(1, 2, 3)");
+  CHECK(actual == expected);
+}
+
+TEST(TestVector, test_parsing_signle_value_sequence)
+{
+  Vector expected = { 1 };
+  Vector actual = Vector::parse("(1)");
+  CHECK(actual == expected);
+}
+
+
+
+
 TEST_GROUP(TestValue)
 {};
 
@@ -58,5 +79,3 @@ TEST(TestValue, test_invalid_values)
 {
    CHECK_THROWS(std::invalid_argument, {Value value(150);});
 }
-
-

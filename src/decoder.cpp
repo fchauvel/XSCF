@@ -16,9 +16,11 @@
  *
  */
 
-#include "decoder.h"
+
 #include <sstream>
 #include <stdexcept>
+
+#include "decoder.h"
 
 
 using namespace std;
@@ -26,6 +28,22 @@ using namespace xcsf;
 
 
 const string SEPARATOR = ":";
+
+
+enum Command {
+  Reward,
+  Predict
+};
+
+
+Command
+parse(const string& text)
+{
+  if (text == "R") return Reward;
+  if (text == "P") return Predict;
+  throw invalid_argument("Unknown command!");
+}
+  
 
 void
 validate(const string& line, size_t position)
@@ -57,9 +75,16 @@ Decoder::decode(void)
   while (getline(_source, line)) {
     size_t position = line.find(SEPARATOR, 0);
     validate(line, position);
-    string key = line.substr(0, position);
+    Command command = parse(line.substr(0, position));
     string value = line.substr(position+1);
-    _target.reward(stod(value));
+    switch(command) {
+    case Reward:
+      _target.reward(stod(value));
+      break;
+    case Predict:
+      _target.predict(Vector::parse(value));
+      break;
+    }
   }
   
 }

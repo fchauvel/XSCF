@@ -24,32 +24,65 @@
 #include <sstream>
 #include <stdexcept>
 
+#include "context.h"
 #include "decoder.h"
 
 
 using namespace std;
 using namespace xcsf;
 
+
 class TestControllable: public Controllable
 {
-  virtual ~TestControllable(){};
+  virtual ~TestControllable()
+  {};
 
-  virtual void reward(double value) {
+  virtual void reward(double value)
+  {
     mock()
       .actualCall("reward")
       .onObject(this)
       .withParameter("value", value);
+  }
+
+  virtual void predict(const Vector& context)
+  {
+    mock()
+      .actualCall("predict").
+      onObject(this)
+      .withParameterOfType("Vector", "context", (void*) &context);
+  }
+  
+};
+
+
+class VectorComparator : public MockNamedValueComparator
+{
+public:
+  virtual bool isEqual(void* object1, void* object2)
+  {
+    Vector left = *(Vector*) (object1);
+    Vector right = *(Vector*) (object2);
+    return left == right;
+  }
+  
+  virtual SimpleString valueToString(void* object)
+  {
+    return StringFrom(object);
   }
 };
 
 
 TEST_GROUP(TestReader)
 {
+  VectorComparator comparator;
   stringstream input;
   Controllable *target;
   Decoder *reader;
   
   void setup(void) {
+    mock().installComparator("Vector", comparator);
+    
     target = new TestControllable();
     reader = new Decoder(input, *target);
   }
@@ -57,10 +90,23 @@ TEST_GROUP(TestReader)
   void teardown(void) {
     delete target;
     delete reader;
+    mock().removeAllComparators();
     mock().clear();
   }
   
 };
+
+
+TEST(TestReader, test_reading_invalid_command)
+{
+  mock().expectNCalls(0, "reward");
+  mock().expectNCalls(0, "predict");
+  
+  input << "UNKNOWN_COMMAND:(13,34,234)" << endl;
+  CHECK_THROWS(std::invalid_argument, {reader->decode();});
+
+  mock().checkExpectations();
+}
 
 
 TEST(TestReader, test_reading_reward)
@@ -94,3 +140,16 @@ TEST(TestReader, test_reading_invalid_reward)
 
   mock().checkExpectations();
 }
+
+
+TEST(TestReader, test_reading_input)
+{
+  Vector expected = { 10, 20, 30 };
+  mock().expectOneCall("predict").onObject(target).withParameterOfType("Vector", "context", &expected);
+  
+  input << "P:(10, 20, 30)" << endl;
+  reader->decode();
+
+  mock().checkExpectations();
+}
+

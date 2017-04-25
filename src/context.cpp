@@ -2,7 +2,7 @@
 
 #include "context.h"
 
-#include <iostream>
+#include <sstream>
 
 
 Value::Value(int value):
@@ -186,3 +186,29 @@ operator << (ostream& out, const Vector& vector) {
   out << vector._values.back() <<  "]";
   return out;
 }
+
+
+Vector
+Vector::parse(const string& text)
+{
+  vector<unsigned int> values;
+
+  stringstream characters(text);
+  unsigned int value;
+  
+  if (characters.peek() == '(') characters.ignore();
+  
+  while (characters >> value) {
+    values.push_back(value);
+    switch(characters.peek()) {
+    case ' ':
+    case ')':
+    case ',':
+      characters.ignore();
+      break;
+    }
+  }
+
+  return Vector(values);
+}
+  
