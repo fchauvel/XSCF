@@ -22,6 +22,7 @@
 
 #include <iostream>
 #include <sstream>
+#include <stdexcept>
 
 #include "decoder.h"
 
@@ -46,13 +47,16 @@ TEST_GROUP(TestReader)
 {
   stringstream input;
   Controllable *target;
-
+  Decoder *reader;
+  
   void setup(void) {
     target = new TestControllable();
+    reader = new Decoder(input, *target);
   }
 
   void teardown(void) {
     delete target;
+    delete reader;
     mock().clear();
   }
   
@@ -61,24 +65,32 @@ TEST_GROUP(TestReader)
 
 TEST(TestReader, test_reading_reward)
 {
-  input << "R:23.5" << endl;
-  Decoder reader(input, *target);
- 
   mock().expectOneCall("reward").onObject(target).withParameter("value", 23.5);
- 
-  reader.decode();
+
+  input << "R:23.5" << endl;
+  reader->decode();
+  
   mock().checkExpectations();
 }
 
-/*
+
 TEST(TestReader, test_reading_another_reward)
 {
-  input << "R:15.34" << endl;
-  Decoder reader(input, *target);
- 
   mock().expectOneCall("reward").onObject(target).withParameter("value", 15.34);
- 
-  reader.decode();
+  
+  input << "R:15.34" << endl;
+  reader->decode();
+
   mock().checkExpectations();
 }
-*/
+
+
+TEST(TestReader, test_reading_invalid_reward)
+{
+  mock().expectNCalls(0, "reward");
+  
+  input << "R=15.34" << endl;
+  CHECK_THROWS(std::invalid_argument, {reader->decode();});
+
+  mock().checkExpectations();
+}
