@@ -108,3 +108,52 @@ TEST(TestCrossover, test_invalid_cut_points) {
 
   CHECK_THROWS(invalid_argument,{ evolution.breed(*rule_1, *rule_2); });
 }
+
+
+TEST_GROUP(TestCrossoverWithInvalidRules)
+{
+  Rule *rule_1, *rule_2;
+
+  void setup(void)
+  {
+    rule_1 = new Rule({Interval(0,50)}, { 4 }, 1.0, 1.0, 1.0);
+    rule_2 = new Rule({Interval(50, 100), Interval(75, 100)}, { 2 }, 1.0, 1.0, 1.0);
+  }
+
+  void teardown(void)
+  {
+    delete rule_1;
+    delete rule_2;
+  }
+};
+
+
+TEST(TestCrossoverWithInvalidRules, test)
+{
+  Crossover crossover(1, 2);
+  Evolution evolution(crossover);
+
+  CHECK_THROWS(invalid_argument,{ evolution.breed(*rule_1, *rule_2); });
+}
+
+
+TEST_GROUP(TestCrossoverOperators)
+{};
+
+
+TEST(TestCrossoverOperators, test_equals)
+{
+  Crossover c1(1, 2);
+
+  CHECK(c1 == c1);
+}
+
+
+TEST(TestCrossoverOperators, test_assignment)
+{
+  Crossover c1(1, 2);
+  Crossover c2(2, 3);
+
+  c1 = c2;
+  CHECK(c1 == c2);
+}
