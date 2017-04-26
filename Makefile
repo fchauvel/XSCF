@@ -28,7 +28,8 @@ COVERAGE_DATA = i3.info
 
 
 upload-coverage: ${COVERAGE_DATA}
-	python3 tools/upload_coverage.py -u fchauvel -p XSCF --input-file ${COVERAGE_DATA}
+	curl -s https://codecov.io/bash | bash
+
 
 ${COVERAGE_DATA}: test
 	lcov --base-directory . --directory . --capture --output-file $@
