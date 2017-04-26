@@ -29,7 +29,8 @@ main(int argc, char** argv)
 {
   cout << APPLICATION << " v" << VERSION << endl; 
 
-  Application application(cin, cout);
+  RuleFactory* factory = new BasicRuleFactory();
+  Application application(cin, cout, *factory);
   application.run();
 
   return 0;

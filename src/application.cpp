@@ -23,9 +23,9 @@
 using namespace xcsf;
 
 
-Application::Application(istream& input, ostream& output)
+Application::Application(istream& input, ostream& output, const RuleFactory& factory)
   :_encoder(new Encoder(output))
-  ,_controller(new AgentController(*_encoder))
+  ,_controller(new AgentController(*_encoder, factory))
   ,_decoder(new Decoder(input, *_controller))
 {
 }

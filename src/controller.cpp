@@ -104,14 +104,22 @@ Encoder::show_prediction(const Vector& prediction)
 }
 
 
-AgentController::AgentController(Encoder& encoder)
+AgentController::AgentController(Encoder& encoder, const RuleFactory& factory)
   :Controller()
   ,_encoder(encoder)
-{}
+  ,_factory(factory)
+  ,_agents()
+{
+  _agents.push_back(new Agent(_factory));
+}
 
 
 AgentController::~AgentController()
-{}
+{
+  for(auto each_agent: _agents) {
+    delete each_agent;
+  }
+}
 
 
 void
@@ -123,14 +131,45 @@ AgentController::select_action(const Vector& inputs) const
 
 
 void
-AgentController::reward(double reward)
+AgentController::reward(double prize)
 {
-  
+  _agents[0]->reward(prize);
 }
 
 
 void
 AgentController::predict(const Vector& context)
 {
-  _encoder.show_prediction(context);
+  const Vector prediction = _agents[0]->select_action(context);
+  _encoder.show_prediction(prediction);
+}
+
+
+
+BasicRuleFactory::BasicRuleFactory()
+  :RuleFactory()
+  ,_rules()
+{};
+
+
+BasicRuleFactory::~BasicRuleFactory()
+{
+  for (auto each_rule: _rules) {
+    delete each_rule;
+  }
+}
+
+
+void
+BasicRuleFactory::initialise(RuleSet& rules) const
+{
+  for (unsigned int index=1 ; index<5 ; index++) {
+    unsigned int lower = 25 * (index - 1);
+    unsigned int upper = 25 * index;
+    int mode = (lower + upper) / 2;
+      
+    Rule* rule = new Rule({ Interval(lower, upper) }, { mode }, 1., 1., 0.);
+    rules.add(*rule);
+    _rules.push_back(rule);
+  }  
 }
