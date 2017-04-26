@@ -72,6 +72,27 @@ namespace xcsf {
     double _error;
     
   };
+
+
+  class Performance
+  {
+  public:
+    explicit Performance(double fitness=0.0, double payoff=0.0, double error=0.0);
+    Performance(const Performance& other);
+    ~Performance();
+
+    Performance& operator = (const Performance& other);
+    bool operator == (const Performance& other) const;
+    bool operator != (const Performance& other) const;
+    
+  private:
+    friend ostream& operator << (ostream& out, const Performance performance);
+    
+    double _fitness;
+    double _payoff;
+    double _error;
+    
+  };
   
   
   class RuleSet

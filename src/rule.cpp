@@ -1,7 +1,7 @@
 
 #include <sstream>
 #include <cmath>
-
+#include <iomanip>
 
 #include "rule.h"
 
@@ -217,6 +217,62 @@ xcsf::operator << (ostream& out, const Rule& rule)
   return out;
 }
 
+
+
+Performance::Performance(double fitness, double payoff, double error)
+  :_fitness(fitness)
+  ,_payoff(payoff)
+  ,_error(error)
+{}
+
+
+Performance::Performance(const Performance& other)
+  :_fitness(other._fitness)
+  ,_payoff(other._payoff)
+  ,_error(other._error)
+{}
+
+
+Performance::~Performance()
+{}
+
+
+Performance&
+Performance::operator = (const Performance& other)
+{
+  _fitness = other._fitness;
+  _payoff = other._payoff;
+  _error = other._error;
+  return *this;
+}
+
+bool
+Performance::operator == (const Performance& other) const
+{
+  return _fitness == other._fitness
+    and _payoff == other._payoff
+    and _error == other._error;
+  
+}
+
+
+bool
+Performance::operator != (const Performance& other) const
+{
+  return not (*this == other);
+}
+
+
+ostream&
+xcsf::operator << (ostream& out, const Performance performance)
+{
+  out << fixed <<  setprecision(2);
+  out << "{ F = " << performance._fitness
+      << " ; P = " << performance._payoff
+      << " ; E = " << performance._error << " }";
+    
+  return out;
+}
 
 
 RuleSet::RuleSet():

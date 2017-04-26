@@ -1,9 +1,82 @@
 #include "CppUTest/TestHarness.h"
 
+#include <sstream>
+
 #include "rule.h"
 
 
 using namespace xcsf;
+
+TEST_GROUP(TestPerformance)
+{
+  const double fitness = 12.0;
+  const double payoff = 13.0;
+  const double error = 14.0;
+  Performance perf;
+
+  void setup(void)
+  {
+    perf = Performance(fitness, payoff, error);
+  }
+
+  void teardown(void)
+  {}
+  
+};
+
+TEST(TestPerformance, test_equals_itself)
+{
+  CHECK(perf == perf);
+}
+
+TEST(TestPerformance, test_equals_same)
+{
+  Performance equivalent(fitness, payoff, error);
+  CHECK(perf == equivalent);
+}
+
+TEST(TestPerformance, test_detect_fitness_mismatch)
+{
+  Performance different(fitness + 1, payoff, error);
+
+  CHECK(perf != different);
+}
+
+TEST(TestPerformance, test_detect_payoff_mismatch)
+{
+  Performance different(fitness, payoff + 1, error);
+
+  CHECK(perf != different);
+}
+
+TEST(TestPerformance, test_detect_error_mismatch)
+{
+  Performance different(fitness, payoff, error + 1);
+
+  CHECK(perf != different);
+}
+
+TEST(TestPerformance, test_copy_constructor)
+{
+  Performance copy(perf);
+
+  CHECK(perf == copy);
+}
+
+TEST(TestPerformance, test_assignment)
+{
+  Performance copy = perf;
+
+  CHECK(copy == perf);
+};
+
+TEST(TestPerformance, test_formatting)
+{
+  stringstream out;
+  out << perf;
+
+  CHECK(out.str() == "{ F = 12.00 ; P = 13.00 ; E = 14.00 }" );
+}
 
 
 TEST_GROUP(TestSimpleRule)
