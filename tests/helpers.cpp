@@ -33,15 +33,3 @@ TestRuleFactory::define(Rule& rule)
   _rules.push_back(&rule);
 }
 
-
-
-RuleFactory&
-Helper::one_rule(std::vector<int> predictions) {
-  TestRuleFactory *factory = new TestRuleFactory();
-  const double fitness = 0.75;
-  const double payoff = 0.75;
-  const double error = 1.0;
-  Rule *single_rule = new Rule({Interval(0, 100)}, predictions, fitness, payoff, error);
-  factory->define(*single_rule);
-  return *factory;
-}
