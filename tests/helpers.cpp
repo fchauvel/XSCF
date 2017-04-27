@@ -68,3 +68,24 @@ TestableRandomizer::uniform(void) const
 {
   return _random_number;
 }
+
+void
+TestableRandomizer::define_number(double number)
+{
+  _random_number = number;
+}
+
+
+
+FixedDecision::FixedDecision(bool evolution)
+  : Decision()
+  , _evolution(evolution)
+{}
+
+FixedDecision::~FixedDecision()
+{}
+
+bool
+FixedDecision::shall_evolve(void) const {
+  return _evolution;
+};

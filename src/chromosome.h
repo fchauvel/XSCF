@@ -17,37 +17,20 @@
  */
 
 
-#include "CppUTest/TestHarness.h"
-
-#include "helpers.h"
-
+#ifndef XCSF_CHROMOSOME_H
+#define XCSF_CHROMOSOME_H
 
 
-using namespace xcsf;
+#include <vector>
 
 
-
-TEST_GROUP(TestRandomizer)
-{
-  double canned_value = 0.234;
-  Randomizer *generate;
-
-  void setup(void)
-  {
-    generate = new TestableRandomizer(canned_value);
-  }
-
-  void teardown(void)
-  {
-    delete generate;
-  }
-
-};
-
-
-TEST(TestRandomizer, test_canned_response)
-{
-  double random_number = generate->uniform();
+namespace xcsf {
   
-  CHECK(random_number == canned_value);
+  typedef unsigned int Allele;
+
+  typedef std::vector<Allele> Chromosome;
+
 }
+
+
+#endif

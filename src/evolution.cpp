@@ -40,81 +40,6 @@ Mutation::apply_to(Chromosome& subject) const
 }
 
 
-Crossover::Crossover(unsigned int cut_point_A, unsigned int cut_point_B)
-  : _cut_point_A(cut_point_A)
-  , _cut_point_B(cut_point_B)
-{
-  if (_cut_point_A >= _cut_point_B) {
-    ostringstream error;
-    error << "Invalid cut-points! Left cut-point must be smaller than the right one";
-    throw invalid_argument(error.str());
-  }
-}
-
-
-Crossover::Crossover(const Crossover& other)
-  : _cut_point_A(other._cut_point_A)
-  , _cut_point_B(other._cut_point_B)
-{}
-
-
-Crossover::~Crossover()
-{}
-
-
-Crossover& 
-Crossover::operator = (const Crossover& other)
-{
-  _cut_point_A = other._cut_point_A;
-  _cut_point_B = other._cut_point_B;
-  return *this;
-}
-
-
-bool
-Crossover::operator == (const Crossover& other) const
-{
-  return _cut_point_A == other._cut_point_A
-    and _cut_point_B == other._cut_point_B;
-}
-
-
-void
-validate(const Chromosome father, const Chromosome& mother)
-{ 
-  if (father.size() != mother.size()) {
-    ostringstream error;
-    error << "Parents chromosomes have different length!"
-	  << "(father=" << father.size() << ", but mother="
-	  << mother.size() << ")";
-    throw invalid_argument(error.str());
-  }  
-}
-
-
-void
-Crossover::breed(const Chromosome& father, const Chromosome& mother, vector<Chromosome>& children) const
-{
-  validate(father, mother);
-
-  if (_cut_point_B >= father.size()) {
-    throw invalid_argument("The chromosomes are too short for the selected cut_points");
-  }
-  
-  if (children.size() < 2) {
-    throw invalid_argument("Crossovers generates at two children!");
-  }
-  
-  for(unsigned int index=0 ; index<father.size() ; ++index) {
-    if (_cut_point_A <= index and index < _cut_point_B) {
-      children[0].push_back(mother[index]);
-      children[1].push_back(father[index]);
-    } else {
-      children[0].push_back(father[index]);
-      children[1].push_back(mother[index]);
-    }
-  }
-}
 
 
 Decision::Decision()
@@ -143,9 +68,32 @@ RandomDecision::shall_evolve(void) const
 }
 
 
-Evolution::Evolution(const Decision& decision, const Crossover& crossover, unsigned int input_count, unsigned int output_count)
+
+
+Selection::~Selection()
+{}
+
+
+DummySelection::DummySelection()
+{}
+
+DummySelection::~DummySelection()
+{}
+
+vector<Rule*>
+DummySelection::operator () (const RuleSet& rules) const
+{
+  vector<Rule*> selection;
+  selection.push_back(&rules[0]);
+  selection.push_back(&rules[1]);
+  return selection;  
+}
+
+
+Evolution::Evolution(const Decision& decision, const Crossover& crossover, const Selection& selection, unsigned int input_count, unsigned int output_count)
   : _decision(decision)
   , _crossover(crossover)
+  , _select_parents(selection)
   , _input_count(input_count)
   , _output_count(output_count)
   , _rules()
@@ -163,7 +111,14 @@ Evolution::~Evolution()
 void
 Evolution::evolve(RuleSet& rules) const
 {
-  if (not _decision.shall_evolve()) return;
+  if (not _decision.shall_evolve())
+    return;
+
+  vector<Rule*> parents = _select_parents(rules);
+  vector<Rule*> children = breed(*parents[0], *parents[1]);
+  for (auto each_child: children) {
+    rules.add(*each_child);
+  }
 }
 
 
@@ -207,11 +162,10 @@ Evolution::decode(const Chromosome& values) const
 
 
 vector<Rule*>
-Evolution::breed(const Rule& father, const Rule& mother)
+Evolution::breed(const Rule& father, const Rule& mother) const
 {
-  
   vector<Chromosome> children(2);
-  _crossover.breed(encode(father), encode(mother), children);
+  _crossover(encode(father), encode(mother), children);
 
   vector<Rule*> children_rules;
   for (auto each_child: children) {

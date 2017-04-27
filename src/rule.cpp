@@ -154,9 +154,11 @@ Rule::as_vector(void) const {
     result.push_back(each_constraint.lower().unsigned_int());
     result.push_back(each_constraint.upper().unsigned_int());
   }
+  
   for (unsigned int index=0 ; index<_outputs.size() ; ++index) {
     result.push_back(_outputs[index].unsigned_int());
   }
+  
   return result;
 }
 

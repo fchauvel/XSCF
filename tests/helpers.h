@@ -7,7 +7,7 @@
 #include <vector>
 #include "utils.h"
 #include "rule.h"
-
+#include "evolution.h"
 
 using namespace xcsf;
 
@@ -31,14 +31,33 @@ private:
 class TestableRandomizer: public Randomizer
 {
 public:
-  TestableRandomizer(double number);
+  explicit TestableRandomizer(double number);
   virtual ~TestableRandomizer();
 
   virtual double uniform(void) const;
-    
-private:
-  const double _random_number;
 
+  void define_number(double number);
+  
+private:
+  double _random_number;
+
+};
+
+
+const bool NO_EVOLUTION = false;
+
+
+class FixedDecision: public Decision
+{
+public:
+  FixedDecision(bool evolution);
+  virtual ~FixedDecision();
+
+  virtual bool shall_evolve(void) const;
+  
+private:
+  bool _evolution;
+  
 };
 
 

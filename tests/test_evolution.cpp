@@ -33,14 +33,13 @@ using namespace xcsf;
 
 TEST_GROUP(TestRandomDecision)
 {
-  const double EVOLUTION_PROBABILITY = 0.25;
-  Randomizer* randomizer;
+  TestableRandomizer* randomizer;
   RandomDecision *decision;
   
   void setup(void)
   {
     randomizer = new TestableRandomizer(0);
-    decision = new RandomDecision(*randomizer, EVOLUTION_PROBABILITY);
+    decision = new RandomDecision(*randomizer, 0);
   }
 
   void teardown(void)
@@ -54,50 +53,69 @@ TEST_GROUP(TestRandomDecision)
 
 TEST(TestRandomDecision, test_shall_evolve)
 {
+  randomizer->define_number(1.0);
+  CHECK(decision->shall_evolve());
+}
+
+
+TEST(TestRandomDecision, test_shall_not_evolve)
+{
+  randomizer->define_number(0.0);
   CHECK(not decision->shall_evolve());
 }
 
 
-
-const bool NO_EVOLUTION = false;
-
-
-class FixedDecision: public Decision
+class FakeCrossover: public Crossover
 {
 public:
-  FixedDecision(bool evolution)
-    : Decision()
-    , _evolution(evolution)
-  {}
+  explicit FakeCrossover(const Chromosome& child)
+    :Crossover()
+    ,_child(child)
+  {};
 
-  virtual ~FixedDecision()
-  {}
+  ~FakeCrossover()
+  {};
 
-  virtual bool shall_evolve(void) const {
-    return _evolution;
+  virtual void
+  operator ()(const Chromosome& father, const Chromosome& mother, vector<Chromosome>& children) const
+  {
+    children[0] = _child;
+    children.erase(children.begin()+1);
   };
-
-private:
-  bool _evolution;
   
+private:
+  const Chromosome& _child;
+
 };
+
 
 
 TEST_GROUP(TestEvolution)
 {
+  Chromosome child = { 5, 10, 20 };
+  Rule *rule_1, *rule_2;
   RuleSet *rules;
   Crossover *crossover;
-
+  Selection *selection;
+  
   void setup(void)
   {
+    crossover = new FakeCrossover(child);
+    rule_1 = new Rule({Interval(0, 50)}, { 4 }, 1.0, 1.0, 1.0);
+    rule_2 = new Rule({Interval(50, 100)}, { 2 }, 1.0, 1.0, 1.0);
     rules = new RuleSet();
-    crossover = new Crossover(1, 2);
+    rules->add(*rule_1);
+    rules->add(*rule_2);
+    selection = new DummySelection();
   }
 
   void teardown(void)
   {
     delete rules;
     delete crossover;
+    delete rule_1;
+    delete rule_2;
+    delete selection;
   }
   
 };
@@ -107,7 +125,7 @@ TEST(TestEvolution, test_no_evolution)
 {
   RuleSet before_evolution(*rules);
   FixedDecision decision(NO_EVOLUTION);
-  Evolution evolution(decision, *crossover);
+  Evolution evolution(decision, *crossover, *selection);
   
   evolution.evolve(*rules);
   
@@ -115,152 +133,16 @@ TEST(TestEvolution, test_no_evolution)
 }
 
 
-TEST_GROUP(TestMutation)
+TEST(TestEvolution, test_evolution_without_mutation)
 {
-  Chromosome *chromosome;
+  RuleSet before_evolution(*rules);
+  FixedDecision decision(true);
+  Evolution evolution(decision, *crossover, *selection);
 
-  void setup(void)
-  {
-    chromosome = new Chromosome({50, 50, 50});
-  }
+  evolution.evolve(*rules);
 
-
-  void teardown(void)
-  {
-    delete chromosome;
-  }
-  
-};
-
-
-TEST(TestMutation, simple_mutation)
-{
-  Mutation mutation(1, 10);
-
-  mutation.apply_to(*chromosome);
-
-  Chromosome expected = { 50, 60, 50 }; 
-  CHECK(*chromosome == expected);
+  CHECK_EQUAL(before_evolution.size() + 1, rules->size());
+  //CHECK(*rules == before_evolution);
 }
 
 
-TEST(TestMutation, test_excessive_positive_mutation)
-{
-  Mutation mutation(1, 200);
-
-  mutation.apply_to(*chromosome);
-
-  Chromosome expected = { 50, 100, 50 }; 
-  CHECK(*chromosome == expected);
-}
-
-
-TEST(TestMutation, test_excessive_negative_mutation)
-{
-  Mutation mutation(1, -200);
-
-  mutation.apply_to(*chromosome);
-
-  Chromosome expected = { 50, 0, 50 }; 
-  CHECK(*chromosome == expected);
-}
-
-
-TEST_GROUP(TestCrossover)
-{
-  Rule *rule_1, *rule_2;
-
-  void setup(void)
-  {
-    rule_1 = new Rule({Interval(0,50)}, { 4 }, 1.0, 1.0, 1.0);
-    rule_2 = new Rule({Interval(50, 100)}, { 2 }, 1.0, 1.0, 1.0);
-  }
-
-  void teardown(void)
-  {
-    delete rule_1;
-    delete rule_2;
-  }
-  
-};
-
-
-TEST(TestCrossover, simple_test)
-{
-  FixedDecision decision(NO_EVOLUTION);
-  Crossover crossover(1, 2);
-  Evolution evolution(decision, crossover);
-
-  vector<Rule*> children = evolution.breed(*rule_1, *rule_2);
-
-  Rule expected_child_A({Interval(0, 100)}, {4}, 1.0, 1.0, 1.0);
-  Rule expected_child_B({Interval(50, 50)}, {2}, 1.0, 1.0, 1.0); 
-   
-  CHECK(2 == children.size());
-  CHECK(expected_child_A == *children[0]);
-  CHECK(expected_child_B == *children[1]);
-}
-
-
-TEST(TestCrossover, test_inverted_cut_points) {
-  CHECK_THROWS(invalid_argument, {   Crossover crossover(2, 1); });
-}
-
-
-TEST(TestCrossover, test_invalid_cut_points) {
-  FixedDecision decision(NO_EVOLUTION);
-  Crossover crossover(2, 8);
-  Evolution evolution(decision, crossover);
-
-  CHECK_THROWS(invalid_argument,{ evolution.breed(*rule_1, *rule_2); });
-}
-
-
-TEST_GROUP(TestCrossoverWithInvalidRules)
-{
-  Rule *rule_1, *rule_2;
-
-  void setup(void)
-  {
-    rule_1 = new Rule({Interval(0,50)}, { 4 }, 1.0, 1.0, 1.0);
-    rule_2 = new Rule({Interval(50, 100), Interval(75, 100)}, { 2 }, 1.0, 1.0, 1.0);
-  }
-
-  void teardown(void)
-  {
-    delete rule_1;
-    delete rule_2;
-  }
-};
-
-
-TEST(TestCrossoverWithInvalidRules, test)
-{
-  FixedDecision decision(NO_EVOLUTION);
-  Crossover crossover(1, 2);
-  Evolution evolution(decision, crossover);
-
-  CHECK_THROWS(invalid_argument,{ evolution.breed(*rule_1, *rule_2); });
-}
-
-
-TEST_GROUP(TestCrossoverOperators)
-{};
-
-
-TEST(TestCrossoverOperators, test_equals)
-{
-  Crossover c1(1, 2);
-
-  CHECK(c1 == c1);
-}
-
-
-TEST(TestCrossoverOperators, test_assignment)
-{
-  Crossover c1(1, 2);
-  Crossover c2(2, 3);
-
-  c1 = c2;
-  CHECK(c1 == c2);
-}

@@ -24,15 +24,12 @@
 
 #include "utils.h"
 #include "rule.h"
-
+#include "crossover.h"
 
 using namespace std;
 
 
 namespace xcsf {
-
-  typedef unsigned int Allele;
-  typedef vector<Allele> Chromosome;
 
   class Mutation
   {
@@ -44,25 +41,6 @@ namespace xcsf {
   private:
     Allele _target;
     int _update;
-  };
-
-  
-  class Crossover
-  {
-  public:
-    Crossover(unsigned int cut_point_A, unsigned int cut_point_B);
-    Crossover(const Crossover& other);
-    ~Crossover();
-
-    Crossover& operator = (const Crossover& other);
-    bool operator == (const Crossover& other) const;
-
-    void breed(const Chromosome& father, const Chromosome& mother, vector<Chromosome>& children) const;
-
-  private: 
-    unsigned int _cut_point_A;
-    unsigned int _cut_point_B;
-
   };
 
 
@@ -90,26 +68,48 @@ namespace xcsf {
     const double _evolution_probability;
     
   };
- 
+
+
+  class Selection
+  {
+  public:
+    virtual ~Selection();
+    
+    virtual vector<Rule*> operator () (const RuleSet& rules) const = 0;
+    
+  };
+
+
+  class DummySelection: public Selection
+  {
+  public:
+    DummySelection();
+    ~DummySelection();
+
+    virtual vector<Rule*> operator () (const RuleSet& rules) const;
+  };
+  
   
   class Evolution
   {
   public:
-    Evolution(const Decision& decisions, const Crossover& crossover, unsigned int input=1, unsigned int output=1);
+    Evolution(const Decision& decisions, const Crossover& crossover, const Selection& selection, unsigned int input=1, unsigned int output=1);
     ~Evolution(void);
 
     void evolve(RuleSet& rules) const;
-    
-    vector<Rule*> breed(const Rule& father, const Rule& mother);
+
+    vector<Rule*> select_parents(const RuleSet& rules) const;
+    vector<Rule*> breed(const Rule& father, const Rule& mother) const;
     Rule* decode(const Chromosome&) const;
     Chromosome encode(const Rule& rule) const;
     
   private:
     const Decision& _decision;
     const Crossover& _crossover;
+    const Selection& _select_parents;
     unsigned int _input_count;
     unsigned int _output_count;
-    vector<Rule*> _rules;
+    mutable vector<Rule*> _rules;
   };
 
   

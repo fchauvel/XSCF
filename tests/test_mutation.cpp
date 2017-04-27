@@ -20,34 +20,62 @@
 #include "CppUTest/TestHarness.h"
 
 #include "helpers.h"
+#include "rule.h"
+#include "evolution.h"
 
+#include <iostream>
+#include <sstream>
 
 
 using namespace xcsf;
 
 
-
-TEST_GROUP(TestRandomizer)
+TEST_GROUP(TestMutation)
 {
-  double canned_value = 0.234;
-  Randomizer *generate;
+  Chromosome *chromosome;
 
   void setup(void)
   {
-    generate = new TestableRandomizer(canned_value);
+    chromosome = new Chromosome({50, 50, 50});
   }
+
 
   void teardown(void)
   {
-    delete generate;
+    delete chromosome;
   }
-
+  
 };
 
 
-TEST(TestRandomizer, test_canned_response)
+TEST(TestMutation, simple_mutation)
 {
-  double random_number = generate->uniform();
-  
-  CHECK(random_number == canned_value);
+  Mutation mutation(1, 10);
+
+  mutation.apply_to(*chromosome);
+
+  Chromosome expected = { 50, 60, 50 }; 
+  CHECK(*chromosome == expected);
+}
+
+
+TEST(TestMutation, test_excessive_positive_mutation)
+{
+  Mutation mutation(1, 200);
+
+  mutation.apply_to(*chromosome);
+
+  Chromosome expected = { 50, 100, 50 }; 
+  CHECK(*chromosome == expected);
+}
+
+
+TEST(TestMutation, test_excessive_negative_mutation)
+{
+  Mutation mutation(1, -200);
+
+  mutation.apply_to(*chromosome);
+
+  Chromosome expected = { 50, 0, 50 }; 
+  CHECK(*chromosome == expected);
 }
