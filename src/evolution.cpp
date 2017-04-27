@@ -117,8 +117,18 @@ Crossover::breed(const Chromosome& father, const Chromosome& mother, vector<Chro
 }
 
 
-Evolution::Evolution(const Crossover& crossover, unsigned int input_count, unsigned int output_count)
-  : _crossover(crossover)
+Decision::Decision()
+{}
+
+
+Decision::~Decision()
+{}
+
+
+
+Evolution::Evolution(const Decision& decision, const Crossover& crossover, unsigned int input_count, unsigned int output_count)
+  : _decision(decision)
+  , _crossover(crossover)
   , _input_count(input_count)
   , _output_count(output_count)
   , _rules()
@@ -133,14 +143,24 @@ Evolution::~Evolution()
 }
 
 
+
+void
+Evolution::evolve(RuleSet& rules) const
+{
+  if (not _decision.shall_evolve()) return;
+}
+
+
 Chromosome
-Evolution::encode(const Rule& rule) const {
+Evolution::encode(const Rule& rule) const
+{
   return Chromosome(rule.as_vector());
 }
 
 
 Rule*
-Evolution::decode(const Chromosome& values) const {
+Evolution::decode(const Chromosome& values) const
+{
   using namespace std;
 
   if (values.size() != 2 * _input_count + _output_count) {

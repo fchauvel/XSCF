@@ -21,6 +21,7 @@
 
 
 #include <vector>
+
 #include "rule.h"
 
 
@@ -30,7 +31,7 @@ using namespace std;
 namespace xcsf {
 
   typedef unsigned int Allele;
-  typedef vector<unsigned int> Chromosome;
+  typedef vector<Allele> Chromosome;
 
   class Mutation
   {
@@ -63,18 +64,33 @@ namespace xcsf {
 
   };
 
+
+  class Decision
+  {
+  public:
+    Decision();
+    virtual ~Decision();
+
+    virtual bool shall_evolve(void) const = 0;
+    
+  };
+
+ 
   
   class Evolution
   {
   public:
-    Evolution(const Crossover& crossover, unsigned int input=1, unsigned int output=1);
+    Evolution(const Decision& decisions, const Crossover& crossover, unsigned int input=1, unsigned int output=1);
     ~Evolution(void);
+
+    void evolve(RuleSet& rules) const;
     
     vector<Rule*> breed(const Rule& father, const Rule& mother);
     Rule* decode(const Chromosome&) const;
     Chromosome encode(const Rule& rule) const;
     
   private:
+    const Decision& _decision;
     const Crossover& _crossover;
     unsigned int _input_count;
     unsigned int _output_count;

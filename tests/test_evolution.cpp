@@ -28,6 +28,58 @@
 
 using namespace xcsf;
 
+const bool NO_EVOLUTION = false;
+
+class FixedDecision: public Decision
+{
+public:
+  FixedDecision(bool evolution)
+    :Decision()
+    ,_evolution(evolution)
+  {}
+
+  virtual ~FixedDecision() {}
+
+  virtual bool shall_evolve(void) const {
+    return _evolution;
+  };
+
+private:
+  bool _evolution;
+  
+};
+
+
+TEST_GROUP(TestEvolution)
+{
+  RuleSet *rules;
+  Crossover *crossover;
+
+  void setup(void)
+  {
+    rules = new RuleSet();
+    crossover = new Crossover(1, 2);
+  }
+
+  void teardown(void)
+  {
+    delete rules;
+    delete crossover;
+  }
+  
+};
+
+
+TEST(TestEvolution, test_no_evolution)
+{
+  RuleSet before_evolution(*rules);
+  FixedDecision decision(NO_EVOLUTION);
+  
+  Evolution evolution(decision, *crossover);
+  evolution.evolve(*rules);
+  
+  CHECK(*rules == before_evolution);
+}
 
 
 TEST_GROUP(TestMutation)
@@ -101,9 +153,10 @@ TEST_GROUP(TestCrossover)
 
 
 TEST(TestCrossover, simple_test)
-{  
+{
+  FixedDecision decision(NO_EVOLUTION);
   Crossover crossover(1, 2);
-  Evolution evolution(crossover);
+  Evolution evolution(decision, crossover);
 
   vector<Rule*> children = evolution.breed(*rule_1, *rule_2);
 
@@ -122,8 +175,9 @@ TEST(TestCrossover, test_inverted_cut_points) {
 
 
 TEST(TestCrossover, test_invalid_cut_points) {
+  FixedDecision decision(NO_EVOLUTION);
   Crossover crossover(2, 8);
-  Evolution evolution(crossover);
+  Evolution evolution(decision, crossover);
 
   CHECK_THROWS(invalid_argument,{ evolution.breed(*rule_1, *rule_2); });
 }
@@ -149,8 +203,9 @@ TEST_GROUP(TestCrossoverWithInvalidRules)
 
 TEST(TestCrossoverWithInvalidRules, test)
 {
+  FixedDecision decision(NO_EVOLUTION);
   Crossover crossover(1, 2);
-  Evolution evolution(crossover);
+  Evolution evolution(decision, crossover);
 
   CHECK_THROWS(invalid_argument,{ evolution.breed(*rule_1, *rule_2); });
 }
