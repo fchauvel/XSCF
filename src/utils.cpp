@@ -17,54 +17,32 @@
  */
 
 
+#include "utils.h"
 
-#include "helpers.h"
+#include <ctime>
+#include <cstdlib>
+
+
+using namespace xcsf;
 
 
 
-TestRuleFactory::TestRuleFactory()
-  :RuleFactory(),
-   _rules()
+Randomizer::Randomizer()
+{
+  std::srand(std::time(0));
+}
+
+
+Randomizer::~Randomizer()
 {}
 
 
-TestRuleFactory::~TestRuleFactory()
-{
-  for (auto each_rule: _rules) {
-    delete each_rule;
-  }
-}
-
-
-void
-TestRuleFactory::initialise(RuleSet& rule_set) const
-{
-  for (auto each_predefined_rule: _rules) {
-    rule_set.add(*each_predefined_rule);
-  }
-};
-
-
-void
-TestRuleFactory::define(Rule& rule)
-{
-  _rules.push_back(&rule);
-}
-
-
-
-TestableRandomizer::TestableRandomizer(double number)
-  :Randomizer()
-  ,_random_number(number)
-{};
-
-
-TestableRandomizer::~TestableRandomizer()
-{};
-
-
 double
-TestableRandomizer::uniform(void) const
+Randomizer::uniform(void) const
 {
-  return _random_number;
+  return std::rand() / RAND_MAX;
 }
+  
+
+
+

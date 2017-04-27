@@ -22,6 +22,7 @@
 
 #include <vector>
 
+#include "utils.h"
 #include "rule.h"
 
 
@@ -75,6 +76,20 @@ namespace xcsf {
     
   };
 
+
+  class RandomDecision: public Decision
+  {
+  public:
+    RandomDecision(const Randomizer& generator, double evolution_probability);
+    virtual ~RandomDecision(void);
+
+    virtual bool shall_evolve(void) const;
+    
+  private:
+    const Randomizer& _generator;
+    const double _evolution_probability;
+    
+  };
  
   
   class Evolution

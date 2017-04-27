@@ -5,7 +5,7 @@
 
 
 #include <vector>
-
+#include "utils.h"
 #include "rule.h"
 
 
@@ -28,9 +28,16 @@ private:
 };
 
 
-class Helper {
- public:
-  static RuleFactory& one_rule(std::vector<int> predictions);
+class TestableRandomizer: public Randomizer
+{
+public:
+  TestableRandomizer(double number);
+  virtual ~TestableRandomizer();
+
+  virtual double uniform(void) const;
+    
+private:
+  const double _random_number;
 
 };
 

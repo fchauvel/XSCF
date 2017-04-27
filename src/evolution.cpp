@@ -125,6 +125,23 @@ Decision::~Decision()
 {}
 
 
+RandomDecision::RandomDecision(const Randomizer& generator, double evolution_probability)
+  :Decision()
+  ,_generator(generator)
+  ,_evolution_probability(evolution_probability)
+{}
+
+
+RandomDecision::~RandomDecision()
+{}
+
+
+bool
+RandomDecision::shall_evolve(void) const
+{
+  return _generator.uniform() > _evolution_probability;
+}
+
 
 Evolution::Evolution(const Decision& decision, const Crossover& crossover, unsigned int input_count, unsigned int output_count)
   : _decision(decision)
@@ -141,7 +158,6 @@ Evolution::~Evolution()
     delete each_rule;
   }
 }
-
 
 
 void

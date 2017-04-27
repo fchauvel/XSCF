@@ -17,54 +17,24 @@
  */
 
 
-
-#include "helpers.h"
-
-
-
-TestRuleFactory::TestRuleFactory()
-  :RuleFactory(),
-   _rules()
-{}
+#ifndef XCSF_UTILS_H
+#define XCSF_UTILS_H
 
 
-TestRuleFactory::~TestRuleFactory()
+
+namespace xcsf
 {
-  for (auto each_rule: _rules) {
-    delete each_rule;
-  }
+
+  class Randomizer
+  {
+  public:
+    Randomizer();
+    virtual ~Randomizer();
+
+    virtual double uniform(void) const;    
+  };
+  
 }
 
 
-void
-TestRuleFactory::initialise(RuleSet& rule_set) const
-{
-  for (auto each_predefined_rule: _rules) {
-    rule_set.add(*each_predefined_rule);
-  }
-};
-
-
-void
-TestRuleFactory::define(Rule& rule)
-{
-  _rules.push_back(&rule);
-}
-
-
-
-TestableRandomizer::TestableRandomizer(double number)
-  :Randomizer()
-  ,_random_number(number)
-{};
-
-
-TestableRandomizer::~TestableRandomizer()
-{};
-
-
-double
-TestableRandomizer::uniform(void) const
-{
-  return _random_number;
-}
+#endif

@@ -19,6 +19,7 @@
 
 #include "CppUTest/TestHarness.h"
 
+#include "helpers.h"
 #include "rule.h"
 #include "evolution.h"
 
@@ -28,17 +29,49 @@
 
 using namespace xcsf;
 
+
+
+TEST_GROUP(TestRandomDecision)
+{
+  const double EVOLUTION_PROBABILITY = 0.25;
+  Randomizer* randomizer;
+  RandomDecision *decision;
+  
+  void setup(void)
+  {
+    randomizer = new TestableRandomizer(0);
+    decision = new RandomDecision(*randomizer, EVOLUTION_PROBABILITY);
+  }
+
+  void teardown(void)
+  {
+    delete randomizer;
+    delete decision;
+  }
+
+};
+
+
+TEST(TestRandomDecision, test_shall_evolve)
+{
+  CHECK(not decision->shall_evolve());
+}
+
+
+
 const bool NO_EVOLUTION = false;
+
 
 class FixedDecision: public Decision
 {
 public:
   FixedDecision(bool evolution)
-    :Decision()
-    ,_evolution(evolution)
+    : Decision()
+    , _evolution(evolution)
   {}
 
-  virtual ~FixedDecision() {}
+  virtual ~FixedDecision()
+  {}
 
   virtual bool shall_evolve(void) const {
     return _evolution;
@@ -74,8 +107,8 @@ TEST(TestEvolution, test_no_evolution)
 {
   RuleSet before_evolution(*rules);
   FixedDecision decision(NO_EVOLUTION);
-  
   Evolution evolution(decision, *crossover);
+  
   evolution.evolve(*rules);
   
   CHECK(*rules == before_evolution);
