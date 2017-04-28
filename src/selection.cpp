@@ -17,14 +17,65 @@
  */
 
 
+
+#include <stdexcept>
+
 #include "selection.h"
+
 
 
 using namespace xcsf;
 
 
+
 Selection::~Selection()
 {}
+
+
+RouletteWheel::RouletteWheel(const Randomizer& randomizer)
+  :Selection()
+  ,_generate(randomizer)
+{}
+
+
+RouletteWheel::~RouletteWheel()
+{}
+
+vector<Rule*>
+RouletteWheel::operator () (const RuleSet& rules) const
+{
+  vector<Rule*> selected_rules(2);
+  
+  selected_rules[0] = select_one(rules, nullptr);
+  selected_rules[1] = select_one(rules, selected_rules[0]);
+ 
+  return selected_rules;
+}
+
+
+Rule*
+RouletteWheel::select_one(const RuleSet& rules, Rule* selected) const
+{
+  double total_fitness = 0;
+  for (unsigned int index=0 ; index<rules.size() ; ++index) {
+    if (&rules[index] != selected) {
+      total_fitness += rules[index].fitness();
+    }
+  }
+  
+  const double threshold = _generate.uniform() * total_fitness;
+  double sum = 0;
+  for (unsigned int index=0 ; index<rules.size() ; ++index) {
+    if (&rules[index] != selected) {
+      sum += rules[index].fitness();
+      if (sum >= threshold) {
+	return &rules[index];
+      }
+    }
+  }
+
+  throw std::logic_error("Roulette wheel error: No rule selected!");
+}
 
 
 DummySelection::~DummySelection()

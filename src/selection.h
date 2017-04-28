@@ -20,7 +20,7 @@
 #ifndef XCSF_SELECTION_H
 #define XCSF_SELECTION_H
 
-
+#include "utils.h"
 #include "rule.h"
 
 
@@ -37,7 +37,21 @@ namespace xcsf
     
   };
 
-  
+
+  class RouletteWheel: public Selection
+  {
+  public:
+    RouletteWheel(const Randomizer& generator);
+    virtual ~RouletteWheel();
+
+    virtual vector<Rule*> operator () (const RuleSet& rules) const;
+
+  private:
+    Rule* select_one(const RuleSet& rules, Rule* selected) const;
+    const Randomizer& _generate;
+    
+  };
+
 
   class DummySelection: public Selection
   {
