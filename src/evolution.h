@@ -25,24 +25,13 @@
 #include "utils.h"
 #include "rule.h"
 #include "crossover.h"
+#include "mutation.h"
+
 
 using namespace std;
 
 
 namespace xcsf {
-
-  class Mutation
-  {
-  public:
-    Mutation(const Allele& target, int update);
-
-    void apply_to(Chromosome& subject) const;
-    
-  private:
-    Allele _target;
-    int _update;
-  };
-
 
   class Decision
   {
@@ -51,21 +40,25 @@ namespace xcsf {
     virtual ~Decision();
 
     virtual bool shall_evolve(void) const = 0;
-    
+    virtual bool shall_mutate(void) const = 0;
   };
 
 
   class RandomDecision: public Decision
   {
   public:
-    RandomDecision(const Randomizer& generator, double evolution_probability);
+    RandomDecision(const Randomizer& generator,
+		   double evolution_probability,
+		   double allele_mutation_probability);
     virtual ~RandomDecision(void);
 
     virtual bool shall_evolve(void) const;
+    virtual bool shall_mutate(void) const;
     
   private:
     const Randomizer& _generator;
     const double _evolution_probability;
+    const double _allele_mutation_probability;
     
   };
 
@@ -93,7 +86,7 @@ namespace xcsf {
   class Evolution
   {
   public:
-    Evolution(const Decision& decisions, const Crossover& crossover, const Selection& selection, unsigned int input=1, unsigned int output=1);
+    Evolution(const Decision& decisions, const Crossover& crossover, const Selection& selection, const MutationFactory& mutations, unsigned int input=1, unsigned int output=1);
     ~Evolution(void);
 
     void evolve(RuleSet& rules) const;
@@ -104,9 +97,12 @@ namespace xcsf {
     Chromosome encode(const Rule& rule) const;
     
   private:
+    void mutate(Chromosome& child) const;
+    
     const Decision& _decision;
     const Crossover& _crossover;
     const Selection& _select_parents;
+    const MutationFactory& _mutations;
     unsigned int _input_count;
     unsigned int _output_count;
     mutable vector<Rule*> _rules;

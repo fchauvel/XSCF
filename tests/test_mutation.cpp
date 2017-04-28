@@ -50,9 +50,9 @@ TEST_GROUP(TestMutation)
 
 TEST(TestMutation, simple_mutation)
 {
-  Mutation mutation(1, 10);
+  ShiftMutation mutation(1, 10);
 
-  mutation.apply_to(*chromosome);
+  mutation(*chromosome);
 
   Chromosome expected = { 50, 60, 50 }; 
   CHECK(*chromosome == expected);
@@ -61,9 +61,9 @@ TEST(TestMutation, simple_mutation)
 
 TEST(TestMutation, test_excessive_positive_mutation)
 {
-  Mutation mutation(1, 200);
+  ShiftMutation mutation(1, 200);
 
-  mutation.apply_to(*chromosome);
+  mutation(*chromosome);
 
   Chromosome expected = { 50, 100, 50 }; 
   CHECK(*chromosome == expected);
@@ -72,9 +72,9 @@ TEST(TestMutation, test_excessive_positive_mutation)
 
 TEST(TestMutation, test_excessive_negative_mutation)
 {
-  Mutation mutation(1, -200);
+  ShiftMutation mutation(1, -200);
 
-  mutation.apply_to(*chromosome);
+  mutation(*chromosome);
 
   Chromosome expected = { 50, 0, 50 }; 
   CHECK(*chromosome == expected);

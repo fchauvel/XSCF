@@ -22,6 +22,22 @@
 
 
 
+FakeMutationFactory::FakeMutationFactory(const Randomizer& generator)
+  :MutationFactory()
+  ,_generate(generator)
+{}
+  
+FakeMutationFactory::~FakeMutationFactory()
+{};
+
+std::unique_ptr<Mutation>
+FakeMutationFactory::generate() const
+{
+  return std::unique_ptr<Mutation>(new ShiftMutation(0, 100));
+};
+
+
+
 TestRuleFactory::TestRuleFactory()
   :RuleFactory(),
    _rules()
@@ -77,9 +93,10 @@ TestableRandomizer::define_number(double number)
 
 
 
-FixedDecision::FixedDecision(bool evolution)
+FixedDecision::FixedDecision(bool evolution, bool allele)
   : Decision()
   , _evolution(evolution)
+  , _allele(allele) 
 {}
 
 FixedDecision::~FixedDecision()
@@ -89,3 +106,9 @@ bool
 FixedDecision::shall_evolve(void) const {
   return _evolution;
 };
+
+bool
+FixedDecision::shall_mutate(void) const {
+  return _allele;
+}
+

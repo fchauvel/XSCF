@@ -24,21 +24,6 @@
 using namespace xcsf;
 
 
-Mutation::Mutation(const Allele& target, int update)
-  : _target(target)
-  , _update(update)
-{}
-
-
-void
-Mutation::apply_to(Chromosome& subject) const
-{
-  int value = subject[_target] + _update;
-  if (value > 100) { value = 100; }
-  if (value < 0) { value = 0; }
-  subject[_target] = value;
-}
-
 
 
 
@@ -50,10 +35,11 @@ Decision::~Decision()
 {}
 
 
-RandomDecision::RandomDecision(const Randomizer& generator, double evolution_probability)
+RandomDecision::RandomDecision(const Randomizer& generator, double evolution_probability, double allele_mutation_probability)
   :Decision()
   ,_generator(generator)
   ,_evolution_probability(evolution_probability)
+  ,_allele_mutation_probability(allele_mutation_probability)
 {}
 
 
@@ -68,6 +54,12 @@ RandomDecision::shall_evolve(void) const
 }
 
 
+bool
+RandomDecision::shall_mutate(void) const
+{
+  return _generator.uniform() > _allele_mutation_probability;
+}
+  
 
 
 Selection::~Selection()
@@ -90,10 +82,16 @@ DummySelection::operator () (const RuleSet& rules) const
 }
 
 
-Evolution::Evolution(const Decision& decision, const Crossover& crossover, const Selection& selection, unsigned int input_count, unsigned int output_count)
+Evolution::Evolution(const Decision& decision,
+		     const Crossover& crossover,
+		     const Selection& selection,
+		     const MutationFactory& mutations,
+		     unsigned int input_count,
+		     unsigned int output_count)
   : _decision(decision)
   , _crossover(crossover)
   , _select_parents(selection)
+  , _mutations(mutations)
   , _input_count(input_count)
   , _output_count(output_count)
   , _rules()
@@ -169,6 +167,7 @@ Evolution::breed(const Rule& father, const Rule& mother) const
 
   vector<Rule*> children_rules;
   for (auto each_child: children) {
+      mutate(each_child);
       Rule *rule = decode(each_child);
       children_rules.push_back(rule);
       _rules.push_back(rule);
@@ -177,3 +176,14 @@ Evolution::breed(const Rule& father, const Rule& mother) const
   return children_rules;
 }
 
+
+void
+Evolution::mutate(Chromosome& child) const
+{
+  unsigned int length = _input_count * 2 + _output_count;
+  for(Allele each=0 ; each<length ; ++each) {
+    if (_decision.shall_mutate()) {
+      child[each] = 100;
+    }
+  }
+}

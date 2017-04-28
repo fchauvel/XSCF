@@ -39,7 +39,7 @@ TEST_GROUP(TestRandomDecision)
   void setup(void)
   {
     randomizer = new TestableRandomizer(0);
-    decision = new RandomDecision(*randomizer, 0);
+    decision = new RandomDecision(*randomizer, 0, 0);
   }
 
   void teardown(void)
@@ -90,16 +90,20 @@ private:
 
 
 
+
 TEST_GROUP(TestEvolution)
 {
+  Randomizer *randomizer;
   Chromosome child = { 5, 10, 20 };
   Rule *rule_1, *rule_2;
   RuleSet *rules;
+  MutationFactory *mutations;
   Crossover *crossover;
   Selection *selection;
   
   void setup(void)
   {
+    randomizer = new TestableRandomizer(0);
     crossover = new FakeCrossover(child);
     rule_1 = new Rule({Interval(0, 50)}, { 4 }, 1.0, 1.0, 1.0);
     rule_2 = new Rule({Interval(50, 100)}, { 2 }, 1.0, 1.0, 1.0);
@@ -107,15 +111,18 @@ TEST_GROUP(TestEvolution)
     rules->add(*rule_1);
     rules->add(*rule_2);
     selection = new DummySelection();
+    mutations = new FakeMutationFactory(*randomizer);
   }
 
   void teardown(void)
   {
+    delete randomizer;
     delete rules;
     delete crossover;
     delete rule_1;
     delete rule_2;
     delete selection;
+    delete mutations;
   }
   
 };
@@ -124,8 +131,8 @@ TEST_GROUP(TestEvolution)
 TEST(TestEvolution, test_no_evolution)
 {
   RuleSet before_evolution(*rules);
-  FixedDecision decision(NO_EVOLUTION);
-  Evolution evolution(decision, *crossover, *selection);
+  FixedDecision decision(NO_EVOLUTION, NO_MUTATION);
+  Evolution evolution(decision, *crossover, *selection, *mutations);
   
   evolution.evolve(*rules);
   
@@ -136,13 +143,30 @@ TEST(TestEvolution, test_no_evolution)
 TEST(TestEvolution, test_evolution_without_mutation)
 {
   RuleSet before_evolution(*rules);
-  FixedDecision decision(true);
-  Evolution evolution(decision, *crossover, *selection);
+  FixedDecision decision(EVOLUTION, NO_MUTATION);
+  Evolution evolution(decision, *crossover, *selection, *mutations);
 
   evolution.evolve(*rules);
 
   CHECK_EQUAL(before_evolution.size() + 1, rules->size());
-  //CHECK(*rules == before_evolution);
+
+  Rule expected_new_rule({ Interval(5, 10) }, { 20 }, 1., 1., 1.);
+  CHECK(expected_new_rule == (*rules)[2]);
+}
+
+
+TEST(TestEvolution, test_evolution_with_mutation)
+{
+  RuleSet before_evolution(*rules);
+  FixedDecision decision(EVOLUTION, MUTATION);
+  Evolution evolution(decision, *crossover, *selection, *mutations);
+
+  evolution.evolve(*rules);
+
+  CHECK_EQUAL(before_evolution.size() + 1, rules->size());
+
+  Rule expected_new_rule({ Interval(100, 100) }, { 100 }, 1., 1., 1.);
+  CHECK(expected_new_rule == (*rules)[2]);
 }
 
 
