@@ -24,6 +24,7 @@
 
 #include "utils.h"
 #include "rule.h"
+#include "selection.h"
 #include "crossover.h"
 #include "mutation.h"
 
@@ -33,6 +34,7 @@ using namespace std;
 
 namespace xcsf {
 
+  
   class Decision
   {
   public:
@@ -62,25 +64,6 @@ namespace xcsf {
     
   };
 
-
-  class Selection
-  {
-  public:
-    virtual ~Selection();
-    
-    virtual vector<Rule*> operator () (const RuleSet& rules) const = 0;
-    
-  };
-
-
-  class DummySelection: public Selection
-  {
-  public:
-    DummySelection();
-    ~DummySelection();
-
-    virtual vector<Rule*> operator () (const RuleSet& rules) const;
-  };
   
   
   class Evolution

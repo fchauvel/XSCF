@@ -61,27 +61,6 @@ RandomDecision::shall_mutate(void) const
 }
   
 
-
-Selection::~Selection()
-{}
-
-
-DummySelection::DummySelection()
-{}
-
-DummySelection::~DummySelection()
-{}
-
-vector<Rule*>
-DummySelection::operator () (const RuleSet& rules) const
-{
-  vector<Rule*> selection;
-  selection.push_back(&rules[0]);
-  selection.push_back(&rules[1]);
-  return selection;  
-}
-
-
 Evolution::Evolution(const Decision& decision,
 		     const Crossover& crossover,
 		     const Selection& selection,
