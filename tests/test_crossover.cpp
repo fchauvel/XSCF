@@ -33,13 +33,13 @@ using namespace xcsf;
 TEST_GROUP(TestCrossover)
 {
   Randomizer* randomizer;
-  MutationFactory* mutations;
+  AlleleMutation* mutations;
   Rule *rule_1, *rule_2;
 
   void setup(void)
   {
     randomizer = new TestableRandomizer(0);
-    mutations = new FakeMutationFactory(*randomizer);
+    mutations = new RandomAlleleMutation(*randomizer);
     rule_1 = new Rule({Interval(0,50)}, { 4 }, 1.0, 1.0, 1.0);
     rule_2 = new Rule({Interval(50, 100)}, { 2 }, 1.0, 1.0, 1.0);
   }
@@ -91,13 +91,13 @@ TEST(TestCrossover, test_invalid_cut_points) {
 TEST_GROUP(TestCrossoverWithInvalidRules)
 {
   Randomizer* randomizer;
-  MutationFactory* mutations;
+  AlleleMutation* mutations;
   Rule *rule_1, *rule_2;
 
   void setup(void)
   {
     randomizer = new TestableRandomizer(0);
-    mutations = new FakeMutationFactory(*randomizer);
+    mutations = new RandomAlleleMutation(*randomizer);
     rule_1 = new Rule({Interval(0,50)}, { 4 }, 1.0, 1.0, 1.0);
     rule_2 = new Rule({Interval(50, 100), Interval(75, 100)}, { 2 }, 1.0, 1.0, 1.0);
   }
@@ -109,6 +109,7 @@ TEST_GROUP(TestCrossoverWithInvalidRules)
     delete mutations;
     delete randomizer;
   }
+  
 };
 
 

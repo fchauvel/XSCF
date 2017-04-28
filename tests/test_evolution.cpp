@@ -97,13 +97,13 @@ TEST_GROUP(TestEvolution)
   Chromosome child = { 5, 10, 20 };
   Rule *rule_1, *rule_2;
   RuleSet *rules;
-  MutationFactory *mutations;
+  AlleleMutation *mutations;
   Crossover *crossover;
   Selection *selection;
   
   void setup(void)
   {
-    randomizer = new TestableRandomizer(0);
+    randomizer = new TestableRandomizer(1);
     crossover = new FakeCrossover(child);
     rule_1 = new Rule({Interval(0, 50)}, { 4 }, 1.0, 1.0, 1.0);
     rule_2 = new Rule({Interval(50, 100)}, { 2 }, 1.0, 1.0, 1.0);
@@ -111,7 +111,7 @@ TEST_GROUP(TestEvolution)
     rules->add(*rule_1);
     rules->add(*rule_2);
     selection = new DummySelection();
-    mutations = new FakeMutationFactory(*randomizer);
+    mutations = new RandomAlleleMutation(*randomizer);
   }
 
   void teardown(void)

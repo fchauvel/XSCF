@@ -25,17 +25,22 @@
 
 #include <iostream>
 #include <sstream>
+#include <stdexcept>
 
 
 using namespace xcsf;
 
 
-TEST_GROUP(TestMutation)
+TEST_GROUP(TestAlleleMutation)
 {
+  AlleleMutation* mutation;
+  Randomizer *randomizer;
   Chromosome *chromosome;
 
   void setup(void)
   {
+    randomizer = new TestableRandomizer(0);
+    mutation = new RandomAlleleMutation(*randomizer);
     chromosome = new Chromosome({50, 50, 50});
   }
 
@@ -43,39 +48,24 @@ TEST_GROUP(TestMutation)
   void teardown(void)
   {
     delete chromosome;
+    delete randomizer;
+    delete mutation;
   }
   
 };
 
 
-TEST(TestMutation, simple_mutation)
+TEST(TestAlleleMutation, test_simple_mutation)
 {
-  ShiftMutation mutation(1, 10);
-
-  mutation(*chromosome);
-
-  Chromosome expected = { 50, 60, 50 }; 
-  CHECK(*chromosome == expected);
+  (*mutation)(*chromosome, 0);
+  
+  CHECK_EQUAL(0, (*chromosome)[0]);
 }
 
 
-TEST(TestMutation, test_excessive_positive_mutation)
+TEST(TestAlleleMutation, test_invalid_locus)
 {
-  ShiftMutation mutation(1, 200);
-
-  mutation(*chromosome);
-
-  Chromosome expected = { 50, 100, 50 }; 
-  CHECK(*chromosome == expected);
-}
+  CHECK_THROWS(std::invalid_argument, { (*mutation)(*chromosome, 120); });
+}  
 
 
-TEST(TestMutation, test_excessive_negative_mutation)
-{
-  ShiftMutation mutation(1, -200);
-
-  mutation(*chromosome);
-
-  Chromosome expected = { 50, 0, 50 }; 
-  CHECK(*chromosome == expected);
-}

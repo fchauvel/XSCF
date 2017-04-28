@@ -22,22 +22,6 @@
 
 
 
-FakeMutationFactory::FakeMutationFactory(const Randomizer& generator)
-  :MutationFactory()
-  ,_generate(generator)
-{}
-  
-FakeMutationFactory::~FakeMutationFactory()
-{};
-
-std::unique_ptr<Mutation>
-FakeMutationFactory::generate() const
-{
-  return std::unique_ptr<Mutation>(new ShiftMutation(0, 100));
-};
-
-
-
 TestRuleFactory::TestRuleFactory()
   :RuleFactory(),
    _rules()

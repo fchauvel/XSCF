@@ -17,38 +17,40 @@
  */
 
 
+#include <iostream>
+#include <sstream>
+
 #include "mutation.h"
 
 
+using namespace std;
 using namespace xcsf;
 
 
-Mutation::~Mutation()
+AlleleMutation::~AlleleMutation()
 {}
 
 
-MutationFactory::~MutationFactory()
-{}
 
-
-ShiftMutation::~ShiftMutation()
+RandomAlleleMutation::RandomAlleleMutation(const Randomizer& generator)
+  : AlleleMutation()
+  , _generate(generator)
 {};
 
 
-ShiftMutation::ShiftMutation(const Allele& target, int update)
-  : Mutation()
-  , _target(target)
-  , _update(update)
+RandomAlleleMutation::~RandomAlleleMutation()
 {}
 
 
 void
-ShiftMutation::operator () (Chromosome& subject) const
+RandomAlleleMutation::operator () (Chromosome& subject, const Allele& locus) const
 {
-  int value = subject[_target] + _update;
-  if (value > 100) { value = 100; }
-  if (value < 0) { value = 0; }
-  subject[_target] = value;
+  if (locus >= subject.size()) {
+    stringstream err;
+    err << "Invalid locus '" << locus
+	<< "'! The chromosome's length is only " << subject.size() << ".";
+    throw std::invalid_argument(err.str());
+  }
+
+  subject[locus] = static_cast<Allele>(_generate.uniform() * 100);
 }
-
-

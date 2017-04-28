@@ -86,7 +86,7 @@ namespace xcsf {
   class Evolution
   {
   public:
-    Evolution(const Decision& decisions, const Crossover& crossover, const Selection& selection, const MutationFactory& mutations, unsigned int input=1, unsigned int output=1);
+    Evolution(const Decision& decisions, const Crossover& crossover, const Selection& selection, const AlleleMutation& mutation, unsigned int input=1, unsigned int output=1);
     ~Evolution(void);
 
     void evolve(RuleSet& rules) const;
@@ -102,7 +102,7 @@ namespace xcsf {
     const Decision& _decision;
     const Crossover& _crossover;
     const Selection& _select_parents;
-    const MutationFactory& _mutations;
+    const AlleleMutation& _mutate;
     unsigned int _input_count;
     unsigned int _output_count;
     mutable vector<Rule*> _rules;

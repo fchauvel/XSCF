@@ -24,48 +24,37 @@
 
 #include <memory>
 
+#include "utils.h"
 #include "chromosome.h"
-
-
 
 
 namespace xcsf
 {
 
-  class Mutation
+  
+  class AlleleMutation
   {
   public:
-    virtual ~Mutation();
+    virtual ~AlleleMutation();
 
-    virtual void operator () (Chromosome& subject) const = 0;
+    virtual void operator () (Chromosome& subject, const Allele& target) const = 0;
   };
 
 
   
-  class MutationFactory
+  class RandomAlleleMutation: public AlleleMutation
   {
   public:
-    virtual ~MutationFactory();
+    RandomAlleleMutation(const Randomizer& randomizer);
+    virtual ~RandomAlleleMutation();
 
-    virtual std::unique_ptr<Mutation> generate(void) const = 0;
-  };
-  
-  
+    virtual void operator () (Chromosome& subject, const Allele& target) const;
 
-  class ShiftMutation: public Mutation
-  {
-  public:
-    ShiftMutation(const Allele& target, int update);
-    virtual ~ShiftMutation();
-    
-    virtual void operator () (Chromosome& subject) const;
-    
   private:
-    Allele _target;
-    int _update;
+    const Randomizer& _generate;
     
   };
-
+ 
   
 }
 

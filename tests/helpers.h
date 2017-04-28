@@ -13,22 +13,6 @@ using namespace xcsf;
 
 
 
-
-class FakeMutationFactory: public MutationFactory
-{
-public:
-  FakeMutationFactory(const Randomizer& generator);  
-  virtual ~FakeMutationFactory();
-
-  virtual std::unique_ptr<Mutation> generate() const;
-
-private:
-  const Randomizer& _generate;
-
-};
-
-
-
 class TestRuleFactory: public RuleFactory
 {
 public:

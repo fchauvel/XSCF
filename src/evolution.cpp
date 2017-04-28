@@ -85,13 +85,13 @@ DummySelection::operator () (const RuleSet& rules) const
 Evolution::Evolution(const Decision& decision,
 		     const Crossover& crossover,
 		     const Selection& selection,
-		     const MutationFactory& mutations,
+		     const AlleleMutation& mutation,
 		     unsigned int input_count,
 		     unsigned int output_count)
   : _decision(decision)
   , _crossover(crossover)
   , _select_parents(selection)
-  , _mutations(mutations)
+  , _mutate(mutation)
   , _input_count(input_count)
   , _output_count(output_count)
   , _rules()
@@ -181,9 +181,9 @@ void
 Evolution::mutate(Chromosome& child) const
 {
   unsigned int length = _input_count * 2 + _output_count;
-  for(Allele each=0 ; each<length ; ++each) {
+  for(Allele each_locus=0 ; each_locus<length ; ++each_locus) {
     if (_decision.shall_mutate()) {
-      child[each] = 100;
+      _mutate(child, each_locus);
     }
   }
 }
