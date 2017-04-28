@@ -39,7 +39,7 @@ TEST_GROUP(TestAlleleMutation)
 
   void setup(void)
   {
-    randomizer = new TestableRandomizer(0);
+    randomizer = new TestableRandomizer({ 0 });
     mutation = new RandomAlleleMutation(*randomizer);
     chromosome = new Chromosome({50, 50, 50});
   }

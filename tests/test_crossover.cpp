@@ -32,115 +32,148 @@ using namespace xcsf;
 
 TEST_GROUP(TestCrossover)
 {
-  Randomizer* randomizer;
-  AlleleMutation* mutations;
-  Rule *rule_1, *rule_2;
+  Chromosome father = { 10, 20, 30 };
+  Chromosome mother = { 70, 80, 90 };
+
+  TestableRandomizer *randomizer;
+  TwoPointCrossover *crossover;
 
   void setup(void)
   {
-    randomizer = new TestableRandomizer(0);
-    mutations = new RandomAlleleMutation(*randomizer);
-    rule_1 = new Rule({Interval(0,50)}, { 4 }, 1.0, 1.0, 1.0);
-    rule_2 = new Rule({Interval(50, 100)}, { 2 }, 1.0, 1.0, 1.0);
+    randomizer = new TestableRandomizer({0.1, 0.2});
+    crossover = new TwoPointCrossover(*randomizer);
   }
 
-  void teardown(void)
-  {
-    delete mutations;
+  void teardown(void) {
     delete randomizer;
-    delete rule_1;
-    delete rule_2;
+    delete crossover;
   }
   
 };
 
 
-TEST(TestCrossover, simple_test)
+TEST(TestCrossover, cut_in_the_middle)
 {
-  FixedDecision decision(NO_EVOLUTION, NO_MUTATION);
-  TwoPointCrossover crossover(1, 2);
-  DummySelection selection;
-  Evolution evolution(decision, crossover, selection, *mutations);
-
-  vector<Rule*> children = evolution.breed(*rule_1, *rule_2);
-
-  Rule expected_child_A({Interval(0, 100)}, {4}, 1.0, 1.0, 1.0);
-  Rule expected_child_B({Interval(50, 50)}, {2}, 1.0, 1.0, 1.0); 
-   
+  randomizer->sequence({ 0.6, 0.5 });
+  
+  vector<Chromosome> children;
+  (*crossover)(father, mother, children);
+  
   CHECK(2 == children.size());
-  CHECK(expected_child_A == *children[0]);
-  CHECK(expected_child_B == *children[1]);
+
+  Chromosome expected_son = { 10, 80, 30 };
+  CHECK(expected_son == children[0]);
+
+  Chromosome expected_daughter = { 70, 20, 90 };
+  CHECK(expected_daughter == children[1]);
+  
 }
 
 
-TEST(TestCrossover, test_inverted_cut_points) {
-  CHECK_THROWS(invalid_argument, {   TwoPointCrossover crossover(2, 1); });
+TEST(TestCrossover, test_no_left_cut_point)
+{
+  randomizer->sequence({ 0, 0 });
+  
+  vector<Chromosome> children;
+  (*crossover)(father, mother, children);
+  
+  CHECK(2 == children.size());
+
+  Chromosome expected_son = { 70, 20, 30 };
+  CHECK(expected_son == children[0]);
+
+  Chromosome expected_daughter = { 10, 80, 90 };
+  CHECK(expected_daughter == children[1]);
+  
+}
+
+TEST(TestCrossover, test_no_right_cut_point)
+{
+  randomizer->sequence({ 1., 1. });
+  
+  vector<Chromosome> children;
+  (*crossover)(father, mother, children);
+  
+  CHECK(2 == children.size());
+
+  Chromosome expected_son = { 10, 20, 90 };
+  CHECK(expected_son == children[0]);
+
+  Chromosome expected_daughter = { 70, 80, 30 };
+  CHECK(expected_daughter == children[1]);
+  
+}
+
+TEST(TestCrossover, test_only_middle)
+{
+  randomizer->sequence({ 0., 1. });
+  
+  vector<Chromosome> children;
+  (*crossover)(father, mother, children);
+  
+  CHECK(2 == children.size());
+
+  Chromosome expected_son = { 70, 80, 90 };
+  CHECK(expected_son == children[0]);
+
+  Chromosome expected_daughter = { 10, 20, 30 };
+  CHECK(expected_daughter == children[1]);
+  
 }
 
 
-TEST(TestCrossover, test_invalid_cut_points) {
-  FixedDecision decision(NO_EVOLUTION, NO_MUTATION);
-  TwoPointCrossover crossover(2, 8);
-  DummySelection selection;
-  Evolution evolution(decision, crossover, selection, *mutations);
+TEST(TestCrossover, test_no_left_medium_right)
+{
+  randomizer->sequence({ 0., 0.6 });
+  
+  vector<Chromosome> children;
+  (*crossover)(father, mother, children);
+  
+  CHECK(2 == children.size());
 
-  CHECK_THROWS(invalid_argument,{ evolution.breed(*rule_1, *rule_2); });
+  Chromosome expected_son = { 70, 80, 30 };
+  CHECK(expected_son == children[0]);
+
+  Chromosome expected_daughter = { 10, 20, 90 };
+  CHECK(expected_daughter == children[1]);
+  
 }
 
+
+TEST(TestCrossover, test_small_left_no_right)
+{
+  randomizer->sequence({ 0.6, 1. });
+  
+  vector<Chromosome> children;
+  (*crossover)(father, mother, children);
+  
+  CHECK(2 == children.size());
+
+  Chromosome expected_son = { 10, 80, 90 };
+  CHECK(expected_son == children[0]);
+
+  Chromosome expected_daughter = { 70, 20, 30 };
+  CHECK(expected_daughter == children[1]);
+  
+}
 
 TEST_GROUP(TestCrossoverWithInvalidRules)
 {
-  Randomizer* randomizer;
-  AlleleMutation* mutations;
-  Rule *rule_1, *rule_2;
-
+  Chromosome father = { 10, 20, 30 };
+  Chromosome mother = { 70, 80, 85, 87, 90 };
+  
   void setup(void)
-  {
-    randomizer = new TestableRandomizer(0);
-    mutations = new RandomAlleleMutation(*randomizer);
-    rule_1 = new Rule({Interval(0,50)}, { 4 }, 1.0, 1.0, 1.0);
-    rule_2 = new Rule({Interval(50, 100), Interval(75, 100)}, { 2 }, 1.0, 1.0, 1.0);
-  }
-
-  void teardown(void)
-  {
-    delete rule_1;
-    delete rule_2;
-    delete mutations;
-    delete randomizer;
-  }
+  {}
   
 };
 
 
 TEST(TestCrossoverWithInvalidRules, test)
 {
-  FixedDecision decision(NO_EVOLUTION, NO_MUTATION);
-  TwoPointCrossover crossover(1, 2);
-  DummySelection selection; 
-  Evolution evolution(decision, crossover, selection, *mutations);
+  TestableRandomizer randomizer({1, 2});
+  TwoPointCrossover crossover(randomizer);
 
-  CHECK_THROWS(invalid_argument,{ evolution.breed(*rule_1, *rule_2); });
-}
-
-
-TEST_GROUP(TestCrossoverOperators)
-{};
-
-
-TEST(TestCrossoverOperators, test_equals)
-{
-  TwoPointCrossover c1(1, 2);
-
-  CHECK(c1 == c1);
-}
-
-
-TEST(TestCrossoverOperators, test_assignment)
-{
-  TwoPointCrossover c1(1, 2);
-  TwoPointCrossover c2(2, 3);
-
-  c1 = c2;
-  CHECK(c1 == c2);
+  vector<Chromosome> children(2);
+    
+  CHECK_THROWS(invalid_argument,{ crossover(father, mother, children); });
 }

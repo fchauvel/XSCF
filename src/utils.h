@@ -31,6 +31,8 @@ namespace xcsf
     Randomizer();
     virtual ~Randomizer();
 
+    unsigned int unsigned_int(unsigned int lower=0, unsigned int upper=100) const;
+
     virtual double uniform(void) const;    
   };
   

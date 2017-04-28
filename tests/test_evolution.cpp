@@ -38,7 +38,7 @@ TEST_GROUP(TestRandomDecision)
   
   void setup(void)
   {
-    randomizer = new TestableRandomizer(0);
+    randomizer = new TestableRandomizer({ 0 });
     decision = new RandomDecision(*randomizer, 0, 0);
   }
 
@@ -53,14 +53,14 @@ TEST_GROUP(TestRandomDecision)
 
 TEST(TestRandomDecision, test_shall_evolve)
 {
-  randomizer->define_number(1.0);
+  randomizer->sequence({ 1.0 });
   CHECK(decision->shall_evolve());
 }
 
 
 TEST(TestRandomDecision, test_shall_not_evolve)
 {
-  randomizer->define_number(0.0);
+  randomizer->sequence({ 0.0 });
   CHECK(not decision->shall_evolve());
 }
 
@@ -69,13 +69,12 @@ class FakeCrossover: public Crossover
 {
 public:
   explicit FakeCrossover(const Chromosome& child)
-    :Crossover()
-    ,_child(child)
+    :_child(child)
   {};
 
-  ~FakeCrossover()
+  virtual ~FakeCrossover()
   {};
-
+  
   virtual void
   operator ()(const Chromosome& father, const Chromosome& mother, vector<Chromosome>& children) const
   {
@@ -89,11 +88,23 @@ private:
 };
 
 
+class FakeAlleleMutation: public AlleleMutation
+{
+public:
+  FakeAlleleMutation(){};
+  virtual ~FakeAlleleMutation(){};
+  
+  virtual void operator () (Chromosome& subject, const Allele& target) const
+  {
+    subject[target] = 50;
+  };
+  
+};
+
 
 
 TEST_GROUP(TestEvolution)
 {
-  Randomizer *randomizer;
   Chromosome child = { 5, 10, 20 };
   Rule *rule_1, *rule_2;
   RuleSet *rules;
@@ -103,7 +114,6 @@ TEST_GROUP(TestEvolution)
   
   void setup(void)
   {
-    randomizer = new TestableRandomizer(1);
     crossover = new FakeCrossover(child);
     rule_1 = new Rule({Interval(0, 50)}, { 4 }, 1.0, 1.0, 1.0);
     rule_2 = new Rule({Interval(50, 100)}, { 2 }, 1.0, 1.0, 1.0);
@@ -111,12 +121,11 @@ TEST_GROUP(TestEvolution)
     rules->add(*rule_1);
     rules->add(*rule_2);
     selection = new DummySelection();
-    mutations = new RandomAlleleMutation(*randomizer);
+    mutations = new FakeAlleleMutation();
   }
 
   void teardown(void)
   {
-    delete randomizer;
     delete rules;
     delete crossover;
     delete rule_1;
@@ -165,7 +174,7 @@ TEST(TestEvolution, test_evolution_with_mutation)
 
   CHECK_EQUAL(before_evolution.size() + 1, rules->size());
 
-  Rule expected_new_rule({ Interval(100, 100) }, { 100 }, 1., 1., 1.);
+  Rule expected_new_rule({ Interval(50, 50) }, { 50 }, 1., 1., 1.);
   CHECK(expected_new_rule == (*rules)[2]);
 }
 

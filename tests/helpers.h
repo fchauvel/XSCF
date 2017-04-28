@@ -33,15 +33,16 @@ private:
 class TestableRandomizer: public Randomizer
 {
 public:
-  explicit TestableRandomizer(double number);
+  explicit TestableRandomizer(vector<double> sequence);
   virtual ~TestableRandomizer();
 
   virtual double uniform(void) const;
 
-  void define_number(double number);
+  void sequence(vector<double> sequence);
   
 private:
-  double _random_number;
+  vector<double> _sequence;
+  mutable unsigned int _next;
 
 };
 

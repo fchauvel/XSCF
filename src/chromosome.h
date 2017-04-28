@@ -22,6 +22,9 @@
 
 
 #include <vector>
+#include <iostream>
+
+using namespace std;
 
 
 namespace xcsf {
@@ -30,6 +33,8 @@ namespace xcsf {
 
   typedef std::vector<Allele> Chromosome;
 
+  ostream& operator << (ostream& out, const Chromosome& chromosome);
+  
 }
 
 

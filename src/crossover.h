@@ -21,6 +21,7 @@
 #define XCSF_CROSSOVER_H
 
 
+#include "utils.h"
 #include "chromosome.h"
 
 
@@ -33,9 +34,8 @@ namespace xcsf
   class Crossover
   {
   public:
-    Crossover();
     virtual ~Crossover();
-
+    
     virtual void operator () (const Chromosome& father, const Chromosome& mother, vector<Chromosome>& children) const = 0;
   
   };
@@ -44,18 +44,14 @@ namespace xcsf
   class TwoPointCrossover : public Crossover
   {
   public:
-    TwoPointCrossover(unsigned int cut_point_A, unsigned int cut_point_B);
+    TwoPointCrossover(const Randomizer& randomizer);
     TwoPointCrossover(const TwoPointCrossover& other);
     ~TwoPointCrossover();
 
-    TwoPointCrossover& operator = (const TwoPointCrossover& other);
-    bool operator == (const TwoPointCrossover& other) const;
-
     virtual void operator () (const Chromosome& father, const Chromosome& mother, vector<Chromosome>& children) const;
 
-  private: 
-    unsigned int _cut_point_A;
-    unsigned int _cut_point_B;
+  private:
+    const Randomizer& _generate;
 
   };
 

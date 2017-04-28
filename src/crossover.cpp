@@ -27,53 +27,23 @@ using namespace std;
 using namespace xcsf;
 
 
-Crossover::Crossover()
-{}
-
-
 Crossover::~Crossover()
-{}
+{};
 
-
-TwoPointCrossover::TwoPointCrossover(unsigned int cut_point_A, unsigned int cut_point_B)
+TwoPointCrossover::TwoPointCrossover(const Randomizer& randomizer)
   : Crossover()
-  , _cut_point_A(cut_point_A)
-  , _cut_point_B(cut_point_B)
-{
-  if (_cut_point_A >= _cut_point_B) {
-    ostringstream error;
-    error << "Invalid cut-points! Left cut-point must be smaller than the right one";
-    throw invalid_argument(error.str());
-  }
-}
+  , _generate(randomizer)
+{}
 
 
 TwoPointCrossover::TwoPointCrossover(const TwoPointCrossover& other)
   : Crossover(other)
-  , _cut_point_A(other._cut_point_A)
-  , _cut_point_B(other._cut_point_B)
+  , _generate(other._generate)
 {}
 
 
 TwoPointCrossover::~TwoPointCrossover()
 {}
-
-
-TwoPointCrossover& 
-TwoPointCrossover::operator = (const TwoPointCrossover& other)
-{
-  _cut_point_A = other._cut_point_A;
-  _cut_point_B = other._cut_point_B;
-  return *this;
-}
-
-
-bool
-TwoPointCrossover::operator == (const TwoPointCrossover& other) const
-{
-  return _cut_point_A == other._cut_point_A
-    and _cut_point_B == other._cut_point_B;
-}
 
 
 void
@@ -94,21 +64,24 @@ TwoPointCrossover::operator()(const Chromosome& father, const Chromosome& mother
 {
   validate(father, mother);
 
-  if (_cut_point_B >= father.size()) {
-    throw invalid_argument("The chromosomes are too short for the selected cut_points");
-  }
+  Chromosome son(father);
+  Chromosome daughter(father);
   
-  if (children.size() < 2) {
-    throw invalid_argument("TwoPointCrossovers generates at two children!");
-  }
-  
-  for(unsigned int index=0 ; index<father.size() ; ++index) {
-    if (_cut_point_A <= index and index < _cut_point_B) {
-      children[0].push_back(mother[index]);
-      children[1].push_back(father[index]);
+  Allele left = _generate.unsigned_int(0, father.size());
+  Allele right = _generate.unsigned_int(left+1, father.size()+1);
+      
+  for(Allele index=0 ; index<father.size() ; ++index) {
+    if (left <= index and index < right) {
+      son[index] = mother[index];
+      daughter[index] = father[index];
+      
     } else {
-      children[0].push_back(father[index]);
-      children[1].push_back(mother[index]);
+      son[index] = father[index];
+      daughter[index] = mother[index];
     }
+
   }
+
+  children.push_back(son);
+  children.push_back(daughter);
 }

@@ -17,9 +17,7 @@
  */
 
 
-#include "CppUTest/TestHarness.h"
-
-#include "helpers.h"
+#include "chromosome.h"
 
 
 
@@ -27,41 +25,14 @@ using namespace xcsf;
 
 
 
-TEST_GROUP(TestRandomizer)
+ostream&
+xcsf::operator << (ostream& out, const Chromosome& chromosome)
 {
-  vector<double> sequence = {0, 0.5, 1};
-  Randomizer *generate;
-
-  void setup(void)
-  {
-    generate = new TestableRandomizer(sequence);
+  out << "{ ";
+  for (unsigned int locus=0 ; locus<chromosome.size() ; ++locus) {
+    out << chromosome[locus];
+    if (locus < chromosome.size()-1) out << ", ";
   }
-
-  void teardown(void)
-  {
-    delete generate;
-  }
-
-};
-
-
-TEST(TestRandomizer, test_canned_response)
-{
-  for (unsigned int index=0 ; index<25 ; ++index) {
-    CHECK(generate->uniform() == sequence[index % 3]); 
-  }
-
-}
-
-
-TEST(TestRandomizer, test_unsigned_int)
-{
-  unsigned int value = generate->unsigned_int(0, 100);
-  CHECK_EQUAL(0, value);
-
-  value = generate->unsigned_int(0, 100);
-  CHECK_EQUAL(49, value);
-
-  value = generate->unsigned_int(0, 100);
-  CHECK_EQUAL(99, value);
+  out << " }";
+  return out;
 }

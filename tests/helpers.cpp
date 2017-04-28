@@ -21,7 +21,6 @@
 #include "helpers.h"
 
 
-
 TestRuleFactory::TestRuleFactory()
   :RuleFactory(),
    _rules()
@@ -53,9 +52,10 @@ TestRuleFactory::define(Rule& rule)
 
 
 
-TestableRandomizer::TestableRandomizer(double number)
+TestableRandomizer::TestableRandomizer(vector<double> sequence)
   :Randomizer()
-  ,_random_number(number)
+  ,_sequence(sequence)
+  ,_next(0)
 {};
 
 
@@ -66,13 +66,16 @@ TestableRandomizer::~TestableRandomizer()
 double
 TestableRandomizer::uniform(void) const
 {
-  return _random_number;
+  double random_number = _sequence[_next];
+  _next += 1;
+  if (_next >= _sequence.size()) _next = 0;
+  return random_number;
 }
 
 void
-TestableRandomizer::define_number(double number)
+TestableRandomizer::sequence(vector<double> sequence)
 {
-  _random_number = number;
+  _sequence = sequence;
 }
 
 

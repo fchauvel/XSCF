@@ -37,6 +37,14 @@ Randomizer::~Randomizer()
 {}
 
 
+unsigned int
+Randomizer::unsigned_int(unsigned int lower, unsigned int upper) const
+{
+  double value = lower + (upper - lower - 1) * uniform();
+  return static_cast<unsigned int>(value);
+}
+
+
 double
 Randomizer::uniform(void) const
 {
