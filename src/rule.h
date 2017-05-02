@@ -123,7 +123,8 @@ namespace xcsf {
     RuleSet& operator = (const RuleSet& population);
     bool operator == (const RuleSet& rules) const;
     Rule& operator [] (unsigned int index) const;
-    
+
+    bool empty(void) const;
     RuleSet& add(Rule& rule);
     Rule& remove(unsigned int index);
 
@@ -177,10 +178,14 @@ namespace xcsf {
   {
   public:
     virtual ~RuleFactory();
-  
-    virtual void initialise(RuleSet& rule_set) const = 0;
-  
+    
+    virtual void initialise(RuleSet& rules) const = 0;
+    virtual void evolve(RuleSet& rules) const = 0;
+    virtual void create_rule_for(RuleSet& rules, const Vector& context) const = 0;
+    
   };
+  
+
 
 }
 

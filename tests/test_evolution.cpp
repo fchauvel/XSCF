@@ -27,6 +27,7 @@
 #include <sstream>
 
 
+
 using namespace xcsf;
 
 
@@ -203,6 +204,20 @@ TEST(TestEvolution, test_creating_rules_for_unknown_contexts)
   evolution.create_rule_for(*rules, context);
 
   CHECK_EQUAL(before_evolution.size()+1, rules->size());
+}
+
+TEST(TestEvolution, test_creating_rules_for_unknown_contexts_at_capacity)
+{
+  const unsigned int CAPACITY = 2;
+  
+  RuleSet before_evolution(*rules);
+  FixedDecision decision(EVOLUTION, MUTATION);
+  Evolution evolution(decision, *crossover, *selection, *mutations, 1, 1, CAPACITY);
+
+  Vector context = { 80 };
+  evolution.create_rule_for(*rules, context);
+
+  CHECK_EQUAL(before_evolution.size(), rules->size());
 }
 
 

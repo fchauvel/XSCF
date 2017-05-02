@@ -139,8 +139,28 @@ Evolution::create_rule_for(RuleSet& rules, const Vector& context) const
   Rule* rule = new Rule(constraints, predictions, 1., 1., 1.);
   _rules.push_back(rule);
   rules.add(*rule);
+
+  enforce_capacity(rules);
 }
 
+
+void
+Evolution::initialise(RuleSet& rules) const {
+  vector<Interval> constraints;
+  for (unsigned int index=0 ; index<_input_count ; ++index) {
+    constraints.push_back(Interval(0, Value::MAXIMUM));
+  }
+
+  vector<unsigned int> predictions;
+  for (unsigned int index=0 ; index<_output_count ; ++index) {
+    predictions.push_back(50);
+  }
+
+  Rule* rule = new Rule(constraints, predictions, 1., 1., 1.);
+  _rules.push_back(rule);
+  rules.add(*rule);
+ 
+}
 
 Chromosome
 Evolution::encode(const Rule& rule) const

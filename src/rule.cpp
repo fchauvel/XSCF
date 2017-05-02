@@ -352,6 +352,13 @@ RuleSet::validate(unsigned int index) const
 }
 
 
+bool
+RuleSet::empty(void) const
+{
+  return _rules.size() == 0;
+}
+
+
 RuleSet&
 RuleSet::add(Rule& rule)
 {

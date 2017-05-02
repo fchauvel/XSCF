@@ -20,7 +20,9 @@ public:
   virtual ~TestRuleFactory();
   
   virtual void initialise(RuleSet& rule_set) const;
-
+  virtual void evolve(RuleSet& rules) const;
+  virtual void create_rule_for(RuleSet& rules, const Vector& context) const;
+  
   void define(Rule& rule);
 
 private:

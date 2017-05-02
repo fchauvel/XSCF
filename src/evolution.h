@@ -65,16 +65,16 @@ namespace xcsf {
     
   };
 
-  
-  
-  class Evolution
+    
+  class Evolution: public RuleFactory
   {
   public:
     Evolution(const Decision& decisions, const Crossover& crossover, const Selection& selection, const AlleleMutation& mutation, unsigned int input=1, unsigned int output=1, unsigned int capacity=100);
     ~Evolution(void);
 
-    void evolve(RuleSet& rules) const;
-    void create_rule_for(RuleSet& rules, const Vector& context) const;
+    virtual void initialise(RuleSet& rule_set) const;
+    virtual void evolve(RuleSet& rules) const;
+    virtual void create_rule_for(RuleSet& rules, const Vector& context) const;
 
     vector<Rule*> select_parents(const RuleSet& rules) const;
     vector<Rule*> breed(const Rule& father, const Rule& mother) const;

@@ -18,6 +18,7 @@
 
 
 #include "application.h"
+#include "evolution.h"
 
 
 using namespace std;
@@ -27,10 +28,22 @@ using namespace xcsf;
 int
 main(int argc, char** argv)
 {
-  cout << APPLICATION << " v" << VERSION << endl; 
+  cout << APPLICATION << " v" << VERSION << endl;
 
-  RuleFactory* factory = new BasicRuleFactory();
-  Application application(cin, cout, *factory);
+  const unsigned int INPUT_COUNT(1);
+  const unsigned int OUTPUT_COUNT(1);
+  const unsigned int CAPACITY(100);
+  const double EVOLUTION_PROBABILITY(0.25);
+  const double MUTATION_PROBABILITY(0.10);
+
+  Randomizer randomizer;
+  RandomDecision decisions(randomizer, EVOLUTION_PROBABILITY, MUTATION_PROBABILITY);
+  RouletteWheel selection(randomizer);
+  TwoPointCrossover crossover(randomizer);
+  RandomAlleleMutation mutation(randomizer);
+  Evolution evolution(decisions, crossover, selection, mutation, INPUT_COUNT, OUTPUT_COUNT, CAPACITY);
+  
+  Application application(cin, cout, evolution);
   application.run();
 
   return 0;

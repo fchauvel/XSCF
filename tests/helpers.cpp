@@ -43,6 +43,15 @@ TestRuleFactory::initialise(RuleSet& rule_set) const
   }
 };
 
+void
+TestRuleFactory::evolve(RuleSet& rules) const
+{}
+
+
+void
+TestRuleFactory::create_rule_for(RuleSet& rules, const Vector& context) const
+{}
+ 
 
 void
 TestRuleFactory::define(Rule& rule)

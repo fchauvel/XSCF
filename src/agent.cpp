@@ -48,8 +48,13 @@ const Vector&
 Agent::select_action(const Vector& input)
 {
   ActivationGroup active_rules(_rules, input);
+  if (active_rules.empty()) {
+    _factory.create_rule_for(_rules, input);
+  }
+  active_rules = ActivationGroup(_rules, input);
   PredictionGroup predictions(active_rules);
   _rules_to_reward = predictions.rules_to_reward();
+  _factory.evolve(_rules);
   return predictions.most_rewarding();
 }
 
