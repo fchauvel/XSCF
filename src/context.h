@@ -26,68 +26,71 @@
 #include <stdexcept>
 
 
-using namespace std;
-
-
-class Value
+namespace xcsf
 {
- public:
-  Value(int value);
-  Value(unsigned int value);
-  Value(const Value& prototype);
-  ~Value();
 
-  Value& operator = (const Value& other);
+  class Value
+  {
+  public:
+
+    Value(int value);
+    Value(unsigned int value);
+    Value(const Value& prototype);
+    ~Value();
+
+    Value& operator = (const Value& other);
+ 
+    explicit operator unsigned int (void) const;
   
-  bool operator == (const Value& other) const;
-  bool operator != (const Value& other) const;
-  bool operator > (const Value& other) const;
-  bool operator >= (const Value& other) const;
-  bool operator < (const Value& other) const;
-  bool operator <= (const Value& other) const;
-
-  unsigned int unsigned_int(void) const;
+    friend bool operator == (const Value& left, const Value& right);
+    friend bool operator != (const Value& left, const Value& right);
+    friend bool operator > (const Value& left, const Value& right);
+    friend bool operator >= (const Value& left, const Value& right);
+    friend bool operator < (const Value& left, const Value& right);
+    friend bool operator <= (const Value& left, const Value& right);
   
-  static const unsigned int MAXIMUM = 100;
+    friend const Value operator + (const Value& left, const Value& right);
+    friend const Value operator - (const Value& left, const Value& right);
+
+    friend std::ostream& operator << (std::ostream& out, const Value& value);
+
+    static const unsigned int MAXIMUM = 100;
   
- private:
-  friend ostream& operator << (ostream& out, const Value& value);
+  private:
   
-  unsigned int _value;
+    unsigned int _value;
   
-};
+  };
+   
 
+  class Vector
+  {
+  public:
+    Vector(unsigned int dimension_count);
+    Vector(std::initializer_list<int> values);
+    Vector(const std::vector<int>& values);
+    Vector(const std::vector<unsigned int>& values);
+    Vector(const Vector& other);
+    ~Vector();
 
-class Vector
-{
- public:
-  Vector(unsigned int dimension_count);
-  Vector(initializer_list<int> values);
-  Vector(const vector<int>& values);
-  Vector(const vector<unsigned int>& values);
-  Vector(const Vector& other);
-  ~Vector();
-
-  void operator = (const Vector& other);
-  bool operator == (const Vector& other) const;
-  bool operator < (const Vector& other) const;
+    void operator = (const Vector& other);
+    bool operator == (const Vector& other) const;
+    bool operator < (const Vector& other) const;
   
-  unsigned int size(void) const;
-  const Value& operator [] (unsigned int index) const;
+    unsigned int size(void) const;
+    const Value& operator [] (unsigned int index) const;
 
 
-  static Vector parse(const string& text);
+    static Vector parse(const std::string& text);
   
- private:
-  friend ostream& operator << (ostream& out, const Vector& vector);
+  private:
+    friend std::ostream& operator << (std::ostream& out, const Vector& vector);
   
-  vector<Value> _values;
+    std::vector<Value> _values;
   
-};
+  };
 
 
-
-
-
+}
 
 #endif

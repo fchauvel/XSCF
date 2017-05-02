@@ -122,6 +122,26 @@ Evolution::enforce_capacity(RuleSet& rules) const
 }
 
 
+void
+Evolution::create_rule_for(RuleSet& rules, const Vector& context) const
+{
+  vector<Interval> constraints;
+  for (unsigned int index=0 ; index<context.size() ; ++index) {
+    const Value value = context[index];
+    constraints.push_back(Interval(value-10, value+10));
+  }
+
+  vector<unsigned int> predictions;
+  for (unsigned int index=0 ; index<_output_count ; ++index) {
+    predictions.push_back(50);
+  }
+
+  Rule* rule = new Rule(constraints, predictions, 1., 1., 1.);
+  _rules.push_back(rule);
+  rules.add(*rule);
+}
+
+
 Chromosome
 Evolution::encode(const Rule& rule) const
 {

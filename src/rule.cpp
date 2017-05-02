@@ -150,13 +150,14 @@ Rule::operator != (const Rule& other_rule) const
 vector<unsigned int>
 Rule::as_vector(void) const {
   vector<unsigned int> result;
+
   for (auto each_constraint: _intervals) {
-    result.push_back(each_constraint.lower().unsigned_int());
-    result.push_back(each_constraint.upper().unsigned_int());
+    result.push_back(static_cast<unsigned int>(each_constraint.lower()));
+    result.push_back(static_cast<unsigned int>(each_constraint.upper()));
   }
   
   for (unsigned int index=0 ; index<_outputs.size() ; ++index) {
-    result.push_back(_outputs[index].unsigned_int());
+    result.push_back(static_cast<unsigned int>(_outputs[index]));
   }
   
   return result;
@@ -508,10 +509,6 @@ RuleSet&
 PredictionGroup::rules_to_reward(void) const {
   return _most_rewarding;
 }
-
-
-RuleFactory::RuleFactory()
-{}
 
 
 RuleFactory::~RuleFactory()

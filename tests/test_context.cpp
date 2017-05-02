@@ -4,6 +4,9 @@
 #include "context.h"
 
 
+using namespace xcsf;
+
+
 TEST_GROUP(TestVector)
 {};
 
@@ -72,6 +75,30 @@ TEST(TestValue, test_less_or_equal_than) {
   Value v1(50);
   Value v2(50);
   CHECK(v1 <= v2);
+};
+
+TEST(TestValue, test_addition) {
+  Value v1(10);
+  Value v2(20);
+  CHECK(30 == v1 + v2);
+};
+
+TEST(TestValue, test_addition_with_overflow) {
+  Value v1(90);
+  Value v2(90);
+  CHECK(100 == v1 + v2);
+};
+
+TEST(TestValue, test_subtraction) {
+  Value v1(90);
+  Value v2(30);
+  CHECK(60 == v1 - v2);
+};
+
+TEST(TestValue, test_subtraction_with_underflow) {
+  Value v1(30);
+  Value v2(90);
+  CHECK(0 == v1 - v2);
 };
 
 

@@ -74,6 +74,7 @@ namespace xcsf {
     ~Evolution(void);
 
     void evolve(RuleSet& rules) const;
+    void create_rule_for(RuleSet& rules, const Vector& context) const;
 
     vector<Rule*> select_parents(const RuleSet& rules) const;
     vector<Rule*> breed(const Rule& father, const Rule& mother) const;

@@ -176,7 +176,6 @@ namespace xcsf {
   class RuleFactory
   {
   public:
-    RuleFactory(void);
     virtual ~RuleFactory();
   
     virtual void initialise(RuleSet& rule_set) const = 0;

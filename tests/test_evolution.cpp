@@ -193,5 +193,18 @@ TEST(TestEvolution, test_evolution_with_population_at_capacity)
 }
 
 
+TEST(TestEvolution, test_creating_rules_for_unknown_contexts)
+{
+  RuleSet before_evolution(*rules);
+  FixedDecision decision(EVOLUTION, MUTATION);
+  Evolution evolution(decision, *crossover, *selection, *mutations, 1, 1);
+
+  Vector context = { 80 };
+  evolution.create_rule_for(*rules, context);
+
+  CHECK_EQUAL(before_evolution.size()+1, rules->size());
+}
+
+
 
 

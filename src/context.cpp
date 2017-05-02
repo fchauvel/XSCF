@@ -22,6 +22,10 @@
 #include <sstream>
 
 
+using namespace std;
+using namespace xcsf;
+
+
 Value::Value(int value):
   Value(static_cast<unsigned>(value))
 {}
@@ -51,56 +55,75 @@ Value::operator = (const Value& other)
 }
 
 bool
-Value::operator == (const Value& other) const
+xcsf::operator == (const Value& left, const Value& right)
 {
-  return _value == other._value;
+  return left._value == right._value;
 }
 
 
 bool
-Value::operator != (const Value& other) const
+xcsf::operator != (const Value& left, const Value& right)
 {
-  return !(*this == other);
+  return left._value != right._value;
 }
 
 
 bool
-Value::operator > (const Value& other) const
+xcsf::operator > (const Value& left, const Value& right)
 {
-  return _value > other._value;
+  return left._value > right._value;
 }
 
 
 bool
-Value::operator >= (const Value& other) const
+xcsf::operator >= (const Value& left, const Value& right)
 {
-  return _value > other._value or _value == other._value;
+  return left._value >= right._value;
 }
 
 
 bool
-Value::operator < (const Value& other) const
+xcsf::operator < (const Value& left, const Value& right)
 {
-  return !(_value >= other._value);
+  return left._value < right._value;
 }
 
 bool
-Value::operator <= (const Value& other) const
+xcsf::operator <= (const Value& left, const Value& right)
 {
-  return _value < other._value or _value == other._value;
+  return left._value <= right._value;
 }
 
-unsigned int
-Value::unsigned_int(void) const
+
+Value::operator unsigned int(void) const
 {
   return _value;
 }
 
 
+
 std::ostream&
-operator << (std::ostream& out, const Value& value) {
+xcsf::operator << (std::ostream& out, const Value& value) {
   out << value._value;
   return out;
+}
+
+const Value
+xcsf::operator + (const Value& left, const Value& right) {
+  unsigned int sum = left._value + right._value;
+  if (sum > Value::MAXIMUM) {
+    sum = Value::MAXIMUM;
+  }
+  return Value(sum); 
+}
+
+const Value
+xcsf::operator - (const Value& left, const Value& right) {
+  unsigned int sum = 0;
+  if (left._value > right._value) {
+    sum = left._value - right._value;
+  }
+  return Value(sum); 
 }
 
 
@@ -194,8 +217,8 @@ Vector::operator < (const Vector& other) const
 }
 
 
-std::ostream&
-operator << (ostream& out, const Vector& vector) {
+ostream&
+xcsf::operator << (ostream& out, const Vector& vector) {
   out << "[";
   for(unsigned int index=0 ; index<vector._values.size()-1 ; ++index) {
     out << vector._values[index] << ", ";
