@@ -4,7 +4,7 @@ APPLICATION = XCSF
 VERSION = 0.0.1
 
 CXX = g++
-CXXFLAGS = -std=c++11 -g -O3 -Wall -fprofile-arcs -ftest-coverage -DVERSION=\"${VERSION}\" -DAPPLICATION=\"${APPLICATION}\" -I./src
+CXXFLAGS = -std=c++11 -g -O3 -Wall --friend-injection -fprofile-arcs -ftest-coverage -DVERSION=\"${VERSION}\" -DAPPLICATION=\"${APPLICATION}\" -I./src
 
 LD = g++
 LDFLAGS = -g
