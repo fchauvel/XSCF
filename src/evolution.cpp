@@ -59,20 +59,25 @@ RandomDecision::shall_mutate(void) const
 {
   return _generator.uniform() > _allele_mutation_probability;
 }
-  
+
+
+
+
 
 Evolution::Evolution(const Decision& decision,
 		     const Crossover& crossover,
 		     const Selection& selection,
 		     const AlleleMutation& mutation,
 		     unsigned int input_count,
-		     unsigned int output_count)
+		     unsigned int output_count,
+		     unsigned int capacity)
   : _decision(decision)
   , _crossover(crossover)
   , _select_parents(selection)
   , _mutate(mutation)
   , _input_count(input_count)
   , _output_count(output_count)
+  , _capacity(capacity)
   , _rules()
 {}
 
@@ -92,9 +97,27 @@ Evolution::evolve(RuleSet& rules) const
     return;
 
   vector<Rule*> parents = _select_parents(rules);
+  
   vector<Rule*> children = breed(*parents[0], *parents[1]);
   for (auto each_child: children) {
     rules.add(*each_child);
+  }
+
+  enforce_capacity(rules);
+}
+
+
+void
+Evolution::enforce_capacity(RuleSet& rules) const
+{
+  if (rules.size() > _capacity) {
+    unsigned int excess = rules.size() - _capacity;
+
+    for (unsigned int index=0 ; index<excess ; ++index) {
+      unsigned int worst_rule = rules.worst();
+      rules.remove(worst_rule);
+    }
+    
   }
 }
 

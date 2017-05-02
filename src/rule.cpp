@@ -327,6 +327,7 @@ RuleSet::operator == (const RuleSet& other) const
 Rule&
 RuleSet::operator [] (unsigned int index) const
 {
+  validate(index);
   return *_rules[index];
 }
 
@@ -338,11 +339,51 @@ RuleSet::size(void) const
 }
 
 
+void
+RuleSet::validate(unsigned int index) const
+{
+  if (index < _rules.size()) return;
+
+  stringstream error;
+  error << "Invalid index " << index
+	<< ". there are only " << _rules.size() << " rule(s)." << endl;
+  throw std::invalid_argument(error.str());
+}
+
+
 RuleSet&
 RuleSet::add(Rule& rule)
 {
   _rules.push_back(&rule);
   return *this;
+}
+
+Rule&
+RuleSet::remove(unsigned int index)
+{
+  validate(index);
+  
+  Rule& removed = *_rules[index];
+  _rules.erase(_rules.begin()+ index);
+  
+  return removed;
+}
+
+
+unsigned int
+RuleSet::worst(void) const
+{
+  if (_rules.empty())
+    throw std::invalid_argument("Unable to find the worst rule: The rule set is empty.");
+
+  unsigned int worst = 0;
+  for (unsigned int index=1 ; index<_rules.size() ; ++index) {
+    if (_rules[worst]->fitness() < _rules[index]->fitness()) {
+      worst = index;
+    }
+  }
+  
+  return worst;
 }
 
 
@@ -361,7 +402,7 @@ RuleSet::average_payoff(void) const
   for(auto each_rule : _rules) {
     total_fitness += each_rule->fitness();
     total_weighted_payoff += each_rule->weighted_payoff();
-  }
+   }
   return total_weighted_payoff / total_fitness;
 }
 

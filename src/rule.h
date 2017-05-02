@@ -125,6 +125,9 @@ namespace xcsf {
     Rule& operator [] (unsigned int index) const;
     
     RuleSet& add(Rule& rule);
+    Rule& remove(unsigned int index);
+
+    unsigned int worst(void) const;
     
     size_t size(void) const;
     bool rewards_more_than(const RuleSet& other) const;
@@ -133,6 +136,9 @@ namespace xcsf {
     void reward(double reward);
 
   private:
+    void validate(unsigned int index) const;
+    
+    
     vector<Rule*> _rules;
 
   };

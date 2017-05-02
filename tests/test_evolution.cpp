@@ -179,3 +179,19 @@ TEST(TestEvolution, test_evolution_with_mutation)
 }
 
 
+TEST(TestEvolution, test_evolution_with_population_at_capacity)
+{
+  const unsigned int CAPACITY = 2;
+  
+  RuleSet before_evolution(*rules);
+  FixedDecision decision(EVOLUTION, MUTATION);
+  Evolution evolution(decision, *crossover, *selection, *mutations, 1, 1, CAPACITY);
+
+  evolution.evolve(*rules);
+
+  CHECK_EQUAL(CAPACITY, rules->size());
+}
+
+
+
+
