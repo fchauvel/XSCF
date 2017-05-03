@@ -62,12 +62,29 @@ RandomDecision::shall_mutate(void) const
 
 
 
+EvolutionListener::~EvolutionListener(void)
+{};
+
+
+LogListener::LogListener(std::ostream& out)
+  : _out(out)
+{};
+
+LogListener::~LogListener()
+{}
+
+void
+LogListener::on_rule_added(const Rule& rule) const
+{
+  _out << "New rule '" << rule << "'" << endl;
+}
 
 
 Evolution::Evolution(const Decision& decision,
 		     const Crossover& crossover,
 		     const Selection& selection,
 		     const AlleleMutation& mutation,
+		     const EvolutionListener& listener,
 		     unsigned int input_count,
 		     unsigned int output_count,
 		     unsigned int capacity)
@@ -75,6 +92,7 @@ Evolution::Evolution(const Decision& decision,
   , _crossover(crossover)
   , _select_parents(selection)
   , _mutate(mutation)
+  , _listener(listener)
   , _input_count(input_count)
   , _output_count(output_count)
   , _capacity(capacity)
@@ -125,42 +143,51 @@ Evolution::enforce_capacity(RuleSet& rules) const
 void
 Evolution::create_rule_for(RuleSet& rules, const Vector& context) const
 {
-  vector<Interval> constraints;
-  for (unsigned int index=0 ; index<context.size() ; ++index) {
-    const Value value = context[index];
-    constraints.push_back(Interval(value-10, value+10));
-  }
-
-  vector<unsigned int> predictions;
-  for (unsigned int index=0 ; index<_output_count ; ++index) {
-    predictions.push_back(50);
-  }
-
-  Rule* rule = new Rule(constraints, predictions, 1., 1., 1.);
-  _rules.push_back(rule);
-  rules.add(*rule);
-
+  create_rule(rules, context, 10, 50);
   enforce_capacity(rules);
 }
 
 
 void
-Evolution::initialise(RuleSet& rules) const {
+Evolution::initialise(RuleSet& rules) const
+{
+  const Value delta(25);
+
+  Vector rule_1 = { 25 };
+  create_rule(rules, rule_1, delta, 25);
+  
+  Vector rule_2 = { 75 };
+  create_rule(rules, rule_2, delta, 75);
+}
+
+
+void
+Evolution::create_rule(RuleSet& rules, const Vector& seed, const Value& tolerance, const Value& prediction) const
+{
   vector<Interval> constraints;
   for (unsigned int index=0 ; index<_input_count ; ++index) {
-    constraints.push_back(Interval(0, Value::MAXIMUM));
+    constraints.push_back(Interval(seed[index]-tolerance, seed[index]+tolerance));
   }
 
   vector<unsigned int> predictions;
   for (unsigned int index=0 ; index<_output_count ; ++index) {
-    predictions.push_back(50);
+    predictions.push_back(static_cast<unsigned int>(prediction));
   }
 
+  Rule *rule = make_rule(constraints, predictions);
+  rules.add(*rule);
+}
+
+
+Rule*
+Evolution::make_rule(std::vector<Interval> constraints, std::vector<unsigned int> predictions) const
+{
   Rule* rule = new Rule(constraints, predictions, 1., 1., 1.);
   _rules.push_back(rule);
-  rules.add(*rule);
- 
+  _listener.on_rule_added(*rule);
+  return rule;
 }
+
 
 Chromosome
 Evolution::encode(const Rule& rule) const
@@ -212,6 +239,7 @@ Evolution::breed(const Rule& father, const Rule& mother) const
       mutate(each_child);
       Rule *rule = decode(each_child);
       children_rules.push_back(rule);
+      _listener.on_rule_added(*rule);
       _rules.push_back(rule);
   }
   

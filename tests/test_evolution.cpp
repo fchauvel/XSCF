@@ -18,6 +18,7 @@
 
 
 #include "CppUTest/TestHarness.h"
+#include "CppUTestExt/MockSupport.h"
 
 #include "helpers.h"
 #include "rule.h"
@@ -103,6 +104,22 @@ public:
 };
 
 
+class FakeListener: public EvolutionListener
+{
+public:
+  FakeListener()
+  {};
+
+  virtual ~FakeListener()
+  {};
+
+  virtual void on_rule_added(const Rule& rule) const
+  {
+    mock().actualCall("on_rule_added");
+  };
+  
+};
+
 
 TEST_GROUP(TestEvolution)
 {
@@ -112,6 +129,7 @@ TEST_GROUP(TestEvolution)
   AlleleMutation *mutations;
   Crossover *crossover;
   Selection *selection;
+  EvolutionListener *listener;
   
   void setup(void)
   {
@@ -123,6 +141,7 @@ TEST_GROUP(TestEvolution)
     rules->add(*rule_2);
     selection = new DummySelection();
     mutations = new FakeAlleleMutation();
+    listener = new FakeListener();
   }
 
   void teardown(void)
@@ -133,6 +152,8 @@ TEST_GROUP(TestEvolution)
     delete rule_2;
     delete selection;
     delete mutations;
+    delete listener;
+    mock().clear();
   }
   
 };
@@ -140,9 +161,10 @@ TEST_GROUP(TestEvolution)
 
 TEST(TestEvolution, test_no_evolution)
 {
+  
   RuleSet before_evolution(*rules);
   FixedDecision decision(NO_EVOLUTION, NO_MUTATION);
-  Evolution evolution(decision, *crossover, *selection, *mutations);
+  Evolution evolution(decision, *crossover, *selection, *mutations, *listener);
   
   evolution.evolve(*rules);
   
@@ -152,9 +174,11 @@ TEST(TestEvolution, test_no_evolution)
 
 TEST(TestEvolution, test_evolution_without_mutation)
 {
+  mock().expectOneCall("on_rule_added");
+  
   RuleSet before_evolution(*rules);
   FixedDecision decision(EVOLUTION, NO_MUTATION);
-  Evolution evolution(decision, *crossover, *selection, *mutations);
+  Evolution evolution(decision, *crossover, *selection, *mutations, *listener);
 
   evolution.evolve(*rules);
 
@@ -167,9 +191,11 @@ TEST(TestEvolution, test_evolution_without_mutation)
 
 TEST(TestEvolution, test_evolution_with_mutation)
 {
+  mock().expectOneCall("on_rule_added");
+  
   RuleSet before_evolution(*rules);
   FixedDecision decision(EVOLUTION, MUTATION);
-  Evolution evolution(decision, *crossover, *selection, *mutations);
+  Evolution evolution(decision, *crossover, *selection, *mutations, *listener);
 
   evolution.evolve(*rules);
 
@@ -182,11 +208,13 @@ TEST(TestEvolution, test_evolution_with_mutation)
 
 TEST(TestEvolution, test_evolution_with_population_at_capacity)
 {
+  mock().expectOneCall("on_rule_added");
+
   const unsigned int CAPACITY = 2;
   
   RuleSet before_evolution(*rules);
   FixedDecision decision(EVOLUTION, MUTATION);
-  Evolution evolution(decision, *crossover, *selection, *mutations, 1, 1, CAPACITY);
+  Evolution evolution(decision, *crossover, *selection, *mutations, *listener, 1, 1, CAPACITY);
 
   evolution.evolve(*rules);
 
@@ -196,9 +224,11 @@ TEST(TestEvolution, test_evolution_with_population_at_capacity)
 
 TEST(TestEvolution, test_creating_rules_for_unknown_contexts)
 {
+  mock().expectOneCall("on_rule_added");
+
   RuleSet before_evolution(*rules);
   FixedDecision decision(EVOLUTION, MUTATION);
-  Evolution evolution(decision, *crossover, *selection, *mutations, 1, 1);
+  Evolution evolution(decision, *crossover, *selection, *mutations, *listener, 1, 1);
 
   Vector context = { 80 };
   evolution.create_rule_for(*rules, context);
@@ -206,13 +236,16 @@ TEST(TestEvolution, test_creating_rules_for_unknown_contexts)
   CHECK_EQUAL(before_evolution.size()+1, rules->size());
 }
 
+
 TEST(TestEvolution, test_creating_rules_for_unknown_contexts_at_capacity)
 {
+  mock().expectOneCall("on_rule_added");
+
   const unsigned int CAPACITY = 2;
   
   RuleSet before_evolution(*rules);
   FixedDecision decision(EVOLUTION, MUTATION);
-  Evolution evolution(decision, *crossover, *selection, *mutations, 1, 1, CAPACITY);
+  Evolution evolution(decision, *crossover, *selection, *mutations, *listener, 1, 1, CAPACITY);
 
   Vector context = { 80 };
   evolution.create_rule_for(*rules, context);
@@ -221,5 +254,47 @@ TEST(TestEvolution, test_creating_rules_for_unknown_contexts_at_capacity)
 }
 
 
+TEST(TestEvolution, test_listening)
+{
+  mock().expectOneCall("on_rule_added");
+  
+  RuleSet before_evolution(*rules);
+  FixedDecision decision(EVOLUTION, MUTATION);
+  Evolution evolution(decision, *crossover, *selection, *mutations, *listener, 1, 1, 100);
+
+  evolution.evolve(*rules);
+
+  mock().checkExpectations();
+  
+}
 
 
+TEST_GROUP(TestLogListener)
+{
+  stringstream out;
+  EvolutionListener *listener;
+  
+  void setup(void)
+  {
+    listener = new LogListener(out);
+  }
+
+  void teardown(void)
+  {
+    delete listener;
+  }
+  
+};
+
+
+TEST(TestLogListener, test_on_rule_added)
+{
+  Rule rule({Interval(0, 100)}, { 50 }, 1., 1., 1.);
+  
+  listener->on_rule_added(rule);
+
+  stringstream expected;
+  expected << "New rule '" << rule << "'" << endl;
+
+  CHECK_EQUAL(expected.str(), out.str());
+}

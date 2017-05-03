@@ -29,9 +29,6 @@
 #include "mutation.h"
 
 
-using namespace std;
-
-
 namespace xcsf {
 
   
@@ -65,34 +62,63 @@ namespace xcsf {
     
   };
 
+
+  class  EvolutionListener
+  {
+  public:
+    virtual ~EvolutionListener(void);
+    
+    virtual void on_rule_added(const Rule& rule) const = 0; 
+  
+  };
+
+
+
+  class LogListener: public EvolutionListener
+  {
+  public:
+    explicit LogListener(std::ostream& out);
+    virtual ~LogListener();
+
+    virtual void on_rule_added(const Rule& rule) const; 
+    
+  private:
+    std::ostream& _out;
+    
+  };
+  
+  
     
   class Evolution: public RuleFactory
   {
   public:
-    Evolution(const Decision& decisions, const Crossover& crossover, const Selection& selection, const AlleleMutation& mutation, unsigned int input=1, unsigned int output=1, unsigned int capacity=100);
+    Evolution(const Decision& decisions, const Crossover& crossover, const Selection& selection, const AlleleMutation& mutation, const EvolutionListener& listener, unsigned int input=1, unsigned int output=1, unsigned int capacity=100);
     ~Evolution(void);
 
     virtual void initialise(RuleSet& rule_set) const;
     virtual void evolve(RuleSet& rules) const;
     virtual void create_rule_for(RuleSet& rules, const Vector& context) const;
 
-    vector<Rule*> select_parents(const RuleSet& rules) const;
-    vector<Rule*> breed(const Rule& father, const Rule& mother) const;
+    std::vector<Rule*> select_parents(const RuleSet& rules) const;
+    std::vector<Rule*> breed(const Rule& father, const Rule& mother) const;
     Rule* decode(const Chromosome&) const;
     Chromosome encode(const Rule& rule) const;
     
   private:
     void mutate(Chromosome& child) const;
     void enforce_capacity(RuleSet& rules) const;
+    void create_rule(RuleSet& rules, const Vector& seed, const Value& tolerance, const Value& prediction) const;
+    Rule* make_rule(std::vector<Interval>, std::vector<unsigned int>) const;
 
     const Decision& _decision;
     const Crossover& _crossover;
     const Selection& _select_parents;
     const AlleleMutation& _mutate;
+    const EvolutionListener& _listener;
     unsigned int _input_count;
     unsigned int _output_count;
     const unsigned int _capacity;
-    mutable vector<Rule*> _rules;
+    mutable std::vector<Rule*> _rules;
   };
 
   

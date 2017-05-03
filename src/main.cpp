@@ -16,12 +16,12 @@
  *
  */
 
+#include <fstream>
 
 #include "application.h"
 #include "evolution.h"
 
 
-using namespace std;
 using namespace xcsf;
 
 
@@ -30,6 +30,7 @@ main(int argc, char** argv)
 {
   cout << APPLICATION << " v" << VERSION << endl;
 
+  const std::string LOG_FILE("evolution.log");
   const unsigned int INPUT_COUNT(1);
   const unsigned int OUTPUT_COUNT(1);
   const unsigned int CAPACITY(100);
@@ -41,10 +42,16 @@ main(int argc, char** argv)
   RouletteWheel selection(randomizer);
   TwoPointCrossover crossover(randomizer);
   RandomAlleleMutation mutation(randomizer);
-  Evolution evolution(decisions, crossover, selection, mutation, INPUT_COUNT, OUTPUT_COUNT, CAPACITY);
+
+  std::ofstream log;
+  log.open (LOG_FILE, std::ofstream::out | std::ofstream::app);
+  LogListener listener(log);
+  
+  Evolution evolution(decisions, crossover, selection, mutation, listener, INPUT_COUNT, OUTPUT_COUNT, CAPACITY);
   
   Application application(cin, cout, evolution);
   application.run();
 
+  log.close();
   return 0;
 }
