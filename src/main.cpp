@@ -44,10 +44,17 @@ main(int argc, char** argv)
   RandomAlleleMutation mutation(randomizer);
 
   std::ofstream log;
-  log.open (LOG_FILE, std::ofstream::out | std::ofstream::app);
+  log.open(LOG_FILE, std::ofstream::out | std::ofstream::app);
   LogListener listener(log);
   
-  Evolution evolution(decisions, crossover, selection, mutation, listener, INPUT_COUNT, OUTPUT_COUNT, CAPACITY);
+  Evolution evolution(decisions,
+		      crossover,
+		      selection,
+		      mutation,
+		      listener,
+		      INPUT_COUNT,
+		      OUTPUT_COUNT,
+		      CAPACITY);
   
   Application application(cin, cout, evolution);
   application.run();

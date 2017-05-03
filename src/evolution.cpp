@@ -50,14 +50,14 @@ RandomDecision::~RandomDecision()
 bool
 RandomDecision::shall_evolve(void) const
 {
-  return _generator.uniform() > _evolution_probability;
+  return _generator.uniform() <= _evolution_probability;
 }
 
 
 bool
 RandomDecision::shall_mutate(void) const
 {
-  return _generator.uniform() > _allele_mutation_probability;
+  return _generator.uniform() <= _allele_mutation_probability;
 }
 
 
@@ -77,6 +77,12 @@ void
 LogListener::on_rule_added(const Rule& rule) const
 {
   _out << "New rule '" << rule << "'" << endl;
+}
+
+void
+LogListener::on_rule_deleted(const Rule& rule) const
+{
+  _out << "Deleted rule '" << rule << "'" << endl;
 }
 
 
@@ -133,9 +139,9 @@ Evolution::enforce_capacity(RuleSet& rules) const
 
     for (unsigned int index=0 ; index<excess ; ++index) {
       unsigned int worst_rule = rules.worst();
-      rules.remove(worst_rule);
+      Rule& rule = rules.remove(worst_rule);
+      _listener.on_rule_deleted(rule);
     }
-    
   }
 }
 

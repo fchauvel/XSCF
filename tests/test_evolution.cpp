@@ -35,13 +35,14 @@ using namespace xcsf;
 
 TEST_GROUP(TestRandomDecision)
 {
+  const double evolution = 0.5;
   TestableRandomizer* randomizer;
   RandomDecision *decision;
   
   void setup(void)
   {
     randomizer = new TestableRandomizer({ 0 });
-    decision = new RandomDecision(*randomizer, 0, 0);
+    decision = new RandomDecision(*randomizer, evolution, 0.2);
   }
 
   void teardown(void)
@@ -55,14 +56,15 @@ TEST_GROUP(TestRandomDecision)
 
 TEST(TestRandomDecision, test_shall_evolve)
 {
-  randomizer->sequence({ 1.0 });
+  randomizer->sequence({ evolution-0.1, evolution });
+  CHECK(decision->shall_evolve());
   CHECK(decision->shall_evolve());
 }
 
 
 TEST(TestRandomDecision, test_shall_not_evolve)
 {
-  randomizer->sequence({ 0.0 });
+  randomizer->sequence({ evolution+0.1 });
   CHECK(not decision->shall_evolve());
 }
 
@@ -117,6 +119,11 @@ public:
   {
     mock().actualCall("on_rule_added");
   };
+
+  virtual void on_rule_deleted(const Rule& rule) const
+  {
+    mock().actualCall("on_rule_deleted");
+  };
   
 };
 
@@ -160,8 +167,9 @@ TEST_GROUP(TestEvolution)
 
 
 TEST(TestEvolution, test_no_evolution)
-{
-  
+{  
+  mock().expectNCalls(0, "on_rule_added");
+ 
   RuleSet before_evolution(*rules);
   FixedDecision decision(NO_EVOLUTION, NO_MUTATION);
   Evolution evolution(decision, *crossover, *selection, *mutations, *listener);
@@ -169,12 +177,13 @@ TEST(TestEvolution, test_no_evolution)
   evolution.evolve(*rules);
   
   CHECK(*rules == before_evolution);
+  mock().checkExpectations();
 }
 
 
 TEST(TestEvolution, test_evolution_without_mutation)
 {
-  mock().expectOneCall("on_rule_added");
+  mock().expectNCalls(1, "on_rule_added");
   
   RuleSet before_evolution(*rules);
   FixedDecision decision(EVOLUTION, NO_MUTATION);
@@ -186,6 +195,8 @@ TEST(TestEvolution, test_evolution_without_mutation)
 
   Rule expected_new_rule({ Interval(5, 10) }, { 20 }, 1., 1., 1.);
   CHECK(expected_new_rule == (*rules)[2]);
+
+  mock().checkExpectations();
 }
 
 
@@ -203,12 +214,15 @@ TEST(TestEvolution, test_evolution_with_mutation)
 
   Rule expected_new_rule({ Interval(50, 50) }, { 50 }, 1., 1., 1.);
   CHECK(expected_new_rule == (*rules)[2]);
+
+  mock().checkExpectations();
 }
 
 
 TEST(TestEvolution, test_evolution_with_population_at_capacity)
 {
   mock().expectOneCall("on_rule_added");
+  mock().expectOneCall("on_rule_deleted");
 
   const unsigned int CAPACITY = 2;
   
@@ -219,6 +233,8 @@ TEST(TestEvolution, test_evolution_with_population_at_capacity)
   evolution.evolve(*rules);
 
   CHECK_EQUAL(CAPACITY, rules->size());
+
+  mock().checkExpectations();
 }
 
 
@@ -234,13 +250,16 @@ TEST(TestEvolution, test_creating_rules_for_unknown_contexts)
   evolution.create_rule_for(*rules, context);
 
   CHECK_EQUAL(before_evolution.size()+1, rules->size());
+  mock().checkExpectations();
 }
 
 
 TEST(TestEvolution, test_creating_rules_for_unknown_contexts_at_capacity)
 {
   mock().expectOneCall("on_rule_added");
+  mock().expectOneCall("on_rule_deleted");
 
+  
   const unsigned int CAPACITY = 2;
   
   RuleSet before_evolution(*rules);
@@ -251,6 +270,7 @@ TEST(TestEvolution, test_creating_rules_for_unknown_contexts_at_capacity)
   evolution.create_rule_for(*rules, context);
 
   CHECK_EQUAL(before_evolution.size(), rules->size());
+  mock().checkExpectations();
 }
 
 
@@ -265,7 +285,6 @@ TEST(TestEvolution, test_listening)
   evolution.evolve(*rules);
 
   mock().checkExpectations();
-  
 }
 
 
@@ -295,6 +314,18 @@ TEST(TestLogListener, test_on_rule_added)
 
   stringstream expected;
   expected << "New rule '" << rule << "'" << endl;
+
+  CHECK_EQUAL(expected.str(), out.str());
+}
+
+TEST(TestLogListener, test_on_rule_deleted)
+{
+  Rule rule({Interval(0, 100)}, { 50 }, 1., 1., 1.);
+  
+  listener->on_rule_deleted(rule);
+
+  stringstream expected;
+  expected << "Deleted rule '" << rule << "'" << endl;
 
   CHECK_EQUAL(expected.str(), out.str());
 }

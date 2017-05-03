@@ -68,7 +68,8 @@ namespace xcsf {
   public:
     virtual ~EvolutionListener(void);
     
-    virtual void on_rule_added(const Rule& rule) const = 0; 
+    virtual void on_rule_added(const Rule& rule) const = 0;
+    virtual void on_rule_deleted(const Rule& rule) const = 0;
   
   };
 
@@ -81,7 +82,8 @@ namespace xcsf {
     virtual ~LogListener();
 
     virtual void on_rule_added(const Rule& rule) const; 
-    
+    virtual void on_rule_deleted(const Rule& rule) const;
+	
   private:
     std::ostream& _out;
     
