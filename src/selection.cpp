@@ -17,7 +17,7 @@
  */
 
 
-
+#include <sstream>
 #include <stdexcept>
 
 #include "selection.h"
@@ -44,6 +44,12 @@ RouletteWheel::~RouletteWheel()
 vector<Rule*>
 RouletteWheel::operator () (const RuleSet& rules) const
 {
+  if (rules.size() < 2) {
+    stringstream error;
+    error << "Selecting parents requires at least two rules (found " << rules.size() << ")." << endl;
+    throw invalid_argument(error.str());
+  }
+  
   vector<Rule*> selected_rules(2);
   
   selected_rules[0] = select_one(rules, nullptr);
@@ -56,6 +62,7 @@ RouletteWheel::operator () (const RuleSet& rules) const
 Rule*
 RouletteWheel::select_one(const RuleSet& rules, Rule* selected) const
 {
+
   double total_fitness = 0;
   for (unsigned int index=0 ; index<rules.size() ; ++index) {
     if (&rules[index] != selected) {

@@ -35,11 +35,13 @@ Decision::~Decision()
 {}
 
 
-RandomDecision::RandomDecision(const Randomizer& generator, double evolution_probability, double allele_mutation_probability)
-  :Decision()
-  ,_generator(generator)
-  ,_evolution_probability(evolution_probability)
-  ,_allele_mutation_probability(allele_mutation_probability)
+RandomDecision::RandomDecision(const Randomizer& generator,
+			       double evolution_probability,
+			       double allele_mutation_probability)
+  : Decision()
+  , _generator(generator)
+  , _evolution_probability(evolution_probability)
+  , _allele_mutation_probability(allele_mutation_probability)
 {}
 
 
@@ -237,9 +239,9 @@ Evolution::decode(const Chromosome& values) const
 vector<Rule*>
 Evolution::breed(const Rule& father, const Rule& mother) const
 {
-  vector<Chromosome> children(2);
+  vector<Chromosome> children;
   _crossover(encode(father), encode(mother), children);
-
+  
   vector<Rule*> children_rules;
   for (auto each_child: children) {
       mutate(each_child);

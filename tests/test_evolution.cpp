@@ -82,8 +82,7 @@ public:
   virtual void
   operator ()(const Chromosome& father, const Chromosome& mother, vector<Chromosome>& children) const
   {
-    children[0] = _child;
-    children.erase(children.begin()+1);
+    children.push_back(_child);
   };
   
 private:

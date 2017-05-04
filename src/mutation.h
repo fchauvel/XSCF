@@ -21,9 +21,6 @@
 #define XCSF_MUTATION_H
 
 
-
-#include <memory>
-
 #include "utils.h"
 #include "chromosome.h"
 

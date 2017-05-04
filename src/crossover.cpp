@@ -48,7 +48,11 @@ TwoPointCrossover::~TwoPointCrossover()
 
 void
 validate(const Chromosome father, const Chromosome& mother)
-{ 
+{
+  if (father.empty() or mother.empty()) {
+    throw invalid_argument("Empty chromosome!");
+  }
+  
   if (father.size() != mother.size()) {
     ostringstream error;
     error << "Parents chromosomes have different length!"

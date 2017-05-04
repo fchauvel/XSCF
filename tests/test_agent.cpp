@@ -35,7 +35,9 @@ TEST_GROUP(OneRuleAgent)
 
 TEST(OneRuleAgent, test_predict_the_single_active_rule)
 {
-  const Vector& actual = agent->select_action(Vector({ 1 }));
+  const Vector context({ 1 });
+
+  const Vector& actual = agent->predict(context);
   
   CHECK(Vector(predictions) == actual);
 }
@@ -43,7 +45,9 @@ TEST(OneRuleAgent, test_predict_the_single_active_rule)
 
 TEST(OneRuleAgent, test_reward)
 {
-  agent->select_action(Vector({ 1 }));
+  const Vector context({ 1 });
+  
+  agent->predict(context);
   agent->reward(10);
   
   DOUBLES_EQUAL(3.25, rule->weighted_payoff(), 1e-6);
@@ -78,7 +82,8 @@ TEST_GROUP(TwoRulesAgent)
 
 TEST(TwoRulesAgent, test_predict_active_rule)
 {
-  const Vector& actual = agent->select_action(Vector({ 25 }));
+  const Vector context({ 25 });
+  const Vector& actual = agent->predict(context);
 
   CHECK(Vector({ 4 }) == actual);
 }
@@ -112,15 +117,17 @@ TEST_GROUP(OverlappingRulesAgent)
 
 TEST(OverlappingRulesAgent, test_predict_the_most_relevant_rule)
 {
-  const Vector& actual = agent->select_action(Vector({ 50 }));
+  const Vector& actual = agent->predict(Vector({ 50 }));
   
   CHECK(Vector({ 4 }) == actual);
 }
 
 
 TEST(OverlappingRulesAgent, test_reward)
-{ 
-  agent->select_action(Vector({ 50 }));
+{
+  const Vector context({ 50 });
+  
+  agent->predict(context);
   agent->reward(10);
   
   DOUBLES_EQUAL(2.84375, rule_1->weighted_payoff(), 1e-6);

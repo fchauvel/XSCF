@@ -35,7 +35,7 @@ namespace xcsf {
 
     void operator = (const Agent& prototype);
   
-    virtual const Vector& select_action(const Vector& input);
+    virtual const Vector& predict(const Vector& input);
     void reward(double reward);
   
   private:

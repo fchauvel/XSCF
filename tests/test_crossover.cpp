@@ -177,3 +177,16 @@ TEST(TestCrossoverWithInvalidRules, test)
     
   CHECK_THROWS(invalid_argument,{ crossover(father, mother, children); });
 }
+
+
+TEST(TestCrossoverWithInvalidRules, test_empty_parent)
+{
+  TestableRandomizer randomizer({1, 2});
+  TwoPointCrossover crossover(randomizer);
+
+  Chromosome other;
+
+  vector<Chromosome> children(2);
+    
+  CHECK_THROWS(invalid_argument,{ crossover(father, other, children); });
+}

@@ -39,11 +39,10 @@ TEST_GROUP(TestAlleleMutation)
 
   void setup(void)
   {
-    randomizer = new TestableRandomizer({ 0 });
+    randomizer = new TestableRandomizer({ 0, 0.51, 1.0 });
     mutation = new RandomAlleleMutation(*randomizer);
     chromosome = new Chromosome({50, 50, 50});
   }
-
 
   void teardown(void)
   {
@@ -57,9 +56,16 @@ TEST_GROUP(TestAlleleMutation)
 
 TEST(TestAlleleMutation, test_simple_mutation)
 {
-  (*mutation)(*chromosome, 0);
+  const Allele locus(0);
   
-  CHECK_EQUAL(0, (*chromosome)[0]);
+  (*mutation)(*chromosome, locus);
+  CHECK_EQUAL(0, (*chromosome)[locus]);
+
+  (*mutation)(*chromosome, locus);
+  CHECK_EQUAL(50, (*chromosome)[locus]);
+  
+  (*mutation)(*chromosome, locus);
+  CHECK_EQUAL(Value::MAXIMUM-1, (*chromosome)[locus]);
 }
 
 

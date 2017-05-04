@@ -140,7 +140,7 @@ AgentController::reward(double prize)
 void
 AgentController::predict(const Vector& context)
 {
-  const Vector prediction = _agents[0]->select_action(context);
+  const Vector prediction = _agents[0]->predict(context);
   _encoder.show_prediction(prediction);
 }
 

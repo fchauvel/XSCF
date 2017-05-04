@@ -57,6 +57,16 @@ TEST_GROUP(TestRouletteWheel)
 };
 
 
+TEST(TestRouletteWheel, test_empty_rule_set)
+{
+  RouletteWheel selection(*randomizer);
+
+  RuleSet empty;
+  
+  CHECK_THROWS(std::invalid_argument, {selection(empty);});
+
+}
+
 TEST(TestRouletteWheel, test_simple)
 {
   RouletteWheel selection(*randomizer);
@@ -65,5 +75,49 @@ TEST(TestRouletteWheel, test_simple)
 
   CHECK_EQUAL(2, selected_rules.size());
   CHECK(selected_rules[0] == rule_3);
+  CHECK(selected_rules[1] == rule_2);
+}
+
+
+TEST_GROUP(TestZeroFitness)
+{
+  Randomizer *randomizer;
+  Rule *rule_1, *rule_2, *rule_3;
+  RuleSet *rules;
+
+  void setup(void) {
+    randomizer = new TestableRandomizer({ 1.0 });
+
+    rules = new RuleSet();
+    
+    rule_1 = new Rule({ Interval(0, 25) }, { 12 }, 0.0, 1.0, 1.0);
+    rules->add(*rule_1);
+    
+    rule_2 = new Rule({ Interval(0, 25) }, { 12 }, 0.0, 1.0, 1.0);
+    rules->add(*rule_2);
+    
+    rule_3 = new Rule({ Interval(0, 25) }, { 12 }, 0.0, 1.0, 1.0);
+    rules->add(*rule_3);
+  }
+
+  void teardown(void) {
+    delete randomizer;
+    delete rule_1;
+    delete rule_2;
+    delete rule_3;
+    delete rules;
+  }
+
+};
+
+
+TEST(TestZeroFitness, test_simple)
+{
+  RouletteWheel selection(*randomizer);
+
+  vector<Rule*> selected_rules = selection(*rules);
+
+  CHECK_EQUAL(2, selected_rules.size());
+  CHECK(selected_rules[0] == rule_1);
   CHECK(selected_rules[1] == rule_2);
 }

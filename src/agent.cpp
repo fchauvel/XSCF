@@ -45,7 +45,7 @@ Agent::~Agent()
 
 
 const Vector&
-Agent::select_action(const Vector& input)
+Agent::predict(const Vector& input)
 {
   ActivationGroup active_rules(_rules, input);
   if (active_rules.empty()) {

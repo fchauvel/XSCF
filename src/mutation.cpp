@@ -19,9 +19,11 @@
 
 #include <iostream>
 #include <sstream>
+#include <memory>
+
 
 #include "mutation.h"
-
+#include "context.h"
 
 using namespace std;
 using namespace xcsf;
@@ -52,5 +54,6 @@ RandomAlleleMutation::operator () (Chromosome& subject, const Allele& locus) con
     throw std::invalid_argument(err.str());
   }
 
-  subject[locus] = static_cast<Allele>(_generate.uniform() * 100);
+  subject[locus] = static_cast<Allele>(_generate.unsigned_int(0, Value::MAXIMUM));
+  
 }
