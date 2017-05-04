@@ -65,3 +65,16 @@ TEST(TestRandomizer, test_unsigned_int)
   value = generate->unsigned_int(0, 100);
   CHECK_EQUAL(99, value);
 }
+
+
+TEST(TestRandomizer, test_real_output)
+{
+  double total(0);
+  Randomizer generate;
+  for(unsigned int i=0 ; i<10000 ; ++i) {
+    total += generate.uniform();
+  }
+
+  CHECK(total > 0);
+  
+}

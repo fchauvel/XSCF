@@ -70,7 +70,8 @@ namespace xcsf {
     
     virtual void on_rule_added(const Rule& rule) const = 0;
     virtual void on_rule_deleted(const Rule& rule) const = 0;
-  
+    virtual void on_breeding(const Rule& father, const Rule& mother) const = 0;
+    virtual void on_mutation(const Chromosome& chromosome, const Allele& locus) const = 0;
   };
 
 
@@ -81,9 +82,11 @@ namespace xcsf {
     explicit LogListener(std::ostream& out);
     virtual ~LogListener();
 
-    virtual void on_rule_added(const Rule& rule) const; 
+    virtual void on_rule_added(const Rule& rule) const;
+    virtual void on_breeding(const Rule& father, const Rule& mother) const;
     virtual void on_rule_deleted(const Rule& rule) const;
-	
+    virtual void on_mutation(const Chromosome& chromosome, const Allele& locus) const;
+
   private:
     std::ostream& _out;
     

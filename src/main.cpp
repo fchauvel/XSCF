@@ -35,7 +35,7 @@ main(int argc, char** argv)
   const unsigned int OUTPUT_COUNT(1);
   const unsigned int CAPACITY(100);
   const double EVOLUTION_PROBABILITY(0.25);
-  const double MUTATION_PROBABILITY(0.10);
+  const double MUTATION_PROBABILITY(0.1);
 
   Randomizer randomizer;
   RandomDecision decisions(randomizer, EVOLUTION_PROBABILITY, MUTATION_PROBABILITY);
@@ -44,7 +44,7 @@ main(int argc, char** argv)
   RandomAlleleMutation mutation(randomizer);
 
   std::ofstream log;
-  log.open(LOG_FILE, std::ofstream::out | std::ofstream::app);
+  log.open(LOG_FILE, std::ofstream::out);
   LogListener listener(log);
   
   Evolution evolution(decisions,

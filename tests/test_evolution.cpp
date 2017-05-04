@@ -36,13 +36,14 @@ using namespace xcsf;
 TEST_GROUP(TestRandomDecision)
 {
   const double evolution = 0.5;
+  const double mutation = 0.2;
   TestableRandomizer* randomizer;
   RandomDecision *decision;
   
   void setup(void)
   {
     randomizer = new TestableRandomizer({ 0 });
-    decision = new RandomDecision(*randomizer, evolution, 0.2);
+    decision = new RandomDecision(*randomizer, evolution, mutation);
   }
 
   void teardown(void)
@@ -66,6 +67,21 @@ TEST(TestRandomDecision, test_shall_not_evolve)
 {
   randomizer->sequence({ evolution+0.1 });
   CHECK(not decision->shall_evolve());
+}
+
+
+TEST(TestRandomDecision, test_shall_mutate)
+{
+  randomizer->sequence({ mutation-0.1, mutation });
+  CHECK(decision->shall_mutate());
+  CHECK(decision->shall_mutate());
+}
+
+
+TEST(TestRandomDecision, test_shall_not_mutate)
+{
+  randomizer->sequence({ mutation+0.1 });
+  CHECK(not decision->shall_mutate());
 }
 
 
@@ -94,13 +110,16 @@ private:
 class FakeAlleleMutation: public AlleleMutation
 {
 public:
-  FakeAlleleMutation(){};
+  FakeAlleleMutation(const Allele& mutated):_mutated(mutated){};
   virtual ~FakeAlleleMutation(){};
   
   virtual void operator () (Chromosome& subject, const Allele& target) const
   {
-    subject[target] = 50;
+    subject[target] = _mutated;
   };
+
+private:
+  const Allele& _mutated;
   
 };
 
@@ -123,6 +142,17 @@ public:
   {
     mock().actualCall("on_rule_deleted");
   };
+
+  virtual void on_breeding(const Rule& father, const Rule& mother) const
+  {
+    mock().actualCall("on_breeding");
+  };
+
+  virtual void on_mutation(const Chromosome& subject, const Allele& locus) const
+  {
+    mock().actualCall("on_mutation");
+  };    
+  
   
 };
 
@@ -146,7 +176,7 @@ TEST_GROUP(TestEvolution)
     rules->add(*rule_1);
     rules->add(*rule_2);
     selection = new DummySelection();
-    mutations = new FakeAlleleMutation();
+    mutations = new FakeAlleleMutation(77);
     listener = new FakeListener();
   }
 
@@ -182,8 +212,9 @@ TEST(TestEvolution, test_no_evolution)
 
 TEST(TestEvolution, test_evolution_without_mutation)
 {
-  mock().expectNCalls(1, "on_rule_added");
-  
+  mock().expectOneCall("on_rule_added");
+  mock().expectOneCall("on_breeding");
+    
   RuleSet before_evolution(*rules);
   FixedDecision decision(EVOLUTION, NO_MUTATION);
   Evolution evolution(decision, *crossover, *selection, *mutations, *listener);
@@ -192,8 +223,8 @@ TEST(TestEvolution, test_evolution_without_mutation)
 
   CHECK_EQUAL(before_evolution.size() + 1, rules->size());
 
-  Rule expected_new_rule({ Interval(5, 10) }, { 20 }, 1., 1., 1.);
-  CHECK(expected_new_rule == (*rules)[2]);
+  vector<unsigned int> expected_new_rule({ 5, 10, 20 });
+  CHECK(expected_new_rule == (*rules)[2].as_vector());
 
   mock().checkExpectations();
 }
@@ -202,6 +233,8 @@ TEST(TestEvolution, test_evolution_without_mutation)
 TEST(TestEvolution, test_evolution_with_mutation)
 {
   mock().expectOneCall("on_rule_added");
+  mock().expectOneCall("on_breeding");
+  mock().expectNCalls(3, "on_mutation");
   
   RuleSet before_evolution(*rules);
   FixedDecision decision(EVOLUTION, MUTATION);
@@ -211,8 +244,9 @@ TEST(TestEvolution, test_evolution_with_mutation)
 
   CHECK_EQUAL(before_evolution.size() + 1, rules->size());
 
-  Rule expected_new_rule({ Interval(50, 50) }, { 50 }, 1., 1., 1.);
-  CHECK(expected_new_rule == (*rules)[2]);
+  vector<unsigned int> expected_new_rule({ 77, 77, 77 });
+  CHECK(expected_new_rule == (*rules)[2].as_vector());
+
 
   mock().checkExpectations();
 }
@@ -221,8 +255,10 @@ TEST(TestEvolution, test_evolution_with_mutation)
 TEST(TestEvolution, test_evolution_with_population_at_capacity)
 {
   mock().expectOneCall("on_rule_added");
+  mock().expectOneCall("on_breeding");
   mock().expectOneCall("on_rule_deleted");
-
+  mock().expectNCalls(3, "on_mutation");
+ 
   const unsigned int CAPACITY = 2;
   
   RuleSet before_evolution(*rules);
@@ -240,7 +276,7 @@ TEST(TestEvolution, test_evolution_with_population_at_capacity)
 TEST(TestEvolution, test_creating_rules_for_unknown_contexts)
 {
   mock().expectOneCall("on_rule_added");
-
+  
   RuleSet before_evolution(*rules);
   FixedDecision decision(EVOLUTION, MUTATION);
   Evolution evolution(decision, *crossover, *selection, *mutations, *listener, 1, 1);
@@ -257,7 +293,6 @@ TEST(TestEvolution, test_creating_rules_for_unknown_contexts_at_capacity)
 {
   mock().expectOneCall("on_rule_added");
   mock().expectOneCall("on_rule_deleted");
-
   
   const unsigned int CAPACITY = 2;
   
@@ -276,7 +311,9 @@ TEST(TestEvolution, test_creating_rules_for_unknown_contexts_at_capacity)
 TEST(TestEvolution, test_listening)
 {
   mock().expectOneCall("on_rule_added");
-  
+  mock().expectOneCall("on_breeding");
+  mock().expectNCalls(3, "on_mutation");
+   
   RuleSet before_evolution(*rules);
   FixedDecision decision(EVOLUTION, MUTATION);
   Evolution evolution(decision, *crossover, *selection, *mutations, *listener, 1, 1, 100);
@@ -325,6 +362,35 @@ TEST(TestLogListener, test_on_rule_deleted)
 
   stringstream expected;
   expected << "Deleted rule '" << rule << "'" << endl;
+
+  CHECK_EQUAL(expected.str(), out.str());
+}
+
+TEST(TestLogListener, test_on_breeding)
+{
+  Rule father({Interval(0, 50)}, { 50 }, 1., 1., 1.);
+  Rule mother({Interval(50, 75)}, { 67 }, 1., 1., 1.);
+  
+  listener->on_breeding(father, mother);
+
+  stringstream expected;
+  expected << "Breeding:" << endl
+	   << " - Father: " << father << endl
+	   << " - Mother: " << mother << endl;
+
+  CHECK_EQUAL(expected.str(), out.str());
+}
+
+
+TEST(TestLogListener, test_on_mutation)
+{
+  Chromosome individual({ 10, 20, 30, 40 });
+  Allele locus(2);
+  
+  listener->on_mutation(individual, locus); 
+
+  stringstream expected;
+  expected << "Mutation of " << individual << " at " << locus << endl;
 
   CHECK_EQUAL(expected.str(), out.str());
 }

@@ -121,21 +121,33 @@ TEST(TestSimpleRule, test_weighted_payoff)
 }
 
 
-TEST(TestSimpleRule, test_invalid_context){
+TEST(TestSimpleRule, test_invalid_context)
+{
   Vector context({25, 23, 45});
   CHECK_THROWS(std::invalid_argument, { rule->match(context); });
 }
 
 
-TEST(TestSimpleRule, test_match){
+TEST(TestSimpleRule, test_match)
+{
   Vector context({ 25 });
   CHECK(rule->match(context));
 }
 
 
-TEST(TestSimpleRule, test_mismatch){
+TEST(TestSimpleRule, test_mismatch)
+{
   Vector context({ 60 });
   CHECK_FALSE(rule->match(context));
+}
+
+
+TEST(TestSimpleRule, test_as_vector)
+{
+  vector<unsigned int> expected({ 0, 50, 50 });
+  vector<unsigned int> actual = rule->as_vector();
+
+  CHECK(expected == actual);
 }
 
 
@@ -168,4 +180,10 @@ TEST(Test3DRule, test_mismatch_three_value){
   CHECK_FALSE(rule.match(context));   
 }
 
+TEST(Test3DRule, test_as_vector)
+{
+  vector<unsigned int> expected({ 20, 30, 10, 15, 80, 99, 1 });
+  vector<unsigned int> actual = rule.as_vector();
 
+  CHECK(expected == actual);
+}

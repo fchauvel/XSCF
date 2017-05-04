@@ -68,12 +68,16 @@ EvolutionListener::~EvolutionListener(void)
 {};
 
 
+
+
 LogListener::LogListener(std::ostream& out)
   : _out(out)
 {};
 
+
 LogListener::~LogListener()
 {}
+
 
 void
 LogListener::on_rule_added(const Rule& rule) const
@@ -81,10 +85,27 @@ LogListener::on_rule_added(const Rule& rule) const
   _out << "New rule '" << rule << "'" << endl;
 }
 
+
 void
 LogListener::on_rule_deleted(const Rule& rule) const
 {
   _out << "Deleted rule '" << rule << "'" << endl;
+}
+
+
+void
+LogListener::on_breeding(const Rule& father, const Rule& mother) const
+{
+  _out << "Breeding:" << endl
+       << " - Father: " << father << endl
+       << " - Mother: " << mother << endl;
+}
+
+
+void
+LogListener::on_mutation(const Chromosome& subject, const Allele& locus) const
+{
+  _out << "Mutation of " << subject << " at " << locus << endl;
 }
 
 
@@ -241,6 +262,8 @@ Evolution::breed(const Rule& father, const Rule& mother) const
 {
   vector<Chromosome> children;
   _crossover(encode(father), encode(mother), children);
+
+  _listener.on_breeding(father, mother);
   
   vector<Rule*> children_rules;
   for (auto each_child: children) {
@@ -262,6 +285,7 @@ Evolution::mutate(Chromosome& child) const
   for(Allele each_locus=0 ; each_locus<length ; ++each_locus) {
     if (_decision.shall_mutate()) {
       _mutate(child, each_locus);
+      _listener.on_mutation(child, each_locus);
     }
   }
 }

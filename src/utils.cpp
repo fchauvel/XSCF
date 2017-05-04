@@ -48,7 +48,7 @@ Randomizer::unsigned_int(unsigned int lower, unsigned int upper) const
 double
 Randomizer::uniform(void) const
 {
-  return std::rand() / RAND_MAX;
+  return static_cast<double>(std::rand()) / RAND_MAX;
 }
   
 
