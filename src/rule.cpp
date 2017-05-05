@@ -18,6 +18,7 @@
 
 #include <sstream>
 #include <cmath>
+#include <cassert>
 #include <iomanip>
 
 #include "rule.h"
@@ -164,12 +165,19 @@ Rule::as_vector(void) const {
 }
 
 
+
+
 void
 Rule::update(double payoff, double error, double fitness) {
+  assert(std::isfinite(payoff) && "Infinite or NaN payoff");
+  assert(std::isfinite(error) && "Infinite or NaN error");
+  assert(std::isfinite(fitness) && "Infinite or NaN fitness");
+  
   _payoff = payoff;
   _error = error;
   _fitness = fitness;
 }
+
 
 
 double
@@ -441,7 +449,10 @@ RuleSet::reward(double reward)
 
   for(unsigned int index=0 ; index<_rules.size() ; ++index) {
     Rule& each_rule = *_rules[index];
-    double relative_accuracy = accuracy[index] / total_accuracy;
+    double relative_accuracy =
+      (std::isnormal(total_accuracy))
+      ? accuracy[index] / total_accuracy
+      : 0;
     double fitness = each_rule.fitness() + BETA * (relative_accuracy - each_rule.fitness());
     each_rule.update(payoff[index], error[index], fitness);
   }

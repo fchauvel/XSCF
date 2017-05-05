@@ -19,6 +19,8 @@
 
 #include <sstream>
 #include <stdexcept>
+#include <cmath>
+#include <cassert>
 
 #include "selection.h"
 
@@ -65,12 +67,15 @@ RouletteWheel::select_one(const RuleSet& rules, Rule* selected) const
 
   double total_fitness = 0;
   for (unsigned int index=0 ; index<rules.size() ; ++index) {
-    if (&rules[index] != selected) {
+    if (&rules[index] != selected) {      
       total_fitness += rules[index].fitness();
     }
   }
-  
+
   const double threshold = _generate.uniform() * total_fitness;
+  assert(not std::isnan(threshold) && "The fitness threshold is not a number!");
+  assert(not std::isinf(threshold) && "The fitness threshold is infinite!");
+    
   double sum = 0;
   for (unsigned int index=0 ; index<rules.size() ; ++index) {
     if (&rules[index] != selected) {
