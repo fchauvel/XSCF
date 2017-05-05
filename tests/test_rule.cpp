@@ -25,6 +25,7 @@
 
 using namespace xcsf;
 
+
 TEST_GROUP(TestPerformance)
 {
   const double fitness = 12.0;
@@ -186,4 +187,42 @@ TEST(Test3DRule, test_as_vector)
   vector<unsigned int> actual = rule.as_vector();
 
   CHECK(expected == actual);
+}
+
+
+
+TEST_GROUP(TestRuleSet)
+{
+  RuleSet rules;
+  Rule *rule_1;
+  Rule *rule_2;
+
+  void setup(void) {
+    rule_1 = new Rule({ Interval(0, 25) }, { 12 }, 12, 0, 0);
+    rules.add(*rule_1);
+
+    rule_2 = new Rule({ Interval(25, 50) }, { 37 }, 14, 0, 0);
+    rules.add(*rule_2);
+  }
+
+
+  void teardown(void) {
+    delete rule_1;
+    delete rule_2;
+  }
+};
+
+
+TEST(TestRuleSet, test_worst)
+{
+  unsigned int worst_rule = rules.worst();
+
+  CHECK(rule_1 == &(rules[worst_rule]));
+}
+
+
+TEST(TestRuleSet, test_total_fitness)
+{
+  double total_fitness = rules.total_fitness();
+  DOUBLES_EQUAL(26, total_fitness, 1e-6);
 }

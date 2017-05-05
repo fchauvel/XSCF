@@ -28,77 +28,6 @@ using namespace std;
 using namespace xcsf;
 
 
-Interval::Interval(const Value& lower, const Value& upper)
-  :_lower_bound(lower),
-   _upper_bound(upper)
-{}
-
-
-Interval::Interval(const Interval& prototype)
-  :_lower_bound(prototype._lower_bound),
-   _upper_bound(prototype._upper_bound)
-{}
-
-
-Interval::~Interval()
-{}
-
-
-Interval&
-Interval::operator = (const Interval& other)
-{
-  _lower_bound = other._lower_bound;
-  _upper_bound = other._upper_bound;
-  return *this;
-}
-
-
-bool
-Interval::operator == (const Interval& other) const
-{
-  return _lower_bound == other._lower_bound
-    and _upper_bound == other._upper_bound;
-}
-
-
-bool
-Interval::operator != (const Interval& other) const
-{
-  return not (*this == other);
-}
-
-
-const Value&
-Interval::lower(void) const
-{
-  return _lower_bound;
-}
-
-
-const Value&
-Interval::upper(void) const
-{
-  return _upper_bound;
-}
-
-
-bool
-Interval::contains(const Value value) const
-{
-  return _lower_bound <= value and _upper_bound >= value;
-}
-
-
-ostream&
-xcsf::operator << (ostream& out, const Interval& interval)
-{
-  out << "[" << interval._lower_bound
-      << "," << interval._upper_bound
-      << "]";
-  return out;
-}
-
-
 Rule::Rule(const vector<Interval>& constraints, const Vector& prediction, double fitness, double payoff, double error):
   _intervals(constraints),
   _outputs(prediction),
@@ -394,12 +323,25 @@ RuleSet::worst(void) const
 
   unsigned int worst = 0;
   for (unsigned int index=1 ; index<_rules.size() ; ++index) {
-    if (_rules[worst]->fitness() < _rules[index]->fitness()) {
+    if (_rules[worst]->fitness() > _rules[index]->fitness()) {
       worst = index;
     }
   }
   
   return worst;
+}
+
+
+double
+RuleSet::total_fitness(void) const
+{
+  double total = 0;
+  for(auto each_rule: _rules) {
+    total += each_rule->fitness();
+  }
+
+  assert(std::isfinite(total) && "Infinite (or NaN) total fitness!");
+  return total;
 }
 
 
@@ -427,7 +369,7 @@ void
 RuleSet::reward(double reward)
 {
   const double BETA = 0.25;
-  const double ERROR_THRESHOLD = 500;
+  const double ERROR_THRESHOLD = 5;
   const unsigned int V_PARAM = 2;
 
   double error[_rules.size()];

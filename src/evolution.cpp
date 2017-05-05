@@ -208,10 +208,15 @@ Evolution::create_rule(RuleSet& rules, const Vector& seed, const Value& toleranc
 }
 
 
+const double DEFAULT_PAYOFF(100);
+const double DEFAULT_ERROR(0);
+const double DEFAULT_FITNESS(100);
+
+
 Rule*
 Evolution::make_rule(std::vector<Interval> constraints, std::vector<unsigned int> predictions) const
 {
-  Rule* rule = new Rule(constraints, predictions, 1., 1., 1.);
+  Rule* rule = new Rule(constraints, predictions, DEFAULT_FITNESS, DEFAULT_PAYOFF, DEFAULT_ERROR);
   _rules.push_back(rule);
   _listener.on_rule_added(*rule);
   return rule;
@@ -243,6 +248,9 @@ Evolution::decode(const Chromosome& values) const
   for (unsigned int index=0 ; index < _input_count ; ++index) {
     unsigned int lower_bound = values[index * 2];
     unsigned int upper_bound = values[index * 2 + 1];
+    if (lower_bound > upper_bound) {
+      std::swap(lower_bound, upper_bound);
+    }
     constraints.push_back(Interval(lower_bound, upper_bound));
   }
 
@@ -252,7 +260,7 @@ Evolution::decode(const Chromosome& values) const
   }
 
   Vector p = Vector(prediction);
-  Rule *result = new Rule(constraints, p, 1.0, 1.0, 1.0);
+  Rule *result = new Rule(constraints, p, DEFAULT_FITNESS, DEFAULT_PAYOFF, DEFAULT_ERROR);
   return result;
 }  
 

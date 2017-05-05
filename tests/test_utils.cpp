@@ -27,6 +27,52 @@ using namespace xcsf;
 
 
 
+TEST_GROUP(TestInterval)
+{
+  const unsigned int lower = 12;
+  const unsigned int upper = 24;
+  Interval *interval;
+
+  void setup(void) {
+    interval = new Interval(lower, upper);
+  }
+
+  void teardown(void) {
+    delete interval;
+  }
+    
+};
+
+
+TEST(TestInterval, test_lower)
+{
+  CHECK(lower == interval->lower());
+}
+
+
+TEST(TestInterval, test_upper)
+{
+  CHECK(upper == interval->upper());
+}
+
+TEST(TestInterval, test_equality)
+{
+  CHECK(*interval == *interval);
+  CHECK(*interval == Interval(lower, upper));
+}
+
+TEST(TestInterval, test_inequality)
+{
+  CHECK(*interval != Interval(lower, upper+1));
+  CHECK(*interval != Interval(lower+1, upper));
+}
+
+TEST(TestInterval, test_invalid_bounds)
+{
+  CHECK_THROWS(std::invalid_argument, { Interval(lower, lower-1); });
+}
+
+
 TEST_GROUP(TestRandomizer)
 {
   vector<double> sequence = {0, 0.5, 1};

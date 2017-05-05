@@ -21,10 +21,38 @@
 #define XCSF_UTILS_H
 
 
+#include "context.h"
+
 
 namespace xcsf
 {
 
+  
+  class Interval
+  {
+  public:
+    Interval(const Value& lower=0, const Value& upper=Value::MAXIMUM);
+    Interval(const Interval& prototype);
+    ~Interval();
+    
+    Interval& operator = (const Interval& prototype);
+    bool operator == (const Interval& other) const;
+    bool operator != (const Interval& other) const;
+
+    const Value& lower() const;
+    const Value& upper() const;
+    
+    bool contains(const Value value) const;
+    
+  private:
+    friend std::ostream& operator << (std::ostream& out, const Interval& interval);
+    
+    Value _lower_bound;
+    Value _upper_bound;
+    
+  };
+  
+  
   class Randomizer
   {
   public:

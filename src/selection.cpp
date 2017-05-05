@@ -35,8 +35,8 @@ Selection::~Selection()
 
 
 RouletteWheel::RouletteWheel(const Randomizer& randomizer)
-  :Selection()
-  ,_generate(randomizer)
+  : Selection()
+  , _generate(randomizer)
 {}
 
 
@@ -65,17 +65,13 @@ Rule*
 RouletteWheel::select_one(const RuleSet& rules, Rule* selected) const
 {
 
-  double total_fitness = 0;
-  for (unsigned int index=0 ; index<rules.size() ; ++index) {
-    if (&rules[index] != selected) {      
-      total_fitness += rules[index].fitness();
-    }
+  double total_fitness = rules.total_fitness();
+  if (selected != nullptr) {
+    total_fitness -= selected->fitness();
   }
 
   const double threshold = _generate.uniform() * total_fitness;
-  assert(not std::isnan(threshold) && "The fitness threshold is not a number!");
-  assert(not std::isinf(threshold) && "The fitness threshold is infinite!");
-    
+
   double sum = 0;
   for (unsigned int index=0 ; index<rules.size() ; ++index) {
     if (&rules[index] != selected) {

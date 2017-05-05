@@ -23,38 +23,16 @@
 #include <vector>
 #include <map>
 
+
 #include "context.h"
+#include "utils.h"
 #include "actions.h"
 
 
 namespace xcsf {
 
   using namespace std;
-  
-  class Interval
-  {
-  public:
-    Interval(const Value& lower, const Value& upper);
-    Interval(const Interval& prototype);
-    ~Interval();
     
-    Interval& operator = (const Interval& prototype);
-    bool operator == (const Interval& other_interval) const;
-    bool operator != (const Interval& other_interval) const;
-
-    const Value& lower() const;
-    const Value& upper() const;
-    
-    bool contains(const Value value) const;
-    
-  private:
-    friend ostream& operator << (ostream& out, const Interval& interval);
-    
-    Value _lower_bound;
-    Value _upper_bound;
-    
-  };
-  
   
   class Rule
   {
@@ -129,6 +107,7 @@ namespace xcsf {
     Rule& remove(unsigned int index);
 
     unsigned int worst(void) const;
+    double total_fitness(void) const;
     
     size_t size(void) const;
     bool rewards_more_than(const RuleSet& other) const;
