@@ -31,8 +31,6 @@
 
 namespace xcsf {
 
-  using namespace std;
-    
   
   class Rule
   {
@@ -59,7 +57,7 @@ namespace xcsf {
     const Vector& outputs(void) const;
     
   private:
-    friend ostream& operator << (ostream& out, const Rule& rule);
+    friend std::ostream& operator << (std::ostream& out, const Rule& rule);
 
     vector<Interval> _intervals;
     Vector _outputs;
@@ -82,7 +80,7 @@ namespace xcsf {
     bool operator != (const Performance& other) const;
     
   private:
-    friend ostream& operator << (ostream& out, const Performance performance);
+    friend std::ostream& operator << (std::ostream& out, const Performance performance);
     
     double _fitness;
     double _payoff;
@@ -109,15 +107,16 @@ namespace xcsf {
     unsigned int worst(void) const;
     double total_fitness(void) const;
     
-    size_t size(void) const;
+    std::size_t size(void) const;
     bool rewards_more_than(const RuleSet& other) const;
     double average_payoff(void) const;
 
     void reward(double reward);
-
-  private:
-    void validate(unsigned int index) const;
     
+  private:
+    //friend std::ostream& operator << (std::ostream& out, const RuleSet& rules);
+    
+    void validate(unsigned int index) const;
     
     vector<Rule*> _rules;
 

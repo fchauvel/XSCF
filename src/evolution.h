@@ -104,9 +104,8 @@ namespace xcsf {
     virtual void evolve(RuleSet& rules) const;
     virtual void create_rule_for(RuleSet& rules, const Vector& context) const;
 
-    std::vector<Rule*> select_parents(const RuleSet& rules) const;
     std::vector<Rule*> breed(const Rule& father, const Rule& mother) const;
-    Rule* decode(const Chromosome&) const;
+    Rule* decode(const Chromosome&, double fitness, double payoff, double error) const;
     Chromosome encode(const Rule& rule) const;
     
   private:

@@ -231,7 +231,7 @@ Evolution::encode(const Rule& rule) const
 
 
 Rule*
-Evolution::decode(const Chromosome& values) const
+Evolution::decode(const Chromosome& values, double fitness, double payoff, double error) const
 {
   using namespace std;
 
@@ -260,7 +260,7 @@ Evolution::decode(const Chromosome& values) const
   }
 
   Vector p = Vector(prediction);
-  Rule *result = new Rule(constraints, p, DEFAULT_FITNESS, DEFAULT_PAYOFF, DEFAULT_ERROR);
+  Rule *result = new Rule(constraints, p, fitness, payoff, error);
   return result;
 }  
 
@@ -272,11 +272,15 @@ Evolution::breed(const Rule& father, const Rule& mother) const
   _crossover(encode(father), encode(mother), children);
 
   _listener.on_breeding(father, mother);
+
+  double fitness = (father.fitness() + mother.fitness()) / 2;
+  double payoff = (father.payoff() + mother.payoff()) / 2;
+  double error = (father.error() + mother.error()) / 2;
   
   vector<Rule*> children_rules;
   for (auto each_child: children) {
       mutate(each_child);
-      Rule *rule = decode(each_child);
+      Rule *rule = decode(each_child, fitness, payoff, error);
       children_rules.push_back(rule);
       _listener.on_rule_added(*rule);
       _rules.push_back(rule);
