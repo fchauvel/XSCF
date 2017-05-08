@@ -31,6 +31,9 @@
 
 namespace xcsf {
 
+
+  class Formatter;
+  
   
   class Rule
   {
@@ -43,6 +46,8 @@ namespace xcsf {
     bool operator == (const Rule& other_rule) const;
     bool operator != (const Rule& other_rule) const;
 
+    void accept(Formatter& visitor) const;
+    
     // Conversions
     vector<unsigned int> as_vector(void) const;
     
@@ -78,6 +83,10 @@ namespace xcsf {
     Performance& operator = (const Performance& other);
     bool operator == (const Performance& other) const;
     bool operator != (const Performance& other) const;
+
+    double fitness(void) const;
+    double payoff(void) const;
+    double error(void) const;
     
   private:
     friend std::ostream& operator << (std::ostream& out, const Performance performance);
@@ -100,6 +109,8 @@ namespace xcsf {
     bool operator == (const RuleSet& rules) const;
     Rule& operator [] (unsigned int index) const;
 
+    void accept(Formatter& visitor) const;
+    
     bool empty(void) const;
     RuleSet& add(Rule& rule);
     Rule& remove(unsigned int index);
@@ -162,7 +173,20 @@ namespace xcsf {
     virtual void create_rule_for(RuleSet& rules, const Vector& context) const = 0;
     
   };
-  
+
+
+  class Formatter
+  {
+  public:
+    Formatter(std::ostream& out);
+
+    void format(const vector<Rule*>& rules);
+    void format(const vector<Interval>& antecedant, const Vector& conclusion, const Performance& performance);
+    
+  private:
+    ostream& _out;
+    
+  };
 
 
 }

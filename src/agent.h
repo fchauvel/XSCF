@@ -37,6 +37,7 @@ namespace xcsf {
   
     virtual const Vector& predict(const Vector& input);
     void reward(double reward);
+    void display_on(std::ostream& out) const;
   
   private:
     const RuleFactory& _factory;

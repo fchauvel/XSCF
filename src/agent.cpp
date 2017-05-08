@@ -64,3 +64,11 @@ Agent::reward(double reward)
 {
   _rules_to_reward.reward(reward);
 }
+
+
+void
+Agent::display_on(std::ostream& out) const
+{
+  Formatter formatter(out);
+  _rules.accept(formatter);
+}

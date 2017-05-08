@@ -140,8 +140,7 @@ Evolution::~Evolution()
 void
 Evolution::evolve(RuleSet& rules) const
 {
-  if (not _decision.shall_evolve())
-    return;
+  if (not _decision.shall_evolve()) return;
 
   vector<Rule*> parents = _select_parents(rules);
   
@@ -157,8 +156,9 @@ Evolution::evolve(RuleSet& rules) const
 void
 Evolution::enforce_capacity(RuleSet& rules) const
 {
-  if (rules.size() > _capacity) {
-    unsigned int excess = rules.size() - _capacity;
+  unsigned int size = rules.size(); 
+  if (size > _capacity) {
+    unsigned int excess = size - _capacity;
 
     for (unsigned int index=0 ; index<excess ; ++index) {
       unsigned int worst_rule = rules.worst();

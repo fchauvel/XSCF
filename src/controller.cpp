@@ -35,7 +35,8 @@ const string SEPARATOR = ":";
 
 enum Command {
   Reward,
-  Predict
+  Predict,
+  Show
 };
 
 
@@ -44,6 +45,7 @@ parse(const string& text)
 {
   if (text == "R") return Reward;
   if (text == "P") return Predict;
+  if (text == "S") return Show;
   throw invalid_argument("Unknown command!");
 }
   
@@ -82,6 +84,9 @@ Decoder::decode(void)
     case Predict:
       _target.predict(Vector::parse(value));
       break;
+    case Show:
+      _target.show();
+      break;
     }
   }
   
@@ -101,6 +106,12 @@ void
 Encoder::show_prediction(const Vector& prediction)
 {
   _out << prediction << endl;
+}
+
+void
+Encoder::show(const Agent& agent)
+{
+  agent.display_on(_out);
 }
 
 
@@ -144,6 +155,12 @@ AgentController::predict(const Vector& context)
   _encoder.show_prediction(prediction);
 }
 
+
+void
+AgentController::show(void) const
+{
+  _encoder.show(*_agents[0]);
+}
 
 
 BasicRuleFactory::BasicRuleFactory()

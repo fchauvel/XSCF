@@ -77,6 +77,13 @@ Rule::operator != (const Rule& other_rule) const
 }
 
 
+void
+Rule::accept(Formatter& formatter) const
+{
+  formatter.format(_intervals, _outputs, Performance(_fitness, _payoff, _error));
+}
+
+
 vector<unsigned int>
 Rule::as_vector(void) const {
   vector<unsigned int> result;
@@ -92,8 +99,6 @@ Rule::as_vector(void) const {
   
   return result;
 }
-
-
 
 
 void
@@ -135,6 +140,7 @@ Rule::weighted_payoff(void) const
 {
   return _fitness * _payoff;
 }
+
 
 
 bool
@@ -221,6 +227,24 @@ Performance::operator != (const Performance& other) const
 }
 
 
+double
+Performance::fitness(void) const
+{
+  return _fitness;
+}
+
+double
+Performance::payoff(void) const
+{
+  return _payoff;
+}
+
+double
+Performance::error(void) const
+{
+  return _error;
+}
+
 ostream&
 xcsf::operator << (ostream& out, const Performance performance)
 {
@@ -276,6 +300,12 @@ RuleSet::size(void) const
   return _rules.size();
 }
 
+
+void
+RuleSet::accept(Formatter& formatter) const
+{
+  formatter.format(_rules);
+}
 
 void
 RuleSet::validate(unsigned int index) const
@@ -475,3 +505,51 @@ RuleFactory::~RuleFactory()
 {}
 
 
+Formatter::Formatter(std::ostream& out)
+  : _out(out)
+{}
+
+
+void
+Formatter::format(const vector<Rule*>& rules)
+{
+  const unsigned int rule_width(21);
+  const string line(rule_width + 3 * 5, '-');
+  _out << left << setw(rule_width) << "Rule"
+       << right << setw(5) << "F."
+       << right << setw(5) << "P."
+       << right << setw(5) << "E." << endl;
+  _out << line << endl;
+  for (auto each_rule: rules) {
+    each_rule->accept(*this);
+  }
+  _out << line << endl;
+  _out << rules.size() << " rule(s)." << endl; 
+}
+
+
+void
+Formatter::format(const vector<Interval>& antecedent,
+		  const Vector& conclusion,
+		  const Performance& performance)
+{
+  for(unsigned int i=0 ; i<antecedent.size() ; ++i) {
+    _out << "("
+	 << right << setw(2) << antecedent[i].lower()
+	 << ", "
+	 << right << setw(2) << antecedent[i].upper()
+	 << ")";
+  }
+
+  _out << " => ";
+  for(unsigned int i=0 ; i<conclusion.size() ; ++i) {
+    _out << "("
+	 << conclusion[i]
+	 << ")";
+  }
+  _out << setw(5) << "";
+  _out << std::right << setw(5) << fixed << setprecision(1) << performance.fitness();
+  _out << std::right << setw(5) << fixed << setprecision(1) << performance.payoff();
+  _out << std::right << setw(5) << fixed << setprecision(1) << performance.error();
+  _out << endl;
+}

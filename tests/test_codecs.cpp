@@ -27,6 +27,7 @@
 #include "context.h"
 #include "controller.h"
 
+#include "helpers.h"
 
 using namespace std;
 using namespace xcsf;
@@ -51,6 +52,12 @@ class TestController: public Controller
       .actualCall("predict").
       onObject(this)
       .withParameterOfType("Vector", "context", (void*) &context);
+  }
+
+  virtual void show(void) const
+  {
+    mock().
+      actualCall("show");
   }
   
 };
@@ -95,6 +102,16 @@ TEST_GROUP(TestReader)
   }
   
 };
+
+TEST(TestReader, test_reading_show)
+{
+  mock().expectOneCall("show");
+  
+  input << "S:";
+  reader->decode();
+
+  mock().checkExpectations();
+}
 
 
 TEST(TestReader, test_reading_invalid_command)
@@ -179,4 +196,17 @@ TEST(TestEncoder, test_show_prediction)
   encoder->show_prediction(prediction);
 
   CHECK(text.str() == "[10, 20, 30]\n");
+}
+
+
+TEST(TestEncoder, test_show_agent)
+{
+  TestRuleFactory factory;
+  Agent agent(factory);
+
+  encoder->show(agent);
+
+  stringstream expected;
+  agent.display_on(expected);
+  CHECK(text.str() == expected.str());
 }

@@ -226,3 +226,22 @@ TEST(TestRuleSet, test_total_fitness)
   double total_fitness = rules.total_fitness();
   DOUBLES_EQUAL(26, total_fitness, 1e-6);
 }
+
+
+
+TEST(TestRuleSet, test_rule_printer)
+{
+  stringstream out;
+  Formatter formatter(out);
+  rules.accept(formatter);
+
+  stringstream expected;
+  expected << "Rule                    F.   P.   E." << endl
+	   << "------------------------------------" << endl
+	   << "( 0, 25) => (12)      12.0  0.0  0.0" << endl
+	   << "(25, 50) => (37)      14.0  0.0  0.0" << endl
+    	   << "------------------------------------" << endl
+	   << "2 rule(s)." << endl;
+  
+  CHECK_EQUAL(expected.str(), out.str());
+}

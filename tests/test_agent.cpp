@@ -2,12 +2,15 @@
 #include "CppUTest/TestHarness.h"
 
 
+#include <sstream>
+
 #include "agent.h"
 #include "rule.h"
 
 #include "helpers.h"
 
 
+using namespace std;
 using namespace xcsf;
 
 
@@ -78,6 +81,23 @@ TEST_GROUP(TwoRulesAgent)
   }
 
 };
+
+
+TEST(TwoRulesAgent, test_display)
+{
+  stringstream out;
+  agent->display_on(out);
+
+  stringstream expected;
+  expected << "Rule                    F.   P.   E." << endl
+	   << "------------------------------------" << endl
+	   << "( 0, 49) => (4)       1.0  1.0  1.0" << endl
+    	   << "(40, 100) => (3)       1.0  1.0  1.0" << endl
+	   << "------------------------------------" << endl
+	   << "2 rule(s)." << endl;
+
+  CHECK_EQUAL(expected.str(), out.str());
+}
 
 
 TEST(TwoRulesAgent, test_predict_active_rule)

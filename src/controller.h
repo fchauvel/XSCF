@@ -34,6 +34,7 @@ namespace xcsf {
     
     virtual void reward(double value) = 0;
     virtual void predict(const Vector& context) = 0;
+    virtual void show(void) const = 0;
     
   };
 
@@ -59,6 +60,7 @@ namespace xcsf {
     ~Encoder();
     
     void show_prediction(const Vector& prediction);
+    void show(const Agent& agent);
     
   private:
     ostream& _out;
@@ -76,6 +78,7 @@ namespace xcsf {
 
     virtual void reward(double value);
     virtual void predict(const Vector& context);
+    virtual void show(void) const;
   
   private:
     Encoder& _encoder;
