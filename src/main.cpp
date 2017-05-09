@@ -34,8 +34,8 @@ main(int argc, char** argv)
   const unsigned int INPUT_COUNT(1);
   const unsigned int OUTPUT_COUNT(1);
   const unsigned int CAPACITY(10);
-  const double EVOLUTION_PROBABILITY(0.75);
-  const double MUTATION_PROBABILITY(0.25);
+  const double EVOLUTION_PROBABILITY(0.25);
+  const double MUTATION_PROBABILITY(0.1);
 
   Randomizer randomizer;
   RandomDecision decisions(randomizer, EVOLUTION_PROBABILITY, MUTATION_PROBABILITY);

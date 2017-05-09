@@ -208,9 +208,9 @@ Evolution::create_rule(RuleSet& rules, const Vector& seed, const Value& toleranc
 }
 
 
-const double DEFAULT_PAYOFF(100);
+const double DEFAULT_PAYOFF(0);
 const double DEFAULT_ERROR(0);
-const double DEFAULT_FITNESS(100);
+const double DEFAULT_FITNESS(0);
 
 
 Rule*

@@ -96,16 +96,56 @@ namespace xcsf {
     double _error;
     
   };
+
+
+
+  class RewardFunction
+  {
+  public:
+    virtual ~RewardFunction();
+
+    virtual void operator () (double reward, vector<Rule*>& rules) const = 0;
+  };
+
+
+  class NaiveReward
+    : public RewardFunction
+  {
+  public:
+    NaiveReward(double learning_rate);
+    virtual ~NaiveReward();
+
+    virtual void operator () (double reward, vector<Rule*>& rules) const;
+    
+  private:
+    double _learning_rate;
+    
+  };
+
   
+  class WilsonReward
+    : public RewardFunction
+  {
+  public:
+    WilsonReward(double learning_rate, double error, double v);
+    virtual ~WilsonReward();
+
+    virtual void operator () (double reward, vector<Rule*>& rules) const;
+
+  private:
+    double _learning_rate;
+    double _error;
+    double _v;
+
+  };
+
   
   class RuleSet
   {
   public:
-    RuleSet(void);
-    RuleSet(const RuleSet& prototype);
+    RuleSet();
     virtual ~RuleSet(void);
     
-    RuleSet& operator = (const RuleSet& population);
     bool operator == (const RuleSet& rules) const;
     Rule& operator [] (unsigned int index) const;
 
@@ -116,7 +156,8 @@ namespace xcsf {
     Rule& remove(unsigned int index);
 
     unsigned int worst(void) const;
-    double total_fitness(void) const;
+    double total_fitness(void) const; // TODO delete!
+    double total_weighted_payoff(void) const;
     
     std::size_t size(void) const;
     bool rewards_more_than(const RuleSet& other) const;
@@ -125,12 +166,9 @@ namespace xcsf {
     void reward(double reward);
     
   private:
-    //friend std::ostream& operator << (std::ostream& out, const RuleSet& rules);
-    
     void validate(unsigned int index) const;
-    
-    vector<Rule*> _rules;
 
+    vector<Rule*> _rules;
   };
 
 
@@ -147,10 +185,8 @@ namespace xcsf {
   {
   public:
     PredictionGroup(const RuleSet& rules);
-    //PredictionGroup(const PredictionGroup& other);
     ~PredictionGroup();
 
-    //PredictionGroup& operator = (const PredictionGroup& other);
     const Vector& most_rewarding(void) const;
     RuleSet& rules_to_reward(void) const;
 

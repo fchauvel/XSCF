@@ -39,7 +39,7 @@ TEST_GROUP(TestRouletteWheel)
     rule_1 = new Rule({ Interval(0, 25) }, { 12 }, 1.0, 1.0, 1.0);
     rules->add(*rule_1);
     
-    rule_2 = new Rule({ Interval(0, 25) }, { 12 }, 2.0, 1.0, 1.0);
+    rule_2 = new Rule({ Interval(0, 25) }, { 12 }, 2.0, 3.0, 1.0);
     rules->add(*rule_2);
     
     rule_3 = new Rule({ Interval(0, 25) }, { 12 }, 3.0, 1.0, 1.0);

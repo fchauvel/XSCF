@@ -65,17 +65,17 @@ Rule*
 RouletteWheel::select_one(const RuleSet& rules, Rule* selected) const
 {
 
-  double total_fitness = rules.total_fitness();
+  double total_payoff = rules.total_weighted_payoff();
   if (selected != nullptr) {
-    total_fitness -= selected->fitness();
+    total_payoff -= selected->weighted_payoff();
   }
 
-  const double threshold = _generate.uniform() * total_fitness;
+  const double threshold = _generate.uniform() * total_payoff;
 
   double sum = 0;
   for (unsigned int index=0 ; index<rules.size() ; ++index) {
     if (&rules[index] != selected) {
-      sum += rules[index].fitness();
+      sum += rules[index].weighted_payoff();
       if (sum >= threshold) {
 	return &rules[index];
       }

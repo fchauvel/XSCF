@@ -16,6 +16,7 @@
  *
  */
 
+#include <algorithm>
 #include <sstream>
 #include <cmath>
 #include <cassert>
@@ -102,14 +103,14 @@ Rule::as_vector(void) const {
 
 
 void
-Rule::update(double payoff, double error, double fitness) {
+Rule::update(double fitness, double payoff, double error) {
+  assert(std::isfinite(fitness) && "Infinite or NaN fitness");
   assert(std::isfinite(payoff) && "Infinite or NaN payoff");
   assert(std::isfinite(error) && "Infinite or NaN error");
-  assert(std::isfinite(fitness) && "Infinite or NaN fitness");
-  
+
+  _fitness = fitness;
   _payoff = payoff;
   _error = error;
-  _fitness = fitness;
 }
 
 
@@ -257,26 +258,95 @@ xcsf::operator << (ostream& out, const Performance performance)
 }
 
 
-RuleSet::RuleSet():
-  _rules()
+RewardFunction::~RewardFunction()
 {}
 
 
-RuleSet::RuleSet(const RuleSet& prototype)
-  :_rules(prototype._rules)
+NaiveReward::NaiveReward(double learning_rate)
+  : _learning_rate(learning_rate)
+{}
+
+
+NaiveReward::~NaiveReward()
+{}
+
+
+void
+NaiveReward::operator () (double reward, vector<Rule*>& rules) const
+{
+  double payoff[rules.size()];
+  double accuracy[rules.size()];
+  double total_accuracy(0);
+
+  for (unsigned int index=0 ; index<rules.size() ; ++index){
+    Rule& each_rule = *rules[index];
+    payoff[index] = each_rule.payoff() + _learning_rate * (reward - each_rule.payoff());
+    accuracy[index] = std::min(each_rule.payoff(), reward) / std::max(each_rule.payoff(), reward);
+    total_accuracy += accuracy[index];
+  }
+
+  for(unsigned int index=0 ; index<rules.size() ; ++index) {
+    Rule& each_rule = *rules[index];
+    double relative_accuracy =
+      (std::isnormal(total_accuracy))
+      ? accuracy[index] / total_accuracy
+      : 0;
+    double fitness = each_rule.fitness() + _learning_rate * (relative_accuracy - each_rule.fitness());
+    each_rule.update(fitness, payoff[index], 0);
+  }
+}
+
+
+WilsonReward::WilsonReward(double learning_rate, double error, double v)
+  : _learning_rate(learning_rate)
+  , _error(error) 
+  , _v(v)
+{}
+
+
+WilsonReward::~WilsonReward()
+{}
+
+
+void
+WilsonReward::operator () (double reward, vector<Rule*>& rules) const
+{
+  double error[rules.size()];
+  double payoff[rules.size()];
+  double accuracy[rules.size()];
+  double total_accuracy(0);
+
+  for (unsigned int index=0 ; index<rules.size() ; ++index){
+    Rule& each_rule = *rules[index];
+    payoff[index] = each_rule.payoff() + _learning_rate * (reward - each_rule.payoff());
+    error[index] = each_rule.error() + _learning_rate * abs(reward - payoff[index]);
+    
+    accuracy[index] = 1.0;
+    if (error[index] > _error) {
+      accuracy[index] = 0.1 * pow(error[index] / _error, -_v);
+    }
+    total_accuracy += accuracy[index];
+  }
+
+  for(unsigned int index=0 ; index<rules.size() ; ++index) {
+    Rule& each_rule = *rules[index];
+    double relative_accuracy =
+      (std::isnormal(total_accuracy))
+      ? accuracy[index] / total_accuracy
+      : 0;
+    double fitness = each_rule.fitness() + _learning_rate * (relative_accuracy - each_rule.fitness());
+    each_rule.update(fitness, payoff[index], error[index]);
+  }
+}
+
+
+RuleSet::RuleSet()
+  : _rules()
 {}
 
 
 RuleSet::~RuleSet()
 {}
-
-
-RuleSet&
-RuleSet::operator = (const RuleSet& prototype)
-{
-  _rules = prototype._rules;
-  return *this;
-}
 
 
 bool
@@ -353,7 +423,7 @@ RuleSet::worst(void) const
 
   unsigned int worst = 0;
   for (unsigned int index=1 ; index<_rules.size() ; ++index) {
-    if (_rules[worst]->fitness() > _rules[index]->fitness()) {
+    if (_rules[worst]->weighted_payoff() > _rules[index]->weighted_payoff()) {
       worst = index;
     }
   }
@@ -375,6 +445,19 @@ RuleSet::total_fitness(void) const
 }
 
 
+double
+RuleSet::total_weighted_payoff(void) const
+{
+  double total = 0;
+  for (auto each_rule: _rules) {
+    total += each_rule->weighted_payoff();
+  }
+
+  assert(std::isfinite(total) && "Non finite total weighted payoff!");
+  return total;
+}
+
+
 bool
 RuleSet::rewards_more_than(const RuleSet& other) const
 {
@@ -390,7 +473,7 @@ RuleSet::average_payoff(void) const
   for(auto each_rule : _rules) {
     total_fitness += each_rule->fitness();
     total_weighted_payoff += each_rule->weighted_payoff();
-   }
+  }
   return total_weighted_payoff / total_fitness;
 }
 
@@ -398,36 +481,8 @@ RuleSet::average_payoff(void) const
 void
 RuleSet::reward(double reward)
 {
-  const double BETA = 0.25;
-  const double ERROR_THRESHOLD = 5;
-  const unsigned int V_PARAM = 2;
-
-  double error[_rules.size()];
-  double payoff[_rules.size()];
-  double accuracy[_rules.size()];
-  double total_accuracy(0);
-
-  for (unsigned int index=0 ; index<_rules.size() ; ++index){
-    Rule& each_rule = *_rules[index];
-    payoff[index] = each_rule.payoff() + BETA * (reward - each_rule.payoff());
-    error[index] = each_rule.error() + BETA * abs(reward - payoff[index]);
-    
-    accuracy[index] = 1.0;
-    if (error[index] > ERROR_THRESHOLD) {
-      accuracy[index] = 0.1 * pow(error[index] / ERROR_THRESHOLD, -V_PARAM);
-    }
-    total_accuracy += accuracy[index];
-  }
-
-  for(unsigned int index=0 ; index<_rules.size() ; ++index) {
-    Rule& each_rule = *_rules[index];
-    double relative_accuracy =
-      (std::isnormal(total_accuracy))
-      ? accuracy[index] / total_accuracy
-      : 0;
-    double fitness = each_rule.fitness() + BETA * (relative_accuracy - each_rule.fitness());
-    each_rule.update(payoff[index], error[index], fitness);
-  }
+  WilsonReward strategy(0.25, 500, 2);
+  strategy(reward, _rules);
 }
 
 

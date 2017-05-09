@@ -195,13 +195,16 @@ TEST_GROUP(TestRuleSet)
 {
   RuleSet rules;
   Rule *rule_1;
+  double r1_fitness = 12, r2_fitness = 14;
+  double r1_payoff = 2, r2_payoff = 3;
+  double r1_error = 0, r2_error = 0;
   Rule *rule_2;
 
   void setup(void) {
-    rule_1 = new Rule({ Interval(0, 25) }, { 12 }, 12, 0, 0);
+    rule_1 = new Rule({ Interval(0, 25) }, { 12 }, r1_fitness, r1_payoff, r1_error);
     rules.add(*rule_1);
 
-    rule_2 = new Rule({ Interval(25, 50) }, { 37 }, 14, 0, 0);
+    rule_2 = new Rule({ Interval(25, 50) }, { 37 }, r2_fitness, r2_payoff, r2_error);
     rules.add(*rule_2);
   }
 
@@ -211,6 +214,23 @@ TEST_GROUP(TestRuleSet)
     delete rule_2;
   }
 };
+
+
+TEST(TestRuleSet, test_reward)
+{
+  rules.reward(10);
+
+  CHECK(rules[0].fitness() != r1_fitness);
+  CHECK(rules[1].fitness() != r2_fitness);
+
+  CHECK(rules[0].payoff() != r2_payoff);
+  CHECK(rules[1].payoff() != r2_payoff);
+
+  CHECK(rules[0].error() != r2_error);
+  CHECK(rules[1].error() != r2_error);
+
+  
+}
 
 
 TEST(TestRuleSet, test_worst)
@@ -224,9 +244,16 @@ TEST(TestRuleSet, test_worst)
 TEST(TestRuleSet, test_total_fitness)
 {
   double total_fitness = rules.total_fitness();
-  DOUBLES_EQUAL(26, total_fitness, 1e-6);
+  DOUBLES_EQUAL(r1_fitness + r2_fitness, total_fitness, 1e-6);
 }
 
+TEST(TestRuleSet, test_total_weighted_payoff)
+{
+  double expected = r1_fitness * r1_payoff + r2_fitness * r2_payoff;
+  double actual = rules.total_weighted_payoff();
+
+  DOUBLES_EQUAL(expected, actual, 1e-6);
+}
 
 
 TEST(TestRuleSet, test_rule_printer)
@@ -238,8 +265,8 @@ TEST(TestRuleSet, test_rule_printer)
   stringstream expected;
   expected << "Rule                    F.   P.   E." << endl
 	   << "------------------------------------" << endl
-	   << "( 0, 25) => (12)      12.0  0.0  0.0" << endl
-	   << "(25, 50) => (37)      14.0  0.0  0.0" << endl
+	   << "( 0, 25) => (12)      12.0  2.0  0.0" << endl
+	   << "(25, 50) => (37)      14.0  3.0  0.0" << endl
     	   << "------------------------------------" << endl
 	   << "2 rule(s)." << endl;
   
