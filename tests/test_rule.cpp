@@ -396,21 +396,6 @@ TEST(TestRuleSet, test_remove_last_rule_added)
 }
 
 
-TEST(TestRuleSet, test_reward)
-{
-  rules.reward(10);
-
-  CHECK(rules[0].fitness() != r1_fitness);
-  CHECK(rules[1].fitness() != r2_fitness);
-
-  CHECK(rules[0].payoff() != r2_payoff);
-  CHECK(rules[1].payoff() != r2_payoff);
-
-  CHECK(rules[0].error() != r2_error);
-  CHECK(rules[1].error() != r2_error);  
-}
-
-
 TEST(TestRuleSet, test_worst)
 {
   unsigned int worst_rule = rules.worst();

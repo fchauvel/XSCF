@@ -132,51 +132,6 @@ namespace xcsf {
     
   };
 
-
-
-
-
-
-  class RewardFunction
-  {
-  public:
-    virtual ~RewardFunction();
-
-    virtual void operator () (double reward, vector<MetaRule*>& rules) const = 0;
-  };
-
-
-  class NaiveReward
-    : public RewardFunction
-  {
-  public:
-    NaiveReward(double learning_rate);
-    virtual ~NaiveReward();
-
-    virtual void operator () (double reward, vector<MetaRule*>& rules) const;
-    
-  private:
-    double _learning_rate;
-    
-  };
-
-  
-  class WilsonReward
-    : public RewardFunction
-  {
-  public:
-    WilsonReward(double learning_rate, double error, double v);
-    virtual ~WilsonReward();
-
-    virtual void operator () (double reward, vector<MetaRule*>& rules) const;
-
-  private:
-    double _learning_rate;
-    double _error;
-    double _v;
-
-  };
-
   
   class RuleSet
   {
@@ -201,8 +156,6 @@ namespace xcsf {
     bool rewards_more_than(const RuleSet& other) const;
     double average_payoff(void) const;
 
-    void reward(double reward);
-    
   private:
     void validate(unsigned int index) const;
 

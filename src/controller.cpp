@@ -115,13 +115,14 @@ Encoder::show(const Agent& agent)
 }
 
 
-AgentController::AgentController(Encoder& encoder, const RuleFactory& factory)
-  :Controller()
-  ,_encoder(encoder)
-  ,_factory(factory)
-  ,_agents()
+AgentController::AgentController(Encoder& encoder, const RuleFactory& factory, const RewardFunction& reward)
+  : Controller()
+  , _encoder(encoder)
+  , _factory(factory)
+  , _reward(reward)
+  , _agents()
 {
-  _agents.push_back(new Agent(_factory));
+  _agents.push_back(new Agent(_factory, _reward));
 }
 
 

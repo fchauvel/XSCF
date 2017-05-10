@@ -24,22 +24,16 @@
 using namespace xcsf;
 
 
-Agent::Agent(const RuleFactory& factory)
-  :_factory(factory),
-   _rules(),
-   _rules_to_reward()
+Agent::Agent(const RuleFactory& factory, const RewardFunction& reward)
+  : _factory(factory)
+  , _reward(reward)   
+  , _rules()
+  , _rules_to_reward()
 {
   _factory.initialise(_rules);
 }
 
-
-Agent::Agent(const Agent& other)
-  :_factory(other._factory),
-   _rules(other._rules),
-   _rules_to_reward(other._rules_to_reward)
-{}
-   
-	    
+   	    
 Agent::~Agent()
 {}
 
@@ -61,9 +55,9 @@ Agent::predict(const Vector& input)
 
 
 void
-Agent::reward(double reward)
+Agent::reward(double prize)
 {
-  _rules_to_reward.reward(reward);
+  _reward(prize, _rules_to_reward);
 }
 
 

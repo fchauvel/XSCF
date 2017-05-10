@@ -20,7 +20,7 @@
 
 #include <sstream>
 
-#include "rule.h"
+#include "reward.h"
 
 
 using namespace xcsf;
@@ -35,12 +35,12 @@ TEST_GROUP(TestNaiveReward)
   const double payoff = 0.0;
 
   MetaRule *rule;
-  vector<MetaRule*> rules;
+  RuleSet rules;
   RewardFunction* reward;
   
   void setup(void) {
     rule = new MetaRule({ Interval(0, 100) }, { 50 }, fitness, payoff, 0);
-    rules.push_back(rule);
+    rules.add(*rule);
     reward = new NaiveReward(learning_rate);
   }
 
@@ -85,14 +85,14 @@ TEST_GROUP(TestNaiveRewardWithTwoRules)
   const double payoff = 0.0;
 
   MetaRule *rule_1, *rule_2;
-  vector<MetaRule*> rules;
+  RuleSet rules;
   RewardFunction* reward;
   
   void setup(void) {
     rule_1 = new MetaRule({ Interval(0, 100) }, { 50 }, fitness, payoff, 0);
-    rules.push_back(rule_1);
+    rules.add(*rule_1);
     rule_2 = new MetaRule({ Interval(0, 100) }, { 50 }, fitness, payoff, 0);
-    rules.push_back(rule_2);
+    rules.add(*rule_2);
     reward = new NaiveReward(learning_rate);
   }
 

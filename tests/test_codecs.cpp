@@ -201,8 +201,9 @@ TEST(TestEncoder, test_show_prediction)
 
 TEST(TestEncoder, test_show_agent)
 {
+  WilsonReward reward(0.25, 500, 2);
   TestRuleFactory factory;
-  Agent agent(factory);
+  Agent agent(factory, reward);
 
   encoder->show(agent);
 

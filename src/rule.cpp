@@ -335,86 +335,7 @@ xcsf::operator << (ostream& out, const MetaRule& rule)
 
 
 
-RewardFunction::~RewardFunction()
-{}
 
-
-NaiveReward::NaiveReward(double learning_rate)
-  : _learning_rate(learning_rate)
-{}
-
-
-NaiveReward::~NaiveReward()
-{}
-
-
-void
-NaiveReward::operator () (double reward, vector<MetaRule*>& rules) const
-{
-  double payoff[rules.size()];
-  double accuracy[rules.size()];
-  double total_accuracy(0);
-
-  for (unsigned int index=0 ; index<rules.size() ; ++index){
-    MetaRule& each_rule = *rules[index];
-    payoff[index] = each_rule.payoff() + _learning_rate * (reward - each_rule.payoff());
-    accuracy[index] = std::min(each_rule.payoff(), reward) / std::max(each_rule.payoff(), reward);
-    total_accuracy += accuracy[index];
-  }
-
-  for(unsigned int index=0 ; index<rules.size() ; ++index) {
-    MetaRule& each_rule = *rules[index];
-    double relative_accuracy =
-      (std::isnormal(total_accuracy))
-      ? accuracy[index] / total_accuracy
-      : 0;
-    double fitness = each_rule.fitness() + _learning_rate * (relative_accuracy - each_rule.fitness());
-    each_rule.update(fitness, payoff[index], 0);
-  }
-}
-
-
-WilsonReward::WilsonReward(double learning_rate, double error, double v)
-  : _learning_rate(learning_rate)
-  , _error(error) 
-  , _v(v)
-{}
-
-
-WilsonReward::~WilsonReward()
-{}
-
-
-void
-WilsonReward::operator () (double reward, vector<MetaRule*>& rules) const
-{
-  double error[rules.size()];
-  double payoff[rules.size()];
-  double accuracy[rules.size()];
-  double total_accuracy(0);
-
-  for (unsigned int index=0 ; index<rules.size() ; ++index){
-    MetaRule& each_rule = *rules[index];
-    payoff[index] = each_rule.payoff() + _learning_rate * (reward - each_rule.payoff());
-    error[index] = each_rule.error() + _learning_rate * abs(reward - payoff[index]);
-    
-    accuracy[index] = 1.0;
-    if (error[index] > _error) {
-      accuracy[index] = 0.1 * pow(error[index] / _error, -_v);
-    }
-    total_accuracy += accuracy[index];
-  }
-
-  for(unsigned int index=0 ; index<rules.size() ; ++index) {
-    MetaRule& each_rule = *rules[index];
-    double relative_accuracy =
-      (std::isnormal(total_accuracy))
-      ? accuracy[index] / total_accuracy
-      : 0;
-    double fitness = each_rule.fitness() + _learning_rate * (relative_accuracy - each_rule.fitness());
-    each_rule.update(fitness, payoff[index], error[index]);
-  }
-}
 
 
 RuleSet::RuleSet()
@@ -554,14 +475,6 @@ RuleSet::average_payoff(void) const
   return total_weighted_payoff / total_fitness;
 }
 
-
-void
-RuleSet::reward(double reward)
-{
-  WilsonReward strategy(0.25, 500, 2);
-  //NaiveReward strategy(0.25);
-  strategy(reward, _rules);
-}
 
 
 ActivationGroup::ActivationGroup(RuleSet& rules, const Vector& context)

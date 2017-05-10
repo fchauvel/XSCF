@@ -33,6 +33,7 @@ using namespace xcsf;
 
 TEST_GROUP(OneRuleAgent)
 {
+  RewardFunction *reward;
   TestRuleFactory factory;
   Agent* agent;
   vector<int> predictions = { 4 };
@@ -40,14 +41,16 @@ TEST_GROUP(OneRuleAgent)
 
   void setup(void)
   {
+    reward = new WilsonReward(0.25, 500, 2);
     rule = new MetaRule({Interval(0, 50)}, predictions, 1.0, 1.0, 1.0);
     factory.define(*rule);
-    agent = new Agent(factory);
+    agent = new Agent(factory, *reward);
   }
 
   void teardown(void)
   {
     delete agent;
+    delete reward;
   }
 
 };
@@ -84,24 +87,28 @@ TEST(OneRuleAgent, test_covering)
 
 TEST_GROUP(TwoRulesAgent)
 {
+  RewardFunction *reward; 
   TestRuleFactory factory;
   Agent* agent;
   MetaRule *rule_1, *rule_2;
 
   void setup(void)
   {
+    reward = new WilsonReward(0.25, 500, 2);
+    
     rule_1 = new MetaRule({Interval(0, 49)}, { 4 }, 1.0, 1.0, 1.0);
     factory.define(*rule_1);
     
     rule_2 = new MetaRule({Interval(40, 100)}, { 3 }, 1.0, 1.0, 1.0);
     factory.define(*rule_2);
     
-    agent = new Agent(factory);
+    agent = new Agent(factory, *reward);
   }
 
   void teardown(void)
   {
     delete agent;
+    delete reward;
   }
 
 };
@@ -136,24 +143,27 @@ TEST(TwoRulesAgent, test_predict_active_rule)
 
 TEST_GROUP(OverlappingRulesAgent)
 {
+  RewardFunction *reward; 
   TestRuleFactory factory;
   Agent *agent;
   MetaRule *rule_1, *rule_2, *rule_3;
 
   void setup(void)
   {
+    reward = new WilsonReward(0.25, 500, 2);
     rule_1 = new MetaRule({Interval(0, 100)}, { 4 }, 1.0, 1.0, 1.0);
     rule_2 = new MetaRule({Interval(0, 100)}, { 4 }, 0.8, 0.8, 1.0);
     rule_3 = new MetaRule({Interval(0, 100)}, { 3 }, 0.5, 0.5, 1.0);
     factory.define(*rule_1);
     factory.define(*rule_2);
     factory.define(*rule_3);
-    agent = new Agent(factory);
+    agent = new Agent(factory, *reward);
   }
 
   void teardown(void)
   {
     delete agent;
+    delete reward;
   }
 
 };
@@ -182,7 +192,7 @@ TEST(OverlappingRulesAgent, test_reward)
 
 TEST_GROUP(TestAgentEvolution)
 {
-
+  RewardFunction *reward;
   Randomizer randomizer;
   Decision *decisions;
   Selection *selection;
@@ -194,6 +204,7 @@ TEST_GROUP(TestAgentEvolution)
   
   void setup(void)
   {
+    reward = new WilsonReward(0.25, 500, 2);
     decisions = new RandomDecision(randomizer, 0.25, 0.1);
     selection = new RouletteWheel(randomizer);
     crossover = new TwoPointCrossover(randomizer);
@@ -207,7 +218,7 @@ TEST_GROUP(TestAgentEvolution)
 			      1,
 			      1,
 			      10);
-    agent = new Agent(*evolution);
+    agent = new Agent(*evolution, *reward);
   }
 
   void teardown(void)
@@ -219,12 +230,13 @@ TEST_GROUP(TestAgentEvolution)
     delete listener;
     delete evolution;
     delete agent;
+    delete reward;
   }
 
   static constexpr double MAX_REWARD = 100;
   static constexpr double TOLERANCE = 25;
   
-  double reward(double expected, double actual)
+  double compute_reward(double expected, double actual)
   {
     double error = expected - actual;
     return MAX_REWARD * exp(-pow(error, 2) / (2 * pow(TOLERANCE, 2)));  
@@ -239,7 +251,7 @@ IGNORE_TEST(TestAgentEvolution, test_long_run)
     for (int value=0 ; value < 100 ; ++value) {
       Vector prediction  = agent->predict(Vector({ value }));
       unsigned int actual = static_cast<unsigned int>(prediction[0]);
-      double prize = reward(value, actual);
+      double prize = compute_reward(value, actual);
       cout << "X=" << value << " ; P=" << actual << "; R=" << prize << endl;
       agent->reward(prize);
     }

@@ -30,7 +30,7 @@ namespace xcsf {
   class Application
   {
   public:
-    Application(istream& input, ostream& output, const RuleFactory& factory);
+    Application(istream& input, ostream& output, const RuleFactory& factory, const RewardFunction& reward);
     ~Application();
     
     void run(void) const;

@@ -55,8 +55,10 @@ main(int argc, char** argv)
 		      INPUT_COUNT,
 		      OUTPUT_COUNT,
 		      CAPACITY);
+
+  NaiveReward reward(0.25);
   
-  Application application(cin, cout, evolution);
+  Application application(cin, cout, evolution, reward);
   application.run();
 
   log.close();
