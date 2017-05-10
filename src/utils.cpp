@@ -40,25 +40,6 @@ Interval::Interval(const Value& lower, const Value& upper)
 }
 
 
-Interval::Interval(const Interval& prototype)
-  :_lower_bound(prototype._lower_bound),
-   _upper_bound(prototype._upper_bound)
-{}
-
-
-Interval::~Interval()
-{}
-
-
-Interval&
-Interval::operator = (const Interval& other)
-{
-  _lower_bound = other._lower_bound;
-  _upper_bound = other._upper_bound;
-  return *this;
-}
-
-
 bool
 Interval::operator == (const Interval& other) const
 {
@@ -87,6 +68,14 @@ Interval::upper(void) const
   return _upper_bound;
 }
 
+
+bool
+Interval::includes(const Interval& other) const
+{
+  return _lower_bound <= other._lower_bound
+    and _upper_bound >= other._upper_bound;
+}
+  
 
 bool
 Interval::contains(const Value value) const

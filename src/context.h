@@ -75,6 +75,7 @@ namespace xcsf
 
     void operator = (const Vector& other);
     bool operator == (const Vector& other) const;
+    bool operator != (const Vector& other) const;
     bool operator < (const Vector& other) const;
   
     unsigned int size(void) const;

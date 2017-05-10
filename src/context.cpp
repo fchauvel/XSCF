@@ -198,6 +198,12 @@ Vector::operator == (const Vector& other) const
   return true;
 }
 
+bool
+Vector::operator != (const Vector& other) const
+{
+  return not (*this == other);
+}
+
 
 const Value&
 Vector::operator [] (unsigned int index) const

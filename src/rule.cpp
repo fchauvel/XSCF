@@ -54,6 +54,18 @@ Dimensions::validate_inputs(const Vector& input) const
   
 }
 
+bool
+Dimensions::operator == (const Dimensions& other) const
+{
+  return _input_count == other._input_count
+    and _output_count == other._output_count;
+}
+
+bool
+Dimensions::operator != (const Dimensions& other) const
+{
+  return not (*this == other);
+}
 
 
 Rule::Rule(const vector<Interval>& premises, const Vector& conclusion)
@@ -71,6 +83,22 @@ Rule::is_triggered_by(const Vector& context) const
   for (unsigned int i=0 ; i<_premises.size() ; ++i) {
     const Interval& any_interval = _premises[i];
     if ( not any_interval.contains(context[i]) ) {
+      return false;
+    }
+  }
+  
+  return true;
+}
+
+
+bool
+Rule::subsumes(const Rule& other) const
+{
+  if (_dimensions != other._dimensions) return false;
+  if (_conclusion != other._conclusion) return false;
+
+  for (unsigned int i=0 ; i<_premises.size() ; ++i) {
+    if (not _premises[i].includes(other._premises[i])) {
       return false;
     }
   }

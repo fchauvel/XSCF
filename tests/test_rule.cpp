@@ -64,6 +64,29 @@ TEST_GROUP(TestRule)
 
 };
 
+TEST(TestRule, subsumption)
+{
+  Rule rule({ Interval(5, 9) }, { 50 } );
+  CHECK(rule_1->subsumes(rule));
+}
+
+TEST(TestRule, subsumption_with_itself)
+{
+  CHECK(rule_1->subsumes(*rule_1));
+}
+
+TEST(TestRule, subsumption_different_output)
+{
+  Rule rule({ Interval(5, 9) }, { 40 } );
+  CHECK(not rule_1->subsumes(rule));
+}
+
+TEST(TestRule, subsumption_different_dimensions)
+{
+  Rule rule({ Interval(5, 9) , Interval(10, 20) }, { 40, 50 } );
+  CHECK(not rule_1->subsumes(rule));
+}
+
 
 TEST(TestRule, prediction)
 {

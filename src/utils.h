@@ -32,16 +32,15 @@ namespace xcsf
   {
   public:
     Interval(const Value& lower=0, const Value& upper=Value::MAXIMUM);
-    Interval(const Interval& prototype);
-    ~Interval();
+
     
-    Interval& operator = (const Interval& prototype);
     bool operator == (const Interval& other) const;
     bool operator != (const Interval& other) const;
 
     const Value& lower() const;
     const Value& upper() const;
     
+    bool includes(const Interval& other) const;
     bool contains(const Value value) const;
     
   private:

@@ -41,6 +41,9 @@ namespace xcsf {
     Dimensions(unsigned int input_count, unsigned int output_count);
 
     void validate_inputs(const Vector& input) const;
+
+    bool operator == (const Dimensions& other) const;
+    bool operator != (const Dimensions& other) const;
     
   private:
     unsigned int _input_count;
@@ -56,7 +59,8 @@ namespace xcsf {
 
     const Vector& conclusion() const;
     bool is_triggered_by(const Vector& context) const;
-
+    bool subsumes(const Rule& rule) const;
+      
     const Vector& operator () (const Vector& context) const;
     
     bool operator == (const Rule& other) const;
