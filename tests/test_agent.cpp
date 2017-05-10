@@ -1,7 +1,7 @@
 
 #include "CppUTest/TestHarness.h"
 
-
+#include <cmath>
 #include <sstream>
 
 #include "agent.h"
@@ -23,7 +23,7 @@ TEST_GROUP(OneRuleAgent)
 
   void setup(void)
   {
-    rule = new Rule({Interval(0, 100)}, predictions, 1.0, 1.0, 1.0);
+    rule = new Rule({Interval(0, 50)}, predictions, 1.0, 1.0, 1.0);
     factory.define(*rule);
     agent = new Agent(factory);
   }
@@ -54,6 +54,13 @@ TEST(OneRuleAgent, test_reward)
   agent->reward(10);
   
   DOUBLES_EQUAL(3.25, rule->weighted_payoff(), 1e-6);
+}
+
+
+TEST(OneRuleAgent, test_covering)
+{
+  const Vector context({ 55 });
+  agent->predict(context);  
 }
 
 
@@ -156,8 +163,71 @@ TEST(OverlappingRulesAgent, test_reward)
 
 
 
+TEST_GROUP(TestAgentEvolution)
+{
+
+  Randomizer randomizer;
+  Decision *decisions;
+  Selection *selection;
+  Crossover *crossover;
+  AlleleMutation *mutation;
+  Evolution *evolution;
+  EvolutionListener *listener;
+  Agent *agent;
+  
+  void setup(void)
+  {
+    decisions = new RandomDecision(randomizer, 0.25, 0.1);
+    selection = new RouletteWheel(randomizer);
+    crossover = new TwoPointCrossover(randomizer);
+    mutation = new RandomAlleleMutation(randomizer);
+    listener = new LogListener(cout); 
+    evolution = new Evolution(*decisions,
+			      *crossover,
+			      *selection,
+			      *mutation,
+			      *listener,
+			      1,
+			      1,
+			      10);
+    agent = new Agent(*evolution);
+  }
+
+  void teardown(void)
+  {
+    delete decisions;
+    delete selection;
+    delete crossover;
+    delete mutation;
+    delete listener;
+    delete evolution;
+    delete agent;
+  }
+
+  static constexpr double MAX_REWARD = 100;
+  static constexpr double TOLERANCE = 25;
+  
+  double reward(double expected, double actual)
+  {
+    double error = expected - actual;
+    return MAX_REWARD * exp(-pow(error, 2) / (2 * pow(TOLERANCE, 2)));  
+  }
+  
+};
 
 
+IGNORE_TEST(TestAgentEvolution, test_long_run)
+{
+  for (int round=0 ; round< 10 ; ++round){
+    for (int value=0 ; value < 100 ; ++value) {
+      Vector prediction  = agent->predict(Vector({ value }));
+      unsigned int actual = static_cast<unsigned int>(prediction[0]);
+      double prize = reward(value, actual);
+      cout << "X=" << value << " ; P=" << actual << "; R=" << prize << endl;
+      agent->reward(prize);
+    }
+  }
+}
 
 
 

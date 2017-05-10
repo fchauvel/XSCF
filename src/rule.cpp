@@ -409,7 +409,7 @@ RuleSet::remove(unsigned int index)
   validate(index);
   
   Rule& removed = *_rules[index];
-  _rules.erase(_rules.begin()+ index);
+  _rules.erase(_rules.begin() + index);
   
   return removed;
 }
@@ -482,6 +482,7 @@ void
 RuleSet::reward(double reward)
 {
   WilsonReward strategy(0.25, 500, 2);
+  //NaiveReward strategy(0.25);
   strategy(reward, _rules);
 }
 
@@ -513,8 +514,8 @@ PredictionGroup::PredictionGroup(const RuleSet& rules)
 
 RuleSet&
 PredictionGroup::_find_most_rewarding_rules(void) const {
- std::pair<Vector, RuleSet*> most_rewarding = *_predictions.begin();
- for(auto any: _predictions) {
+  std::pair<Vector, RuleSet*> most_rewarding = *_predictions.begin();
+  for(auto any: _predictions) {
     if (any.second->rewards_more_than(*most_rewarding.second)) {
       most_rewarding = any;
     }

@@ -50,7 +50,11 @@ TestRuleFactory::evolve(RuleSet& rules) const
 
 void
 TestRuleFactory::create_rule_for(RuleSet& rules, const Vector& context) const
-{}
+{
+  Rule* covering_rule = new Rule({ Interval(0, 100) }, { 50 }, 1., 1., 1.);
+  _rules.push_back(covering_rule);
+  rules.add(*covering_rule);
+}
  
 
 void

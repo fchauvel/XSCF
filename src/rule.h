@@ -176,8 +176,8 @@ namespace xcsf {
   {
   public:
     ActivationGroup(RuleSet& rules, const Vector& context);
-    ~ActivationGroup();
-
+    virtual ~ActivationGroup();
+    
   };
 
 

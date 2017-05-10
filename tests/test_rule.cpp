@@ -26,6 +26,7 @@
 using namespace xcsf;
 
 
+
 TEST_GROUP(TestPerformance)
 {
   const double fitness = 12.0;
@@ -215,6 +216,13 @@ TEST_GROUP(TestRuleSet)
   }
 };
 
+TEST(TestRuleSet, test_remove_last_rule_added)
+{
+  Rule& deleted = rules.remove(1);
+  CHECK_EQUAL(1, rules.size());
+  CHECK(rules[0] == *rule_1);
+}
+
 
 TEST(TestRuleSet, test_reward)
 {
@@ -227,9 +235,7 @@ TEST(TestRuleSet, test_reward)
   CHECK(rules[1].payoff() != r2_payoff);
 
   CHECK(rules[0].error() != r2_error);
-  CHECK(rules[1].error() != r2_error);
-
-  
+  CHECK(rules[1].error() != r2_error);  
 }
 
 

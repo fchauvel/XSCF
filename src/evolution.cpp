@@ -17,13 +17,14 @@
  */
 
 
-#include "evolution.h"
 #include <sstream>
+#include <cassert>
+
+#include "evolution.h"
+
 
 
 using namespace xcsf;
-
-
 
 
 
@@ -68,6 +69,29 @@ EvolutionListener::~EvolutionListener(void)
 {};
 
 
+
+NoListener::~NoListener()
+{}
+
+
+void
+NoListener::on_rule_added(const Rule& rule) const
+{}
+
+
+void
+NoListener::on_rule_deleted(const Rule& rule) const
+{}
+
+
+void
+NoListener::on_breeding(const Rule& father, const Rule& mother) const
+{}
+
+
+void
+NoListener::on_mutation(const Chromosome& subject, const Allele& locus) const
+{}
 
 
 LogListener::LogListener(std::ostream& out)
@@ -142,6 +166,8 @@ Evolution::evolve(RuleSet& rules) const
 {
   if (not _decision.shall_evolve()) return;
 
+  assert (not rules.empty() && "Impossible evolution, no rules");
+  
   vector<Rule*> parents = _select_parents(rules);
   
   vector<Rule*> children = breed(*parents[0], *parents[1]);
@@ -159,21 +185,31 @@ Evolution::enforce_capacity(RuleSet& rules) const
   unsigned int size = rules.size(); 
   if (size > _capacity) {
     unsigned int excess = size - _capacity;
-
-    for (unsigned int index=0 ; index<excess ; ++index) {
-      unsigned int worst_rule = rules.worst();
-      Rule& rule = rules.remove(worst_rule);
-      _listener.on_rule_deleted(rule);
-    }
+    remove(rules, excess);
   }
 }
 
 
 void
+Evolution::remove(RuleSet& rules, unsigned int excess) const
+{
+  assert(excess < rules.size() && "Invalid excess!");
+  
+  for (unsigned int i=0 ; i<excess ; ++i) {
+    unsigned int worst_rule = rules.worst();
+    Rule& rule = rules.remove(worst_rule);
+    _listener.on_rule_deleted(rule);
+  }
+}
+
+
+
+
+void
 Evolution::create_rule_for(RuleSet& rules, const Vector& context) const
 {
+  if (rules.size() == _capacity) remove(rules, 1);
   create_rule(rules, context, 10, 50);
-  enforce_capacity(rules);
 }
 
 

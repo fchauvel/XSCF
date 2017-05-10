@@ -9,11 +9,13 @@
 #include "rule.h"
 #include "evolution.h"
 
+
 using namespace xcsf;
 
 
 
-class TestRuleFactory: public RuleFactory
+class TestRuleFactory
+: public RuleFactory
 {
 public:
   TestRuleFactory();

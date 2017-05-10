@@ -75,8 +75,21 @@ namespace xcsf {
   };
 
 
+  class NoListener
+    : public EvolutionListener
+  { 
+  public:
+    virtual ~NoListener();
 
-  class LogListener: public EvolutionListener
+    virtual void on_rule_added(const Rule& rule) const;
+    virtual void on_breeding(const Rule& father, const Rule& mother) const;
+    virtual void on_rule_deleted(const Rule& rule) const;
+    virtual void on_mutation(const Chromosome& chromosome, const Allele& locus) const;
+  };
+
+
+  class LogListener
+    : public EvolutionListener
   {
   public:
     explicit LogListener(std::ostream& out);
@@ -90,8 +103,7 @@ namespace xcsf {
   private:
     std::ostream& _out;
     
-  };
-  
+  };  
   
     
   class Evolution: public RuleFactory
@@ -110,6 +122,7 @@ namespace xcsf {
     
   private:
     void mutate(Chromosome& child) const;
+    void remove(RuleSet& rules, unsigned int excess) const;
     void enforce_capacity(RuleSet& rules) const;
     void create_rule(RuleSet& rules, const Vector& seed, const Value& tolerance, const Value& prediction) const;
     Rule* make_rule(std::vector<Interval>, std::vector<unsigned int>) const;

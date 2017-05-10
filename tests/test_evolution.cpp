@@ -305,6 +305,8 @@ TEST(TestEvolution, test_creating_rules_for_unknown_contexts_at_capacity)
 
   CHECK_EQUAL(before_evolution.size(), rules->size());
   mock().checkExpectations();
+
+  CHECK(&(*rules)[0] != rule_1 or &(*rules)[1] != rule_2);
 }
 
 
