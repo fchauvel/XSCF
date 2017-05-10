@@ -29,6 +29,110 @@ using namespace std;
 using namespace xcsf;
 
 
+Dimensions::Dimensions(unsigned int input_count, unsigned int output_count)
+  : _input_count(input_count)
+  , _output_count(output_count)
+{
+  if (_input_count == 0) {
+    throw std::invalid_argument("Expecting at least one input, but found none.");
+  }
+  if (_output_count == 0) {
+    throw std::invalid_argument("Expecting at least one output, but found none.");
+  }
+}
+
+
+void
+Dimensions::validate_inputs(const Vector& input) const
+{
+  if (input.size() == _input_count) return;
+
+  stringstream message;
+  message << "Expected " << _input_count << " input(s), but only "
+	  << input.size() << " found instead.";
+  throw std::invalid_argument(message.str());
+  
+}
+
+
+
+Rule::Rule(const vector<Interval>& premises, const Vector& conclusion)
+  : _premises(premises)
+  , _conclusion(conclusion)
+  , _dimensions(premises.size(), conclusion.size())
+{}
+
+
+bool
+Rule::is_triggered_by(const Vector& context) const
+{
+  _dimensions.validate_inputs(context);
+  
+  for (unsigned int i=0 ; i<_premises.size() ; ++i) {
+    const Interval& any_interval = _premises[i];
+    if ( not any_interval.contains(context[i]) ) {
+      return false;
+    }
+  }
+  
+  return true;
+}
+
+
+const Vector&
+Rule::operator () (const Vector& context) const
+{
+  if (is_triggered_by(context)) return _conclusion;
+
+  stringstream message;
+  message << "Rule '" << *this
+	  << "' is undefined for input '" << context << "'.";
+  throw std::invalid_argument(message.str());
+}
+
+
+bool
+Rule::operator == (const Rule& other) const
+{
+  return _premises == other._premises
+    and _conclusion == other._conclusion;
+}
+
+
+bool
+Rule::operator != (const Rule& other) const
+{
+  return not Rule::operator == (other);
+}
+ 
+
+std::ostream&
+xcsf::operator << (std::ostream& out, const Rule& rule)
+{
+  out << "(";
+  for (unsigned int i=0 ; i<rule._premises.size() ; ++i) {
+    const Interval& each = rule._premises[i];
+    out << "[";
+    out << setw(3) << each.lower();
+    out << ", ";
+    out << setw(3) << each.upper();
+    out << "]";
+    if (i < rule._premises.size() - 1)  {
+      out << ", ";
+    }
+  }
+  out << ") => (";
+  for(unsigned int i=0 ; i<rule._conclusion.size() ;++i) {
+    out << setw(3) << rule._conclusion[i];
+    if (i < rule._conclusion.size() - 1) {
+      out << ", ";
+    }
+  }
+  out << ")";
+  return out;
+}
+
+
 MetaRule::MetaRule(const vector<Interval>& constraints, const Vector& prediction, double fitness, double payoff, double error):
   _intervals(constraints),
   _outputs(prediction),

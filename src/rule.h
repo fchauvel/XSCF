@@ -34,6 +34,42 @@ namespace xcsf {
 
   class Formatter;
 
+
+  class Dimensions
+  {
+  public:
+    Dimensions(unsigned int input_count, unsigned int output_count);
+
+    void validate_inputs(const Vector& input) const;
+    
+  private:
+    unsigned int _input_count;
+    unsigned int _output_count;
+
+  };
+  
+    
+  class Rule
+  {
+  public:
+    Rule(const vector<Interval>& premises, const Vector& conclusion);
+
+    bool is_triggered_by(const Vector& context) const;
+
+    const Vector& operator () (const Vector& context) const;
+    
+    bool operator == (const Rule& other) const;
+    bool operator != (const Rule& other) const;
+    
+    friend std::ostream& operator << (std::ostream& out, const Rule& rule);
+
+  private:
+    vector<Interval> _premises;
+    Vector _conclusion;
+    Dimensions _dimensions;
+    
+  };
+  
   
   class MetaRule
   {
@@ -66,9 +102,8 @@ namespace xcsf {
 
     vector<Interval> _intervals;
     Vector _outputs;
-    double _fitness;
-    double _payoff;
-    double _error;
+    Performance _preformance;
+
     
   };
 

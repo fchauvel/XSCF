@@ -26,6 +26,155 @@
 using namespace xcsf;
 
 
+TEST_GROUP(TestDimensions)
+{};
+
+
+TEST(TestDimensions, invalid_input)
+{
+  CHECK_THROWS(std::invalid_argument, { Dimensions(0, 1); });
+}
+
+TEST(TestDimensions, invalid_output)
+{
+  CHECK_THROWS(std::invalid_argument, { Dimensions(1, 0); });
+}
+
+
+TEST_GROUP(TestRule)
+{
+  Rule *rule_1, *rule_2, *rule_3, *rule_4;
+ 
+
+  void setup(void)
+  {
+    rule_1 = new Rule({ Interval(0, 10) }, { 50 });
+    rule_2 = new Rule({ Interval(0, 20) }, { 50 });
+    rule_3 = new Rule({ Interval(0, 10) }, { 60 });
+    rule_4 = new Rule({ Interval(0, 10), Interval(11, 40) }, { 40, 50 });
+  }
+  
+  void teardown()
+  {
+    delete rule_1;
+    delete rule_2;
+    delete rule_3;
+    delete rule_4;
+  }
+
+};
+
+
+TEST(TestRule, prediction)
+{
+  Vector expected = { 50 };
+  CHECK((*rule_1)({ 5 }) == expected);
+}
+
+
+TEST(TestRule, prediction_of_invalid_context)
+{
+  CHECK_THROWS(std::invalid_argument,
+	       {
+		 (*rule_1)({ 12 });
+	       });
+}
+
+
+TEST(TestRule, invalid_premises)
+{
+  vector<Interval> invalid_premises;
+
+  CHECK_THROWS(std::invalid_argument,
+	       {
+		 Rule rule(invalid_premises, { 4 });
+	       });
+}
+
+
+TEST(TestRule, invalid_conclusion)
+{
+  vector<unsigned int> invalid_conclusion;
+
+  CHECK_THROWS(std::invalid_argument,
+	       {
+		 Rule rule( { Interval(0, 10) }, invalid_conclusion);
+	       });
+}
+
+
+TEST(TestRule, invalid_activation)
+{
+  CHECK_THROWS(std::invalid_argument,
+	       {
+		 rule_1->is_triggered_by({ 1, 2, 3 });
+	       });
+}
+
+TEST(TestRule, activation)
+{
+  CHECK(rule_1->is_triggered_by({ 5 }));
+  CHECK(rule_4->is_triggered_by({ 5, 15 }));
+  
+	
+  CHECK(not rule_1->is_triggered_by({ 11 }));
+  CHECK(not rule_4->is_triggered_by({ 11, 15 }));
+  CHECK(not rule_4->is_triggered_by({ 5, 45 })); 
+}
+
+TEST(TestRule, test_display_1D_rule)
+{
+  stringstream out;
+
+  out << *rule_1;
+
+  string expected("([  0,  10]) => ( 50)");
+  CHECK_EQUAL(expected, out.str());
+}
+
+TEST(TestRule, test_display_2D_rule)
+{
+  stringstream out;
+
+  out << *rule_4;
+
+  string expected("([  0,  10], [ 11,  40]) => ( 40,  50)");
+  CHECK_EQUAL(expected, out.str());
+}
+
+
+TEST(TestRule, test_equality_with_itself)
+{
+  CHECK(*rule_1 == *rule_1);
+}
+
+TEST(TestRule, equality_with_an_equivalent_rule)
+{
+  Rule rule({ Interval(0, 10) }, { 50 });
+  
+  CHECK(*rule_1 == rule);
+  CHECK(rule == *rule_1);
+}
+
+TEST(TestRule, difference_in_premises)
+{
+  CHECK(*rule_1 != *rule_2);
+  CHECK(*rule_2 != *rule_1);
+}
+
+TEST(TestRule, difference_in_conclusion)
+{
+  CHECK(*rule_1 != *rule_3);
+  CHECK(*rule_3 != *rule_1);
+}
+
+TEST(TestRule, difference_in_dimension)
+{
+  CHECK(*rule_1 != *rule_4);
+  CHECK(*rule_4 != *rule_1);
+}
+
+
 
 TEST_GROUP(TestPerformance)
 {
