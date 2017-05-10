@@ -15,7 +15,7 @@ using namespace xcsf;
 
 
 class TestRuleFactory
-: public RuleFactory
+  : public RuleFactory
 {
 public:
   TestRuleFactory();
@@ -25,10 +25,10 @@ public:
   virtual void evolve(RuleSet& rules) const;
   virtual void create_rule_for(RuleSet& rules, const Vector& context) const;
   
-  void define(Rule& rule);
+  void define(MetaRule& rule);
 
 private:
-  mutable vector<Rule*> _rules;
+  mutable vector<MetaRule*> _rules;
   
 };
 

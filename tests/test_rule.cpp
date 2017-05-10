@@ -104,10 +104,10 @@ TEST_GROUP(TestSimpleRule)
   const double fitness = 0.75;
   const double payoff = 0.75;
   const double error = 1.0;
-  Rule* rule;
+  MetaRule* rule;
 
   void setup() {
-    rule = new Rule({ Interval(0, 50) }, { 50 }, fitness, payoff, error);
+    rule = new MetaRule({ Interval(0, 50) }, { 50 }, fitness, payoff, error);
   }
   
   void teardown() {
@@ -158,7 +158,7 @@ TEST_GROUP(Test3DRule)
   const double fitness = 0.75;
   const double payoff = 0.75;
   const double error = 0.1;
-  const Rule& rule = * new Rule({Interval(20, 30), Interval(10, 15), Interval(80, 99)},
+  const MetaRule& rule = * new MetaRule({Interval(20, 30), Interval(10, 15), Interval(80, 99)},
 				{ 1 },
 				fitness, payoff, error);
   
@@ -195,17 +195,17 @@ TEST(Test3DRule, test_as_vector)
 TEST_GROUP(TestRuleSet)
 {
   RuleSet rules;
-  Rule *rule_1;
+  MetaRule *rule_1;
   double r1_fitness = 12, r2_fitness = 14;
   double r1_payoff = 2, r2_payoff = 3;
   double r1_error = 0, r2_error = 0;
-  Rule *rule_2;
+  MetaRule *rule_2;
 
   void setup(void) {
-    rule_1 = new Rule({ Interval(0, 25) }, { 12 }, r1_fitness, r1_payoff, r1_error);
+    rule_1 = new MetaRule({ Interval(0, 25) }, { 12 }, r1_fitness, r1_payoff, r1_error);
     rules.add(*rule_1);
 
-    rule_2 = new Rule({ Interval(25, 50) }, { 37 }, r2_fitness, r2_payoff, r2_error);
+    rule_2 = new MetaRule({ Interval(25, 50) }, { 37 }, r2_fitness, r2_payoff, r2_error);
     rules.add(*rule_2);
   }
 
@@ -218,7 +218,7 @@ TEST_GROUP(TestRuleSet)
 
 TEST(TestRuleSet, test_remove_last_rule_added)
 {
-  Rule& deleted = rules.remove(1);
+  MetaRule& deleted = rules.remove(1);
   CHECK_EQUAL(1, rules.size());
   CHECK(rules[0] == *rule_1);
 }

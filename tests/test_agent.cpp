@@ -19,11 +19,11 @@ TEST_GROUP(OneRuleAgent)
   TestRuleFactory factory;
   Agent* agent;
   vector<int> predictions = { 4 };
-  Rule *rule;
+  MetaRule *rule;
 
   void setup(void)
   {
-    rule = new Rule({Interval(0, 50)}, predictions, 1.0, 1.0, 1.0);
+    rule = new MetaRule({Interval(0, 50)}, predictions, 1.0, 1.0, 1.0);
     factory.define(*rule);
     agent = new Agent(factory);
   }
@@ -69,14 +69,14 @@ TEST_GROUP(TwoRulesAgent)
 {
   TestRuleFactory factory;
   Agent* agent;
-  Rule *rule_1, *rule_2;
+  MetaRule *rule_1, *rule_2;
 
   void setup(void)
   {
-    rule_1 = new Rule({Interval(0, 49)}, { 4 }, 1.0, 1.0, 1.0);
+    rule_1 = new MetaRule({Interval(0, 49)}, { 4 }, 1.0, 1.0, 1.0);
     factory.define(*rule_1);
     
-    rule_2 = new Rule({Interval(40, 100)}, { 3 }, 1.0, 1.0, 1.0);
+    rule_2 = new MetaRule({Interval(40, 100)}, { 3 }, 1.0, 1.0, 1.0);
     factory.define(*rule_2);
     
     agent = new Agent(factory);
@@ -121,13 +121,13 @@ TEST_GROUP(OverlappingRulesAgent)
 {
   TestRuleFactory factory;
   Agent *agent;
-  Rule *rule_1, *rule_2, *rule_3;
+  MetaRule *rule_1, *rule_2, *rule_3;
 
   void setup(void)
   {
-    rule_1 = new Rule({Interval(0, 100)}, { 4 }, 1.0, 1.0, 1.0);
-    rule_2 = new Rule({Interval(0, 100)}, { 4 }, 0.8, 0.8, 1.0);
-    rule_3 = new Rule({Interval(0, 100)}, { 3 }, 0.5, 0.5, 1.0);
+    rule_1 = new MetaRule({Interval(0, 100)}, { 4 }, 1.0, 1.0, 1.0);
+    rule_2 = new MetaRule({Interval(0, 100)}, { 4 }, 0.8, 0.8, 1.0);
+    rule_3 = new MetaRule({Interval(0, 100)}, { 3 }, 0.5, 0.5, 1.0);
     factory.define(*rule_1);
     factory.define(*rule_2);
     factory.define(*rule_3);

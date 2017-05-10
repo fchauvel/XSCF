@@ -75,17 +75,17 @@ NoListener::~NoListener()
 
 
 void
-NoListener::on_rule_added(const Rule& rule) const
+NoListener::on_rule_added(const MetaRule& rule) const
 {}
 
 
 void
-NoListener::on_rule_deleted(const Rule& rule) const
+NoListener::on_rule_deleted(const MetaRule& rule) const
 {}
 
 
 void
-NoListener::on_breeding(const Rule& father, const Rule& mother) const
+NoListener::on_breeding(const MetaRule& father, const MetaRule& mother) const
 {}
 
 
@@ -104,21 +104,21 @@ LogListener::~LogListener()
 
 
 void
-LogListener::on_rule_added(const Rule& rule) const
+LogListener::on_rule_added(const MetaRule& rule) const
 {
   _out << "New rule '" << rule << "'" << endl;
 }
 
 
 void
-LogListener::on_rule_deleted(const Rule& rule) const
+LogListener::on_rule_deleted(const MetaRule& rule) const
 {
   _out << "Deleted rule '" << rule << "'" << endl;
 }
 
 
 void
-LogListener::on_breeding(const Rule& father, const Rule& mother) const
+LogListener::on_breeding(const MetaRule& father, const MetaRule& mother) const
 {
   _out << "Breeding:" << endl
        << " - Father: " << father << endl
@@ -168,9 +168,9 @@ Evolution::evolve(RuleSet& rules) const
 
   assert (not rules.empty() && "Impossible evolution, no rules");
   
-  vector<Rule*> parents = _select_parents(rules);
+  vector<MetaRule*> parents = _select_parents(rules);
   
-  vector<Rule*> children = breed(*parents[0], *parents[1]);
+  vector<MetaRule*> children = breed(*parents[0], *parents[1]);
   for (auto each_child: children) {
     rules.add(*each_child);
   }
@@ -197,7 +197,7 @@ Evolution::remove(RuleSet& rules, unsigned int excess) const
   
   for (unsigned int i=0 ; i<excess ; ++i) {
     unsigned int worst_rule = rules.worst();
-    Rule& rule = rules.remove(worst_rule);
+    MetaRule& rule = rules.remove(worst_rule);
     _listener.on_rule_deleted(rule);
   }
 }
@@ -239,7 +239,7 @@ Evolution::create_rule(RuleSet& rules, const Vector& seed, const Value& toleranc
     predictions.push_back(static_cast<unsigned int>(prediction));
   }
 
-  Rule *rule = make_rule(constraints, predictions);
+  MetaRule *rule = make_rule(constraints, predictions);
   rules.add(*rule);
 }
 
@@ -249,10 +249,10 @@ const double DEFAULT_ERROR(0);
 const double DEFAULT_FITNESS(0);
 
 
-Rule*
+MetaRule*
 Evolution::make_rule(std::vector<Interval> constraints, std::vector<unsigned int> predictions) const
 {
-  Rule* rule = new Rule(constraints, predictions, DEFAULT_FITNESS, DEFAULT_PAYOFF, DEFAULT_ERROR);
+  MetaRule* rule = new MetaRule(constraints, predictions, DEFAULT_FITNESS, DEFAULT_PAYOFF, DEFAULT_ERROR);
   _rules.push_back(rule);
   _listener.on_rule_added(*rule);
   return rule;
@@ -260,13 +260,13 @@ Evolution::make_rule(std::vector<Interval> constraints, std::vector<unsigned int
 
 
 Chromosome
-Evolution::encode(const Rule& rule) const
+Evolution::encode(const MetaRule& rule) const
 {
   return Chromosome(rule.as_vector());
 }
 
 
-Rule*
+MetaRule*
 Evolution::decode(const Chromosome& values, double fitness, double payoff, double error) const
 {
   using namespace std;
@@ -296,13 +296,13 @@ Evolution::decode(const Chromosome& values, double fitness, double payoff, doubl
   }
 
   Vector p = Vector(prediction);
-  Rule *result = new Rule(constraints, p, fitness, payoff, error);
+  MetaRule *result = new MetaRule(constraints, p, fitness, payoff, error);
   return result;
 }  
 
 
-vector<Rule*>
-Evolution::breed(const Rule& father, const Rule& mother) const
+vector<MetaRule*>
+Evolution::breed(const MetaRule& father, const MetaRule& mother) const
 {
   vector<Chromosome> children;
   _crossover(encode(father), encode(mother), children);
@@ -313,10 +313,10 @@ Evolution::breed(const Rule& father, const Rule& mother) const
   double payoff = (father.payoff() + mother.payoff()) / 2;
   double error = (father.error() + mother.error()) / 2;
   
-  vector<Rule*> children_rules;
+  vector<MetaRule*> children_rules;
   for (auto each_child: children) {
       mutate(each_child);
-      Rule *rule = decode(each_child, fitness, payoff, error);
+      MetaRule *rule = decode(each_child, fitness, payoff, error);
       children_rules.push_back(rule);
       _listener.on_rule_added(*rule);
       _rules.push_back(rule);

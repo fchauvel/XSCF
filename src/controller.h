@@ -96,7 +96,7 @@ namespace xcsf {
     virtual void initialise(RuleSet& rule_set) const;
 
   private:
-    mutable vector<Rule*> _rules;
+    mutable vector<MetaRule*> _rules;
 
   };
 

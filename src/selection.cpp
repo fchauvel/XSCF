@@ -43,7 +43,7 @@ RouletteWheel::RouletteWheel(const Randomizer& randomizer)
 RouletteWheel::~RouletteWheel()
 {}
 
-vector<Rule*>
+vector<MetaRule*>
 RouletteWheel::operator () (const RuleSet& rules) const
 {
   if (rules.size() < 2) {
@@ -52,7 +52,7 @@ RouletteWheel::operator () (const RuleSet& rules) const
     throw invalid_argument(error.str());
   }
   
-  vector<Rule*> selected_rules(2);
+  vector<MetaRule*> selected_rules(2);
   
   selected_rules[0] = select_one(rules, nullptr);
   selected_rules[1] = select_one(rules, selected_rules[0]);
@@ -61,8 +61,8 @@ RouletteWheel::operator () (const RuleSet& rules) const
 }
 
 
-Rule*
-RouletteWheel::select_one(const RuleSet& rules, Rule* selected) const
+MetaRule*
+RouletteWheel::select_one(const RuleSet& rules, MetaRule* selected) const
 {
 
   double total_payoff = rules.total_weighted_payoff();
@@ -90,10 +90,10 @@ DummySelection::~DummySelection()
 {}
 
 
-vector<Rule*>
+vector<MetaRule*>
 DummySelection::operator () (const RuleSet& rules) const
 {
-  vector<Rule*> selection;
+  vector<MetaRule*> selection;
   selection.push_back(&rules[0]);
   selection.push_back(&rules[1]);
   return selection;  

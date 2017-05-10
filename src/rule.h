@@ -33,18 +33,18 @@ namespace xcsf {
 
 
   class Formatter;
+
   
-  
-  class Rule
+  class MetaRule
   {
   public:
-    Rule(const vector<Interval>& constraints, const Vector& prediction, double fitness, double payoff, double error);
-    Rule(const Rule& prototype);
-    ~Rule();
+    MetaRule(const vector<Interval>& constraints, const Vector& prediction, double fitness, double payoff, double error);
+    MetaRule(const MetaRule& prototype);
+    ~MetaRule();
     
-    Rule& operator = (const Rule& prototype);
-    bool operator == (const Rule& other_rule) const;
-    bool operator != (const Rule& other_rule) const;
+    MetaRule& operator = (const MetaRule& prototype);
+    bool operator == (const MetaRule& other_rule) const;
+    bool operator != (const MetaRule& other_rule) const;
 
     void accept(Formatter& visitor) const;
     
@@ -62,7 +62,7 @@ namespace xcsf {
     const Vector& outputs(void) const;
     
   private:
-    friend std::ostream& operator << (std::ostream& out, const Rule& rule);
+    friend std::ostream& operator << (std::ostream& out, const MetaRule& rule);
 
     vector<Interval> _intervals;
     Vector _outputs;
@@ -104,7 +104,7 @@ namespace xcsf {
   public:
     virtual ~RewardFunction();
 
-    virtual void operator () (double reward, vector<Rule*>& rules) const = 0;
+    virtual void operator () (double reward, vector<MetaRule*>& rules) const = 0;
   };
 
 
@@ -115,7 +115,7 @@ namespace xcsf {
     NaiveReward(double learning_rate);
     virtual ~NaiveReward();
 
-    virtual void operator () (double reward, vector<Rule*>& rules) const;
+    virtual void operator () (double reward, vector<MetaRule*>& rules) const;
     
   private:
     double _learning_rate;
@@ -130,7 +130,7 @@ namespace xcsf {
     WilsonReward(double learning_rate, double error, double v);
     virtual ~WilsonReward();
 
-    virtual void operator () (double reward, vector<Rule*>& rules) const;
+    virtual void operator () (double reward, vector<MetaRule*>& rules) const;
 
   private:
     double _learning_rate;
@@ -147,13 +147,13 @@ namespace xcsf {
     virtual ~RuleSet(void);
     
     bool operator == (const RuleSet& rules) const;
-    Rule& operator [] (unsigned int index) const;
+    MetaRule& operator [] (unsigned int index) const;
 
     void accept(Formatter& visitor) const;
     
     bool empty(void) const;
-    RuleSet& add(Rule& rule);
-    Rule& remove(unsigned int index);
+    RuleSet& add(MetaRule& rule);
+    MetaRule& remove(unsigned int index);
 
     unsigned int worst(void) const;
     double total_fitness(void) const; // TODO delete!
@@ -168,7 +168,7 @@ namespace xcsf {
   private:
     void validate(unsigned int index) const;
 
-    vector<Rule*> _rules;
+    vector<MetaRule*> _rules;
   };
 
 
@@ -216,7 +216,7 @@ namespace xcsf {
   public:
     Formatter(std::ostream& out);
 
-    void format(const vector<Rule*>& rules);
+    void format(const vector<MetaRule*>& rules);
     void format(const vector<Interval>& antecedant, const Vector& conclusion, const Performance& performance);
     
   private:

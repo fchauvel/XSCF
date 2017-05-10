@@ -68,9 +68,9 @@ namespace xcsf {
   public:
     virtual ~EvolutionListener(void);
     
-    virtual void on_rule_added(const Rule& rule) const = 0;
-    virtual void on_rule_deleted(const Rule& rule) const = 0;
-    virtual void on_breeding(const Rule& father, const Rule& mother) const = 0;
+    virtual void on_rule_added(const MetaRule& rule) const = 0;
+    virtual void on_rule_deleted(const MetaRule& rule) const = 0;
+    virtual void on_breeding(const MetaRule& father, const MetaRule& mother) const = 0;
     virtual void on_mutation(const Chromosome& chromosome, const Allele& locus) const = 0;
   };
 
@@ -81,9 +81,9 @@ namespace xcsf {
   public:
     virtual ~NoListener();
 
-    virtual void on_rule_added(const Rule& rule) const;
-    virtual void on_breeding(const Rule& father, const Rule& mother) const;
-    virtual void on_rule_deleted(const Rule& rule) const;
+    virtual void on_rule_added(const MetaRule& rule) const;
+    virtual void on_breeding(const MetaRule& father, const MetaRule& mother) const;
+    virtual void on_rule_deleted(const MetaRule& rule) const;
     virtual void on_mutation(const Chromosome& chromosome, const Allele& locus) const;
   };
 
@@ -95,9 +95,9 @@ namespace xcsf {
     explicit LogListener(std::ostream& out);
     virtual ~LogListener();
 
-    virtual void on_rule_added(const Rule& rule) const;
-    virtual void on_breeding(const Rule& father, const Rule& mother) const;
-    virtual void on_rule_deleted(const Rule& rule) const;
+    virtual void on_rule_added(const MetaRule& rule) const;
+    virtual void on_breeding(const MetaRule& father, const MetaRule& mother) const;
+    virtual void on_rule_deleted(const MetaRule& rule) const;
     virtual void on_mutation(const Chromosome& chromosome, const Allele& locus) const;
 
   private:
@@ -116,16 +116,16 @@ namespace xcsf {
     virtual void evolve(RuleSet& rules) const;
     virtual void create_rule_for(RuleSet& rules, const Vector& context) const;
 
-    std::vector<Rule*> breed(const Rule& father, const Rule& mother) const;
-    Rule* decode(const Chromosome&, double fitness, double payoff, double error) const;
-    Chromosome encode(const Rule& rule) const;
+    std::vector<MetaRule*> breed(const MetaRule& father, const MetaRule& mother) const;
+    MetaRule* decode(const Chromosome&, double fitness, double payoff, double error) const;
+    Chromosome encode(const MetaRule& rule) const;
     
   private:
     void mutate(Chromosome& child) const;
     void remove(RuleSet& rules, unsigned int excess) const;
     void enforce_capacity(RuleSet& rules) const;
     void create_rule(RuleSet& rules, const Vector& seed, const Value& tolerance, const Value& prediction) const;
-    Rule* make_rule(std::vector<Interval>, std::vector<unsigned int>) const;
+    MetaRule* make_rule(std::vector<Interval>, std::vector<unsigned int>) const;
 
     const Decision& _decision;
     const Crossover& _crossover;
@@ -135,7 +135,7 @@ namespace xcsf {
     unsigned int _input_count;
     unsigned int _output_count;
     const unsigned int _capacity;
-    mutable std::vector<Rule*> _rules;
+    mutable std::vector<MetaRule*> _rules;
   };
 
   

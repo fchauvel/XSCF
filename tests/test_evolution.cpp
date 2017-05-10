@@ -133,17 +133,17 @@ public:
   virtual ~FakeListener()
   {};
 
-  virtual void on_rule_added(const Rule& rule) const
+  virtual void on_rule_added(const MetaRule& rule) const
   {
     mock().actualCall("on_rule_added");
   };
 
-  virtual void on_rule_deleted(const Rule& rule) const
+  virtual void on_rule_deleted(const MetaRule& rule) const
   {
     mock().actualCall("on_rule_deleted");
   };
 
-  virtual void on_breeding(const Rule& father, const Rule& mother) const
+  virtual void on_breeding(const MetaRule& father, const MetaRule& mother) const
   {
     mock().actualCall("on_breeding");
   };
@@ -160,7 +160,7 @@ public:
 TEST_GROUP(TestEvolution)
 {
   Chromosome child = { 5, 10, 20 };
-  Rule *rule_1, *rule_2;
+  MetaRule *rule_1, *rule_2;
   RuleSet *rules;
   AlleleMutation *mutations;
   Crossover *crossover;
@@ -170,8 +170,8 @@ TEST_GROUP(TestEvolution)
   void setup(void)
   {
     crossover = new FakeCrossover(child);
-    rule_1 = new Rule({Interval(0, 50)}, { 4 }, 1.0, 1.0, 1.0);
-    rule_2 = new Rule({Interval(50, 100)}, { 2 }, 1.0, 1.0, 1.0);
+    rule_1 = new MetaRule({Interval(0, 50)}, { 4 }, 1.0, 1.0, 1.0);
+    rule_2 = new MetaRule({Interval(50, 100)}, { 2 }, 1.0, 1.0, 1.0);
     rules = new RuleSet();
     rules->add(*rule_1);
     rules->add(*rule_2);
@@ -346,7 +346,7 @@ TEST_GROUP(TestLogListener)
 
 TEST(TestLogListener, test_on_rule_added)
 {
-  Rule rule({Interval(0, 100)}, { 50 }, 1., 1., 1.);
+  MetaRule rule({Interval(0, 100)}, { 50 }, 1., 1., 1.);
   
   listener->on_rule_added(rule);
 
@@ -358,7 +358,7 @@ TEST(TestLogListener, test_on_rule_added)
 
 TEST(TestLogListener, test_on_rule_deleted)
 {
-  Rule rule({Interval(0, 100)}, { 50 }, 1., 1., 1.);
+  MetaRule rule({Interval(0, 100)}, { 50 }, 1., 1., 1.);
   
   listener->on_rule_deleted(rule);
 
@@ -370,8 +370,8 @@ TEST(TestLogListener, test_on_rule_deleted)
 
 TEST(TestLogListener, test_on_breeding)
 {
-  Rule father({Interval(0, 50)}, { 50 }, 1., 1., 1.);
-  Rule mother({Interval(50, 75)}, { 67 }, 1., 1., 1.);
+  MetaRule father({Interval(0, 50)}, { 50 }, 1., 1., 1.);
+  MetaRule mother({Interval(50, 75)}, { 67 }, 1., 1., 1.);
   
   listener->on_breeding(father, mother);
 

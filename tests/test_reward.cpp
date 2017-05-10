@@ -34,12 +34,12 @@ TEST_GROUP(TestNaiveReward)
   const double fitness = 0.0;
   const double payoff = 0.0;
 
-  Rule *rule;
-  vector<Rule*> rules;
+  MetaRule *rule;
+  vector<MetaRule*> rules;
   RewardFunction* reward;
   
   void setup(void) {
-    rule = new Rule({ Interval(0, 100) }, { 50 }, fitness, payoff, 0);
+    rule = new MetaRule({ Interval(0, 100) }, { 50 }, fitness, payoff, 0);
     rules.push_back(rule);
     reward = new NaiveReward(learning_rate);
   }
@@ -84,14 +84,14 @@ TEST_GROUP(TestNaiveRewardWithTwoRules)
   const double fitness = 0.0;
   const double payoff = 0.0;
 
-  Rule *rule_1, *rule_2;
-  vector<Rule*> rules;
+  MetaRule *rule_1, *rule_2;
+  vector<MetaRule*> rules;
   RewardFunction* reward;
   
   void setup(void) {
-    rule_1 = new Rule({ Interval(0, 100) }, { 50 }, fitness, payoff, 0);
+    rule_1 = new MetaRule({ Interval(0, 100) }, { 50 }, fitness, payoff, 0);
     rules.push_back(rule_1);
-    rule_2 = new Rule({ Interval(0, 100) }, { 50 }, fitness, payoff, 0);
+    rule_2 = new MetaRule({ Interval(0, 100) }, { 50 }, fitness, payoff, 0);
     rules.push_back(rule_2);
     reward = new NaiveReward(learning_rate);
   }

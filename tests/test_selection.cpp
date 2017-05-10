@@ -28,7 +28,7 @@
 TEST_GROUP(TestRouletteWheel)
 {
   Randomizer *randomizer;
-  Rule *rule_1, *rule_2, *rule_3;
+  MetaRule *rule_1, *rule_2, *rule_3;
   RuleSet *rules;
 
   void setup(void) {
@@ -36,13 +36,13 @@ TEST_GROUP(TestRouletteWheel)
 
     rules = new RuleSet();
     
-    rule_1 = new Rule({ Interval(0, 25) }, { 12 }, 1.0, 1.0, 1.0);
+    rule_1 = new MetaRule({ Interval(0, 25) }, { 12 }, 1.0, 1.0, 1.0);
     rules->add(*rule_1);
     
-    rule_2 = new Rule({ Interval(0, 25) }, { 12 }, 2.0, 3.0, 1.0);
+    rule_2 = new MetaRule({ Interval(0, 25) }, { 12 }, 2.0, 3.0, 1.0);
     rules->add(*rule_2);
     
-    rule_3 = new Rule({ Interval(0, 25) }, { 12 }, 3.0, 1.0, 1.0);
+    rule_3 = new MetaRule({ Interval(0, 25) }, { 12 }, 3.0, 1.0, 1.0);
     rules->add(*rule_3);
   }
 
@@ -71,7 +71,7 @@ TEST(TestRouletteWheel, test_simple)
 {
   RouletteWheel selection(*randomizer);
 
-  vector<Rule*> selected_rules = selection(*rules);
+  vector<MetaRule*> selected_rules = selection(*rules);
 
   CHECK_EQUAL(2, selected_rules.size());
   CHECK(selected_rules[0] == rule_3);
@@ -82,7 +82,7 @@ TEST(TestRouletteWheel, test_simple)
 TEST_GROUP(TestZeroFitness)
 {
   Randomizer *randomizer;
-  Rule *rule_1, *rule_2, *rule_3;
+  MetaRule *rule_1, *rule_2, *rule_3;
   RuleSet *rules;
 
   void setup(void) {
@@ -90,13 +90,13 @@ TEST_GROUP(TestZeroFitness)
 
     rules = new RuleSet();
     
-    rule_1 = new Rule({ Interval(0, 25) }, { 12 }, 0.0, 1.0, 1.0);
+    rule_1 = new MetaRule({ Interval(0, 25) }, { 12 }, 0.0, 1.0, 1.0);
     rules->add(*rule_1);
     
-    rule_2 = new Rule({ Interval(0, 25) }, { 12 }, 0.0, 1.0, 1.0);
+    rule_2 = new MetaRule({ Interval(0, 25) }, { 12 }, 0.0, 1.0, 1.0);
     rules->add(*rule_2);
     
-    rule_3 = new Rule({ Interval(0, 25) }, { 12 }, 0.0, 1.0, 1.0);
+    rule_3 = new MetaRule({ Interval(0, 25) }, { 12 }, 0.0, 1.0, 1.0);
     rules->add(*rule_3);
   }
 
@@ -115,7 +115,7 @@ TEST(TestZeroFitness, test_simple)
 {
   RouletteWheel selection(*randomizer);
 
-  vector<Rule*> selected_rules = selection(*rules);
+  vector<MetaRule*> selected_rules = selection(*rules);
 
   CHECK_EQUAL(2, selected_rules.size());
   CHECK(selected_rules[0] == rule_1);

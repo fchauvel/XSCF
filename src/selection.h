@@ -20,6 +20,7 @@
 #ifndef XCSF_SELECTION_H
 #define XCSF_SELECTION_H
 
+
 #include "utils.h"
 #include "rule.h"
 
@@ -33,7 +34,7 @@ namespace xcsf
   public:
     virtual ~Selection();
     
-    virtual vector<Rule*> operator () (const RuleSet& rules) const = 0;
+    virtual vector<MetaRule*> operator () (const RuleSet& rules) const = 0;
     
   };
 
@@ -44,10 +45,10 @@ namespace xcsf
     RouletteWheel(const Randomizer& generator);
     virtual ~RouletteWheel();
 
-    virtual vector<Rule*> operator () (const RuleSet& rules) const;
+    virtual vector<MetaRule*> operator () (const RuleSet& rules) const;
 
   private:
-    Rule* select_one(const RuleSet& rules, Rule* selected) const;
+    MetaRule* select_one(const RuleSet& rules, MetaRule* selected) const;
     const Randomizer& _generate;
     
   };
@@ -58,7 +59,7 @@ namespace xcsf
   public:
     virtual ~DummySelection();
 
-    virtual vector<Rule*> operator () (const RuleSet& rules) const;
+    virtual vector<MetaRule*> operator () (const RuleSet& rules) const;
   };
 
   

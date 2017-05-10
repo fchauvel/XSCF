@@ -29,7 +29,7 @@ using namespace std;
 using namespace xcsf;
 
 
-Rule::Rule(const vector<Interval>& constraints, const Vector& prediction, double fitness, double payoff, double error):
+MetaRule::MetaRule(const vector<Interval>& constraints, const Vector& prediction, double fitness, double payoff, double error):
   _intervals(constraints),
   _outputs(prediction),
   _fitness(fitness),
@@ -38,7 +38,7 @@ Rule::Rule(const vector<Interval>& constraints, const Vector& prediction, double
 {}
 
 
-Rule::Rule(const Rule& prototype)
+MetaRule::MetaRule(const MetaRule& prototype)
   :_intervals(prototype._intervals),
    _outputs(prototype._outputs),
    _fitness(prototype._fitness),
@@ -47,12 +47,12 @@ Rule::Rule(const Rule& prototype)
 {}
 
 
-Rule::~Rule()
+MetaRule::~MetaRule()
 {}
 
 
-Rule&
-Rule::operator = (const Rule& prototype)
+MetaRule&
+MetaRule::operator = (const MetaRule& prototype)
 {
   _intervals = prototype._intervals;
   _outputs = prototype._outputs;
@@ -64,7 +64,7 @@ Rule::operator = (const Rule& prototype)
 
 
 bool
-Rule::operator == (const Rule& other_rule) const
+MetaRule::operator == (const MetaRule& other_rule) const
 {
   return _intervals == other_rule._intervals
     and _outputs == other_rule._outputs;
@@ -72,21 +72,21 @@ Rule::operator == (const Rule& other_rule) const
 
 
 bool
-Rule::operator != (const Rule& other_rule) const
+MetaRule::operator != (const MetaRule& other_rule) const
 {
   return not (*this == other_rule);
 }
 
 
 void
-Rule::accept(Formatter& formatter) const
+MetaRule::accept(Formatter& formatter) const
 {
   formatter.format(_intervals, _outputs, Performance(_fitness, _payoff, _error));
 }
 
 
 vector<unsigned int>
-Rule::as_vector(void) const {
+MetaRule::as_vector(void) const {
   vector<unsigned int> result;
 
   for (auto each_constraint: _intervals) {
@@ -103,7 +103,7 @@ Rule::as_vector(void) const {
 
 
 void
-Rule::update(double fitness, double payoff, double error) {
+MetaRule::update(double fitness, double payoff, double error) {
   assert(std::isfinite(fitness) && "Infinite or NaN fitness");
   assert(std::isfinite(payoff) && "Infinite or NaN payoff");
   assert(std::isfinite(error) && "Infinite or NaN error");
@@ -116,28 +116,28 @@ Rule::update(double fitness, double payoff, double error) {
 
 
 double
-Rule::fitness(void) const
+MetaRule::fitness(void) const
 {
   return _fitness;
 }
 
 
 double
-Rule::error(void) const
+MetaRule::error(void) const
 {
   return _error;
 }
 
 
 double
-Rule::payoff(void) const
+MetaRule::payoff(void) const
 {
   return _payoff;
 }
 
 
 double
-Rule::weighted_payoff(void) const
+MetaRule::weighted_payoff(void) const
 {
   return _fitness * _payoff;
 }
@@ -145,7 +145,7 @@ Rule::weighted_payoff(void) const
 
 
 bool
-Rule::match(const Vector& inputs) const
+MetaRule::match(const Vector& inputs) const
 {
   if (inputs.size() != _intervals.size()) {
     stringstream message;
@@ -166,13 +166,13 @@ Rule::match(const Vector& inputs) const
 
 
 const Vector&
-Rule::outputs(void) const
+MetaRule::outputs(void) const
 {
   return _outputs;
 }
 
 ostream&
-xcsf::operator << (ostream& out, const Rule& rule)
+xcsf::operator << (ostream& out, const MetaRule& rule)
 {
   out << "{";
   for (auto each_constraint: rule._intervals) {
@@ -272,21 +272,21 @@ NaiveReward::~NaiveReward()
 
 
 void
-NaiveReward::operator () (double reward, vector<Rule*>& rules) const
+NaiveReward::operator () (double reward, vector<MetaRule*>& rules) const
 {
   double payoff[rules.size()];
   double accuracy[rules.size()];
   double total_accuracy(0);
 
   for (unsigned int index=0 ; index<rules.size() ; ++index){
-    Rule& each_rule = *rules[index];
+    MetaRule& each_rule = *rules[index];
     payoff[index] = each_rule.payoff() + _learning_rate * (reward - each_rule.payoff());
     accuracy[index] = std::min(each_rule.payoff(), reward) / std::max(each_rule.payoff(), reward);
     total_accuracy += accuracy[index];
   }
 
   for(unsigned int index=0 ; index<rules.size() ; ++index) {
-    Rule& each_rule = *rules[index];
+    MetaRule& each_rule = *rules[index];
     double relative_accuracy =
       (std::isnormal(total_accuracy))
       ? accuracy[index] / total_accuracy
@@ -309,7 +309,7 @@ WilsonReward::~WilsonReward()
 
 
 void
-WilsonReward::operator () (double reward, vector<Rule*>& rules) const
+WilsonReward::operator () (double reward, vector<MetaRule*>& rules) const
 {
   double error[rules.size()];
   double payoff[rules.size()];
@@ -317,7 +317,7 @@ WilsonReward::operator () (double reward, vector<Rule*>& rules) const
   double total_accuracy(0);
 
   for (unsigned int index=0 ; index<rules.size() ; ++index){
-    Rule& each_rule = *rules[index];
+    MetaRule& each_rule = *rules[index];
     payoff[index] = each_rule.payoff() + _learning_rate * (reward - each_rule.payoff());
     error[index] = each_rule.error() + _learning_rate * abs(reward - payoff[index]);
     
@@ -329,7 +329,7 @@ WilsonReward::operator () (double reward, vector<Rule*>& rules) const
   }
 
   for(unsigned int index=0 ; index<rules.size() ; ++index) {
-    Rule& each_rule = *rules[index];
+    MetaRule& each_rule = *rules[index];
     double relative_accuracy =
       (std::isnormal(total_accuracy))
       ? accuracy[index] / total_accuracy
@@ -356,7 +356,7 @@ RuleSet::operator == (const RuleSet& other) const
 }
 
 
-Rule&
+MetaRule&
 RuleSet::operator [] (unsigned int index) const
 {
   validate(index);
@@ -397,18 +397,18 @@ RuleSet::empty(void) const
 
 
 RuleSet&
-RuleSet::add(Rule& rule)
+RuleSet::add(MetaRule& rule)
 {
   _rules.push_back(&rule);
   return *this;
 }
 
-Rule&
+MetaRule&
 RuleSet::remove(unsigned int index)
 {
   validate(index);
   
-  Rule& removed = *_rules[index];
+  MetaRule& removed = *_rules[index];
   _rules.erase(_rules.begin() + index);
   
   return removed;
@@ -491,7 +491,7 @@ ActivationGroup::ActivationGroup(RuleSet& rules, const Vector& context)
   :RuleSet()
 {
   for(unsigned int index=0 ; index<rules.size() ; ++index) {
-    Rule& any_rule = rules[index];
+    MetaRule& any_rule = rules[index];
     if (any_rule.match(context)) {
       add(any_rule);
     }
@@ -567,7 +567,7 @@ Formatter::Formatter(std::ostream& out)
 
 
 void
-Formatter::format(const vector<Rule*>& rules)
+Formatter::format(const vector<MetaRule*>& rules)
 {
   const unsigned int rule_width(21);
   const string line(rule_width + 3 * 5, '-');
