@@ -54,6 +54,7 @@ namespace xcsf {
   public:
     Rule(const vector<Interval>& premises, const Vector& conclusion);
 
+    const Vector& conclusion() const;
     bool is_triggered_by(const Vector& context) const;
 
     const Vector& operator () (const Vector& context) const;
@@ -63,22 +64,44 @@ namespace xcsf {
     
     friend std::ostream& operator << (std::ostream& out, const Rule& rule);
 
+    explicit operator vector<unsigned int> () const;
+
+    
   private:
     vector<Interval> _premises;
     Vector _conclusion;
     Dimensions _dimensions;
     
   };
-  
+
+
+  class Performance
+  {
+  public:
+    Performance(double fitness=0.0, double payoff=0.0, double error=0.0);
+    
+    bool operator == (const Performance& other) const;
+    bool operator != (const Performance& other) const;
+
+    double fitness(void) const;
+    double payoff(void) const;
+    double error(void) const;
+
+    friend std::ostream& operator << (std::ostream& out, const Performance performance);
+    
+  private:
+    double _fitness;
+    double _payoff;
+    double _error;
+    
+  };
+    
   
   class MetaRule
   {
   public:
     MetaRule(const vector<Interval>& constraints, const Vector& prediction, double fitness, double payoff, double error);
-    MetaRule(const MetaRule& prototype);
-    ~MetaRule();
     
-    MetaRule& operator = (const MetaRule& prototype);
     bool operator == (const MetaRule& other_rule) const;
     bool operator != (const MetaRule& other_rule) const;
 
@@ -100,37 +123,13 @@ namespace xcsf {
   private:
     friend std::ostream& operator << (std::ostream& out, const MetaRule& rule);
 
-    vector<Interval> _intervals;
-    Vector _outputs;
-    Performance _preformance;
-
+    Rule _rule;
+    Performance _performance;
     
   };
 
 
-  class Performance
-  {
-  public:
-    explicit Performance(double fitness=0.0, double payoff=0.0, double error=0.0);
-    Performance(const Performance& other);
-    ~Performance();
 
-    Performance& operator = (const Performance& other);
-    bool operator == (const Performance& other) const;
-    bool operator != (const Performance& other) const;
-
-    double fitness(void) const;
-    double payoff(void) const;
-    double error(void) const;
-    
-  private:
-    friend std::ostream& operator << (std::ostream& out, const Performance performance);
-    
-    double _fitness;
-    double _payoff;
-    double _error;
-    
-  };
 
 
 
@@ -252,7 +251,7 @@ namespace xcsf {
     Formatter(std::ostream& out);
 
     void format(const vector<MetaRule*>& rules);
-    void format(const vector<Interval>& antecedant, const Vector& conclusion, const Performance& performance);
+    void format(const Rule& rule, const Performance& performance);
     
   private:
     ostream& _out;

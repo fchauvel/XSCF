@@ -80,6 +80,12 @@ Rule::is_triggered_by(const Vector& context) const
 
 
 const Vector&
+Rule::conclusion() const
+{
+  return _conclusion;
+}
+
+const Vector&
 Rule::operator () (const Vector& context) const
 {
   if (is_triggered_by(context)) return _conclusion;
@@ -113,9 +119,9 @@ xcsf::operator << (std::ostream& out, const Rule& rule)
   for (unsigned int i=0 ; i<rule._premises.size() ; ++i) {
     const Interval& each = rule._premises[i];
     out << "[";
-    out << setw(3) << each.lower();
+    out << right << setw(3) << each.lower();
     out << ", ";
-    out << setw(3) << each.upper();
+    out << right << setw(3) << each.upper();
     out << "]";
     if (i < rule._premises.size() - 1)  {
       out << ", ";
@@ -123,7 +129,7 @@ xcsf::operator << (std::ostream& out, const Rule& rule)
   }
   out << ") => (";
   for(unsigned int i=0 ; i<rule._conclusion.size() ;++i) {
-    out << setw(3) << rule._conclusion[i];
+    out << right << setw(3) << rule._conclusion[i];
     if (i < rule._conclusion.size() - 1) {
       out << ", ";
     }
@@ -133,159 +139,21 @@ xcsf::operator << (std::ostream& out, const Rule& rule)
 }
 
 
-MetaRule::MetaRule(const vector<Interval>& constraints, const Vector& prediction, double fitness, double payoff, double error):
-  _intervals(constraints),
-  _outputs(prediction),
-  _fitness(fitness),
-  _payoff(payoff),
-  _error(error)
-{}
-
-
-MetaRule::MetaRule(const MetaRule& prototype)
-  :_intervals(prototype._intervals),
-   _outputs(prototype._outputs),
-   _fitness(prototype._fitness),
-   _payoff(prototype._payoff),
-   _error(prototype._error)
-{}
-
-
-MetaRule::~MetaRule()
-{}
-
-
-MetaRule&
-MetaRule::operator = (const MetaRule& prototype)
+Rule::operator vector<unsigned int> () const
 {
-  _intervals = prototype._intervals;
-  _outputs = prototype._outputs;
-  _fitness = prototype._fitness;
-  _payoff = prototype._payoff;
-  _error = prototype._error;
-  return *this;
-}
-
-
-bool
-MetaRule::operator == (const MetaRule& other_rule) const
-{
-  return _intervals == other_rule._intervals
-    and _outputs == other_rule._outputs;
-}
-
-
-bool
-MetaRule::operator != (const MetaRule& other_rule) const
-{
-  return not (*this == other_rule);
-}
-
-
-void
-MetaRule::accept(Formatter& formatter) const
-{
-  formatter.format(_intervals, _outputs, Performance(_fitness, _payoff, _error));
-}
-
-
-vector<unsigned int>
-MetaRule::as_vector(void) const {
   vector<unsigned int> result;
-
-  for (auto each_constraint: _intervals) {
+  
+  for (auto each_constraint: _premises) {
     result.push_back(static_cast<unsigned int>(each_constraint.lower()));
     result.push_back(static_cast<unsigned int>(each_constraint.upper()));
   }
   
-  for (unsigned int index=0 ; index<_outputs.size() ; ++index) {
-    result.push_back(static_cast<unsigned int>(_outputs[index]));
+  for (unsigned int index=0 ; index<_conclusion.size() ; ++index) {
+    result.push_back(static_cast<unsigned int>(_conclusion[index]));
   }
   
   return result;
 }
-
-
-void
-MetaRule::update(double fitness, double payoff, double error) {
-  assert(std::isfinite(fitness) && "Infinite or NaN fitness");
-  assert(std::isfinite(payoff) && "Infinite or NaN payoff");
-  assert(std::isfinite(error) && "Infinite or NaN error");
-
-  _fitness = fitness;
-  _payoff = payoff;
-  _error = error;
-}
-
-
-
-double
-MetaRule::fitness(void) const
-{
-  return _fitness;
-}
-
-
-double
-MetaRule::error(void) const
-{
-  return _error;
-}
-
-
-double
-MetaRule::payoff(void) const
-{
-  return _payoff;
-}
-
-
-double
-MetaRule::weighted_payoff(void) const
-{
-  return _fitness * _payoff;
-}
-
-
-
-bool
-MetaRule::match(const Vector& inputs) const
-{
-  if (inputs.size() != _intervals.size()) {
-    stringstream message;
-    message << "Invalid context! Expecting " << _intervals.size()
-	    << " dimensions, but found only " << inputs.size()
-	    << " instead."; 
-    throw std::invalid_argument(message.str());
-  }
-  
-  for(unsigned int index=0 ; index<_intervals.size() ; index++) {
-    if (!_intervals[index].contains(inputs[index])) {
-      return false;
-    }
-  }
-  
-  return true;
-}
-
-
-const Vector&
-MetaRule::outputs(void) const
-{
-  return _outputs;
-}
-
-ostream&
-xcsf::operator << (ostream& out, const MetaRule& rule)
-{
-  out << "{";
-  for (auto each_constraint: rule._intervals) {
-    out << each_constraint << " " ;
-  }
-  out << "} => " << rule._outputs;
-  return out;
-}
-
 
 
 Performance::Performance(double fitness, double payoff, double error)
@@ -295,33 +163,12 @@ Performance::Performance(double fitness, double payoff, double error)
 {}
 
 
-Performance::Performance(const Performance& other)
-  :_fitness(other._fitness)
-  ,_payoff(other._payoff)
-  ,_error(other._error)
-{}
-
-
-Performance::~Performance()
-{}
-
-
-Performance&
-Performance::operator = (const Performance& other)
-{
-  _fitness = other._fitness;
-  _payoff = other._payoff;
-  _error = other._error;
-  return *this;
-}
-
 bool
 Performance::operator == (const Performance& other) const
 {
   return _fitness == other._fitness
     and _payoff == other._payoff
-    and _error == other._error;
-  
+    and _error == other._error;  
 }
 
 
@@ -353,13 +200,111 @@ Performance::error(void) const
 ostream&
 xcsf::operator << (ostream& out, const Performance performance)
 {
-  out << fixed <<  setprecision(2);
-  out << "{ F = " << performance._fitness
-      << " ; P = " << performance._payoff
-      << " ; E = " << performance._error << " }";
+  out << right << fixed << setprecision(2);
+  out << "{ F = " <<  performance._fitness
+      << " ; P = " <<  performance._payoff
+      << " ; E = " <<  performance._error
+      << " }";
     
   return out;
 }
+
+
+
+MetaRule::MetaRule(const vector<Interval>& constraints, const Vector& prediction, double fitness, double payoff, double error)
+  : _rule(constraints, prediction)
+  , _performance(fitness, payoff, error)
+{}
+
+
+bool
+MetaRule::operator == (const MetaRule& other) const
+{
+  return _rule == other._rule;
+}
+
+
+bool
+MetaRule::operator != (const MetaRule& other) const
+{
+  return not (*this == other);
+}
+
+
+void
+MetaRule::accept(Formatter& formatter) const
+{
+  formatter.format(_rule, _performance);
+}
+
+
+vector<unsigned int>
+MetaRule::as_vector(void) const {
+  return static_cast<vector<unsigned int>>(_rule);
+}
+
+
+void
+MetaRule::update(double fitness, double payoff, double error) {
+  assert(std::isfinite(fitness) && "Infinite or NaN fitness");
+  assert(std::isfinite(payoff) && "Infinite or NaN payoff");
+  assert(std::isfinite(error) && "Infinite or NaN error");
+
+  _performance = Performance(fitness, payoff, error);
+}
+
+
+
+double
+MetaRule::fitness(void) const
+{
+  return _performance.fitness();
+}
+
+
+double
+MetaRule::error(void) const
+{
+  return _performance.error();
+}
+
+
+double
+MetaRule::payoff(void) const
+{
+  return _performance.payoff();
+}
+
+
+double
+MetaRule::weighted_payoff(void) const
+{
+  return _performance.fitness() * _performance.payoff();
+}
+
+
+bool
+MetaRule::match(const Vector& inputs) const
+{
+  return _rule.is_triggered_by(inputs);
+}
+
+
+const Vector&
+MetaRule::outputs(void) const
+{
+  return _rule.conclusion();
+}
+
+
+ostream&
+xcsf::operator << (ostream& out, const MetaRule& rule)
+{
+  out << rule._rule << " " << rule._performance;
+  return out;
+}
+
+
 
 
 RewardFunction::~RewardFunction()
@@ -673,12 +618,14 @@ Formatter::Formatter(std::ostream& out)
 void
 Formatter::format(const vector<MetaRule*>& rules)
 {
-  const unsigned int rule_width(21);
-  const string line(rule_width + 3 * 5, '-');
-  _out << left << setw(rule_width) << "Rule"
-       << right << setw(5) << "F."
-       << right << setw(5) << "P."
-       << right << setw(5) << "E." << endl;
+  const unsigned int width(6);
+  const unsigned int rule_width(27);
+  const string line(rule_width + 3 * width, '-');
+  _out << right << setw(width) << "F."
+       << right << setw(width) << "P."
+       << right << setw(width) << "E."
+       << right << setw(3) << ""
+       << left << "Rule"<< endl;
   _out << line << endl;
   for (auto each_rule: rules) {
     each_rule->accept(*this);
@@ -689,27 +636,14 @@ Formatter::format(const vector<MetaRule*>& rules)
 
 
 void
-Formatter::format(const vector<Interval>& antecedent,
-		  const Vector& conclusion,
-		  const Performance& performance)
+Formatter::format(const Rule& rule, const Performance& performance)
 {
-  for(unsigned int i=0 ; i<antecedent.size() ; ++i) {
-    _out << "("
-	 << right << setw(2) << antecedent[i].lower()
-	 << ", "
-	 << right << setw(2) << antecedent[i].upper()
-	 << ")";
-  }
 
-  _out << " => ";
-  for(unsigned int i=0 ; i<conclusion.size() ; ++i) {
-    _out << "("
-	 << conclusion[i]
-	 << ")";
-  }
-  _out << setw(5) << "";
-  _out << std::right << setw(5) << fixed << setprecision(1) << performance.fitness();
-  _out << std::right << setw(5) << fixed << setprecision(1) << performance.payoff();
-  _out << std::right << setw(5) << fixed << setprecision(1) << performance.error();
+  _out << std::right << fixed << setprecision(1);
+  _out << setw(6) << performance.fitness();
+  _out << setw(6) << performance.payoff();
+  _out << setw(6) << performance.error();
+  _out << setw(3) << "";
+  _out << std::left << rule;
   _out << endl;
 }

@@ -179,7 +179,7 @@ TEST(TestRule, difference_in_dimension)
 TEST_GROUP(TestPerformance)
 {
   const double fitness = 12.0;
-  const double payoff = 13.0;
+  const double payoff = 2313.0;
   const double error = 14.0;
   Performance perf;
 
@@ -244,7 +244,7 @@ TEST(TestPerformance, test_formatting)
   stringstream out;
   out << perf;
 
-  CHECK(out.str() == "{ F = 12.00 ; P = 13.00 ; E = 14.00 }" );
+  CHECK_EQUAL("{ F = 12.00 ; P = 2313.00 ; E = 14.00 }", out.str());
 }
 
 
@@ -418,11 +418,11 @@ TEST(TestRuleSet, test_rule_printer)
   rules.accept(formatter);
 
   stringstream expected;
-  expected << "Rule                    F.   P.   E." << endl
-	   << "------------------------------------" << endl
-	   << "( 0, 25) => (12)      12.0  2.0  0.0" << endl
-	   << "(25, 50) => (37)      14.0  3.0  0.0" << endl
-    	   << "------------------------------------" << endl
+  expected << "    F.    P.    E.   Rule" << endl
+	   << "---------------------------------------------" << endl
+	   << "  12.0   2.0   0.0   ([  0,  25]) => ( 12)" << endl
+	   << "  14.0   3.0   0.0   ([ 25,  50]) => ( 37)" << endl
+    	   << "---------------------------------------------" << endl
 	   << "2 rule(s)." << endl;
   
   CHECK_EQUAL(expected.str(), out.str());
