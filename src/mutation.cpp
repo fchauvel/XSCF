@@ -25,6 +25,7 @@
 #include "mutation.h"
 #include "context.h"
 
+
 using namespace std;
 using namespace xcsf;
 
@@ -34,9 +35,10 @@ AlleleMutation::~AlleleMutation()
 
 
 
-RandomAlleleMutation::RandomAlleleMutation(const Randomizer& generator)
+RandomAlleleMutation::RandomAlleleMutation(const Randomizer& generator, Value maximum)
   : AlleleMutation()
   , _generate(generator)
+  , _maximum(static_cast<unsigned int>(maximum))
 {};
 
 
@@ -54,6 +56,13 @@ RandomAlleleMutation::operator () (Chromosome& subject, const Allele& locus) con
     throw std::invalid_argument(err.str());
   }
 
-  subject[locus] = static_cast<Allele>(_generate.unsigned_int(0, Value::MAXIMUM));
+  unsigned int draw = _generate.unsigned_int(0, 2 * _maximum);
+  if (draw >= _maximum) {
+    unsigned int update = std::min(draw - _maximum, Value::MAXIMUM - subject[locus]);
+    subject[locus] += update;
+  } else {
+    unsigned int update = std::min(_maximum - draw, subject[locus]);
+    subject[locus] -= update;
+  }
   
 }

@@ -34,19 +34,22 @@ using namespace xcsf;
 TEST_GROUP(TestAlleleMutation)
 {
   AlleleMutation* mutation;
-  Randomizer *randomizer;
-  Chromosome *chromosome;
+  TestableRandomizer *randomizer;
+
+  unsigned int initial;
+  unsigned int maximum;
 
   void setup(void)
   {
+    initial = 50;
+    maximum = 30;
     randomizer = new TestableRandomizer({ 0, 0.51, 1.0 });
-    mutation = new RandomAlleleMutation(*randomizer);
-    chromosome = new Chromosome({50, 50, 50});
+    mutation = new RandomAlleleMutation(*randomizer, maximum);
+   
   }
 
   void teardown(void)
   {
-    delete chromosome;
     delete randomizer;
     delete mutation;
   }
@@ -56,22 +59,44 @@ TEST_GROUP(TestAlleleMutation)
 
 TEST(TestAlleleMutation, test_simple_mutation)
 {
-  const Allele locus(0);
+  const unsigned int initial(50);
+  Chromosome chromosome({initial, initial, initial});
   
-  (*mutation)(*chromosome, locus);
-  CHECK_EQUAL(0, (*chromosome)[locus]);
+  (*mutation)(chromosome, 0);
+  CHECK_EQUAL(initial - maximum, chromosome[0]);
 
-  (*mutation)(*chromosome, locus);
-  CHECK_EQUAL(50, (*chromosome)[locus]);
+  (*mutation)(chromosome, 1);
+  CHECK_EQUAL(initial, chromosome[1]);
   
-  (*mutation)(*chromosome, locus);
-  CHECK_EQUAL(Value::MAXIMUM-1, (*chromosome)[locus]);
+  (*mutation)(chromosome, 2);
+  CHECK_EQUAL(initial + maximum -1, chromosome[2]);
+}
+
+TEST(TestAlleleMutation, test_underflow)
+{
+  const unsigned int initial(0);
+  Chromosome chromosome({initial, initial, initial});
+  
+  (*mutation)(chromosome, 0);
+  CHECK_EQUAL(0, chromosome[0]);
+}
+
+TEST(TestAlleleMutation, test_overflow)
+{
+  randomizer->sequence({ 1.0 });
+  
+  const unsigned int initial(Value::MAXIMUM);
+  Chromosome chromosome({initial, initial, initial});
+  
+  (*mutation)(chromosome, 0);
+  CHECK_EQUAL(Value::MAXIMUM, chromosome[0]);
 }
 
 
 TEST(TestAlleleMutation, test_invalid_locus)
 {
-  CHECK_THROWS(std::invalid_argument, { (*mutation)(*chromosome, 120); });
+  Chromosome chromosome({ 50, 50, 50});
+  CHECK_THROWS(std::invalid_argument, { (*mutation)(chromosome, 120); });
 }  
 
 

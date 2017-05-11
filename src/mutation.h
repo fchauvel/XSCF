@@ -42,13 +42,14 @@ namespace xcsf
   class RandomAlleleMutation: public AlleleMutation
   {
   public:
-    RandomAlleleMutation(const Randomizer& randomizer);
+    RandomAlleleMutation(const Randomizer& randomizer, Value maximum=10);
     virtual ~RandomAlleleMutation();
 
-    virtual void operator () (Chromosome& subject, const Allele& target) const;
+    virtual void operator () (Chromosome& subject, const Allele& locus) const;
 
   private:
     const Randomizer& _generate;
+    unsigned int _maximum;
     
   };
  

@@ -41,7 +41,7 @@ main(int argc, char** argv)
   RandomDecision decisions(randomizer, EVOLUTION_PROBABILITY, MUTATION_PROBABILITY);
   RouletteWheel selection(randomizer);
   TwoPointCrossover crossover(randomizer);
-  RandomAlleleMutation mutation(randomizer);
+  RandomAlleleMutation mutation(randomizer, 10);
 
   std::ofstream log;
   log.open(LOG_FILE, std::ofstream::out);
