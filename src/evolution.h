@@ -110,7 +110,6 @@ namespace xcsf {
   {
   public:
     Evolution(const Decision& decisions, const Crossover& crossover, const Selection& selection, const AlleleMutation& mutation, const EvolutionListener& listener, unsigned int input=1, unsigned int output=1, unsigned int capacity=100);
-    ~Evolution(void);
 
     virtual void initialise(RuleSet& rule_set) const;
     virtual void evolve(RuleSet& rules) const;
@@ -135,7 +134,7 @@ namespace xcsf {
     unsigned int _input_count;
     unsigned int _output_count;
     const unsigned int _capacity;
-    mutable std::vector<MetaRule*> _rules;
+    mutable MetaRulePool _rules;
   };
 
   

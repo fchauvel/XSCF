@@ -587,3 +587,75 @@ Formatter::format(const Rule& rule, const Performance& performance)
   _out << std::left << rule;
   _out << endl;
 }
+
+
+MetaRulePool::~MetaRulePool()
+{
+  for (auto each_rule: _active_rules) {
+    delete each_rule;
+  }
+
+  for (auto each_rule: _free_rules) {
+    delete each_rule;
+  }
+}
+
+
+MetaRule*
+MetaRulePool::acquire(const Rule& rule, const Performance& performance)
+{
+  if (_free_rules.empty()) {
+    MetaRule *meta_rule = new MetaRule(rule, performance);
+    _active_rules.push_back(meta_rule);
+    return meta_rule;
+  }
+
+  MetaRule *meta_rule = _free_rules.back();
+  *meta_rule = MetaRule(rule, performance);
+  _free_rules.pop_back();
+  _active_rules.push_back(meta_rule);
+  return meta_rule;
+}
+
+void
+MetaRulePool::release(MetaRule *rule)
+{
+  if (is_free(rule)) { return; }
+
+  if (is_active(rule)) {
+    _active_rules.remove(rule);
+    _free_rules.push_back(rule);
+    return;
+  }
+  
+  stringstream message;
+  message << "Rule at address " << rule << " is not managed by this pool!";
+  throw std::invalid_argument(message.str()); 
+}
+
+
+bool
+MetaRulePool::is_active(MetaRule* rule) const
+{
+  return std::find(_active_rules.begin(), _active_rules.end(), rule) != std::end(_active_rules);
+}
+
+bool
+MetaRulePool::is_free(MetaRule* rule) const
+{
+  return std::find(_free_rules.begin(), _free_rules.end(), rule) != std::end(_free_rules);
+}
+
+
+unsigned int
+MetaRulePool::active_rule_count(void) const
+{
+  return _active_rules.size();
+}
+
+
+unsigned int
+MetaRulePool::free_rule_count(void) const
+{
+  return _free_rules.size();
+}

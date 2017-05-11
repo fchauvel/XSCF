@@ -20,6 +20,7 @@
 #define XCSF_RULE_H
 
 
+#include <list>
 #include <vector>
 #include <map>
 
@@ -215,18 +216,26 @@ namespace xcsf {
     
   };
 
-  /*
+  
   class MetaRulePool
   {
   public:
     ~MetaRulePool();
-    Rule* make_meta_rule(const Rule& rule, const Performance& performance);
+
+    MetaRule* acquire(const Rule& rule, const Performance& performance);
+    void release(MetaRule *rule);
+
+    bool is_active(MetaRule *rule) const;
+    bool is_free(MetaRule *rule) const;
+    
+    unsigned int active_rule_count(void) const;
+    unsigned int free_rule_count(void) const;
     
   private:
     std::list<MetaRule*> _active_rules;
     std::list<MetaRule*> _free_rules;
 
-    };*/
+  };
 
 }
 

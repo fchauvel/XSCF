@@ -153,14 +153,6 @@ Evolution::Evolution(const Decision& decision,
 {}
 
 
-Evolution::~Evolution()
-{
-  for(auto each_rule: _rules) {
-    delete each_rule;
-  }
-}
-
-
 void
 Evolution::evolve(RuleSet& rules) const
 {
@@ -251,8 +243,7 @@ const Performance DEFAULT(0, 0, 0);
 MetaRule*
 Evolution::make_rule(std::vector<Interval> constraints, std::vector<unsigned int> predictions) const
 {
-  MetaRule* rule = new MetaRule(Rule(constraints, predictions), DEFAULT);
-  _rules.push_back(rule);
+  MetaRule* rule = _rules.acquire(Rule(constraints, predictions), DEFAULT);
   _listener.on_rule_added(*rule);
   return rule;
 }
@@ -295,7 +286,7 @@ Evolution::decode(const Chromosome& values, const Performance& performance) cons
   }
 
   Vector p = Vector(prediction);
-  MetaRule *result = new MetaRule(Rule(constraints, p), performance);
+  MetaRule *result = _rules.acquire(Rule(constraints, p), performance);
   return result;
 }  
 
@@ -319,7 +310,6 @@ Evolution::breed(const MetaRule& father, const MetaRule& mother) const
       MetaRule *rule = decode(each_child, performance);
       children_rules.push_back(rule);
       _listener.on_rule_added(*rule);
-      _rules.push_back(rule);
   }
   
   return children_rules;

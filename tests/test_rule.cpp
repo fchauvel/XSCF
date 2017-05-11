@@ -440,17 +440,65 @@ TEST(TestRuleSet, test_rule_printer)
 }
 
 
-/**
+
 TEST_GROUP(TestMetaRulePool)
 {
   MetaRulePool pool;
 };
 
 
-
-TEST(TestMetaRulePool, test_allocation_deallocation)
+TEST(TestMetaRulePool, test_automated_deallocation)
 {
-  pool.make_meta_rule(Rule({Interval(10, 20)}, { 35 }), Performance(0, 0, 0));
+  pool.acquire(Rule({Interval(10, 20)}, { 35 }), Performance(0, 0, 0));
+
+  CHECK_EQUAL(1, pool.active_rule_count());
 }
-**/
+
+
+TEST(TestMetaRulePool, test_automated_releasing)
+{
+  MetaRule *rule = pool.acquire(Rule({Interval(10, 20)}, { 35 }), Performance(0, 0, 0));
+
+  pool.release(rule);
+
+  CHECK_EQUAL(0, pool.active_rule_count());
+  CHECK_EQUAL(1, pool.free_rule_count());
+}
+
+
+TEST(TestMetaRulePool, test_reusing_rules)
+{
+  MetaRule *rule = pool.acquire(Rule({Interval(10, 20)}, { 35 }), Performance(0, 0, 0));
+  pool.release(rule);
+  
+  rule = pool.acquire(Rule({Interval(10, 20)}, { 45 }), Performance(0, 0, 0));
+
+  CHECK_EQUAL(1, pool.active_rule_count());
+  CHECK_EQUAL(0, pool.free_rule_count());
+}
+
+
+TEST(TestMetaRulePool, test_releasing_a_foreign_rule)
+{
+  MetaRule *foreign_rule = new MetaRule(Rule({Interval(10, 20)}, { 35 }), Performance(0, 0, 0));
+
+  CHECK_THROWS(std::invalid_argument,
+	       {
+		 pool.release(foreign_rule);
+	       });
+
+  delete foreign_rule;
+}
+
+TEST(TestMetaRulePool, test_releasing_twice_the_same_rule)
+{
+  MetaRule *rule = pool.acquire(Rule({Interval(10, 20)}, { 35 }), Performance(0, 0, 0));
+  pool.release(rule);
+  pool.release(rule);
+
+  CHECK_EQUAL(0, pool.active_rule_count());
+  CHECK_EQUAL(1, pool.free_rule_count());
+  
+}
+
 
