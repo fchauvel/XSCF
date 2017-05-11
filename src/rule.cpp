@@ -239,11 +239,10 @@ xcsf::operator << (ostream& out, const Performance performance)
 
 
 
-MetaRule::MetaRule(const vector<Interval>& constraints, const Vector& prediction, double fitness, double payoff, double error)
-  : _rule(constraints, prediction)
-  , _performance(fitness, payoff, error)
+MetaRule::MetaRule(const Rule& rule, const Performance& performance)
+  : _rule(rule)
+  , _performance(performance)
 {}
-
 
 bool
 MetaRule::operator == (const MetaRule& other) const

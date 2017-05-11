@@ -36,13 +36,16 @@ TEST_GROUP(TestRouletteWheel)
 
     rules = new RuleSet();
     
-    rule_1 = new MetaRule({ Interval(0, 25) }, { 12 }, 1.0, 1.0, 1.0);
+    rule_1 = new MetaRule(Rule({ Interval(0, 25) }, { 12 }),
+			  Performance(1.0, 1.0, 1.0));
     rules->add(*rule_1);
     
-    rule_2 = new MetaRule({ Interval(0, 25) }, { 12 }, 2.0, 3.0, 1.0);
+    rule_2 = new MetaRule(Rule({ Interval(0, 25) }, { 12 }),
+			  Performance(2.0, 3.0, 1.0));
     rules->add(*rule_2);
     
-    rule_3 = new MetaRule({ Interval(0, 25) }, { 12 }, 3.0, 1.0, 1.0);
+    rule_3 = new MetaRule(Rule({ Interval(0, 25) }, { 12 }),
+			  Performance(3.0, 1.0, 1.0));
     rules->add(*rule_3);
   }
 
@@ -90,13 +93,16 @@ TEST_GROUP(TestZeroFitness)
 
     rules = new RuleSet();
     
-    rule_1 = new MetaRule({ Interval(0, 25) }, { 12 }, 0.0, 1.0, 1.0);
+    rule_1 = new MetaRule(Rule({ Interval(0, 25) }, { 12 }),
+			  Performance(0.0, 1.0, 1.0));
     rules->add(*rule_1);
     
-    rule_2 = new MetaRule({ Interval(0, 25) }, { 12 }, 0.0, 1.0, 1.0);
+    rule_2 = new MetaRule(Rule({ Interval(0, 25) }, { 12 }),
+			  Performance(0.0, 1.0, 1.0));
     rules->add(*rule_2);
     
-    rule_3 = new MetaRule({ Interval(0, 25) }, { 12 }, 0.0, 1.0, 1.0);
+    rule_3 = new MetaRule(Rule({ Interval(0, 25) }, { 12 }),
+			  Performance(0.0, 1.0, 1.0));
     rules->add(*rule_3);
   }
 

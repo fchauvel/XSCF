@@ -51,7 +51,8 @@ TestRuleFactory::evolve(RuleSet& rules) const
 void
 TestRuleFactory::create_rule_for(RuleSet& rules, const Vector& context) const
 {
-  MetaRule* covering_rule = new MetaRule({ Interval(0, 100) }, { 50 }, 1., 1., 1.);
+  MetaRule* covering_rule = new MetaRule(Rule({ Interval(0, 100) }, { 50 }),
+					 Performance(1., 1., 1.));
   _rules.push_back(covering_rule);
   rules.add(*covering_rule);
 }

@@ -56,7 +56,8 @@ main(int argc, char** argv)
 		      OUTPUT_COUNT,
 		      CAPACITY);
 
-  NaiveReward reward(0.25);
+  //NaiveReward reward(0.25);
+  WilsonReward reward(0.25, 500, 2);
   
   Application application(cin, cout, evolution, reward);
   application.run();

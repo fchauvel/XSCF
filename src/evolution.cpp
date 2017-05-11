@@ -208,7 +208,9 @@ Evolution::remove(RuleSet& rules, unsigned int excess) const
 void
 Evolution::create_rule_for(RuleSet& rules, const Vector& context) const
 {
-  if (rules.size() == _capacity) remove(rules, 1);
+  if (rules.size() == _capacity) {
+    remove(rules, 1);
+  }
   create_rule(rules, context, 10, 50);
 }
 
@@ -244,15 +246,12 @@ Evolution::create_rule(RuleSet& rules, const Vector& seed, const Value& toleranc
 }
 
 
-const double DEFAULT_PAYOFF(0);
-const double DEFAULT_ERROR(0);
-const double DEFAULT_FITNESS(0);
-
+const Performance DEFAULT(0, 0, 0);
 
 MetaRule*
 Evolution::make_rule(std::vector<Interval> constraints, std::vector<unsigned int> predictions) const
 {
-  MetaRule* rule = new MetaRule(constraints, predictions, DEFAULT_FITNESS, DEFAULT_PAYOFF, DEFAULT_ERROR);
+  MetaRule* rule = new MetaRule(Rule(constraints, predictions), DEFAULT);
   _rules.push_back(rule);
   _listener.on_rule_added(*rule);
   return rule;
@@ -267,7 +266,7 @@ Evolution::encode(const MetaRule& rule) const
 
 
 MetaRule*
-Evolution::decode(const Chromosome& values, double fitness, double payoff, double error) const
+Evolution::decode(const Chromosome& values, const Performance& performance) const
 {
   using namespace std;
 
@@ -296,7 +295,7 @@ Evolution::decode(const Chromosome& values, double fitness, double payoff, doubl
   }
 
   Vector p = Vector(prediction);
-  MetaRule *result = new MetaRule(constraints, p, fitness, payoff, error);
+  MetaRule *result = new MetaRule(Rule(constraints, p), performance);
   return result;
 }  
 
@@ -309,14 +308,15 @@ Evolution::breed(const MetaRule& father, const MetaRule& mother) const
 
   _listener.on_breeding(father, mother);
 
-  double fitness = (father.fitness() + mother.fitness()) / 2;
-  double payoff = (father.payoff() + mother.payoff()) / 2;
-  double error = (father.error() + mother.error()) / 2;
+  Performance performance = Performance((father.fitness() + mother.fitness()) / 2,
+					(father.payoff() + mother.payoff()) / 2,
+					(father.error() + mother.error()) / 2);
+  
   
   vector<MetaRule*> children_rules;
   for (auto each_child: children) {
       mutate(each_child);
-      MetaRule *rule = decode(each_child, fitness, payoff, error);
+      MetaRule *rule = decode(each_child, performance);
       children_rules.push_back(rule);
       _listener.on_rule_added(*rule);
       _rules.push_back(rule);

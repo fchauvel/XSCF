@@ -104,7 +104,7 @@ namespace xcsf {
   class MetaRule
   {
   public:
-    MetaRule(const vector<Interval>& constraints, const Vector& prediction, double fitness, double payoff, double error);
+    MetaRule(const Rule& rule, const Performance& performance);
     
     bool operator == (const MetaRule& other_rule) const;
     bool operator != (const MetaRule& other_rule) const;
@@ -215,6 +215,18 @@ namespace xcsf {
     
   };
 
+  /*
+  class MetaRulePool
+  {
+  public:
+    ~MetaRulePool();
+    Rule* make_meta_rule(const Rule& rule, const Performance& performance);
+    
+  private:
+    std::list<MetaRule*> _active_rules;
+    std::list<MetaRule*> _free_rules;
+
+    };*/
 
 }
 

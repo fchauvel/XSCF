@@ -170,8 +170,8 @@ TEST_GROUP(TestEvolution)
   void setup(void)
   {
     crossover = new FakeCrossover(child);
-    rule_1 = new MetaRule({Interval(0, 50)}, { 4 }, 1.0, 1.0, 1.0);
-    rule_2 = new MetaRule({Interval(50, 100)}, { 2 }, 1.0, 1.0, 1.0);
+    rule_1 = new MetaRule(Rule({Interval(0, 50)}, { 4 }), Performance(1.0, 1.0, 1.0));
+    rule_2 = new MetaRule(Rule({Interval(50, 100)}, { 2 }), Performance(1.0, 1.0, 1.0));
     rules = new RuleSet();
     rules->add(*rule_1);
     rules->add(*rule_2);
@@ -346,7 +346,7 @@ TEST_GROUP(TestLogListener)
 
 TEST(TestLogListener, test_on_rule_added)
 {
-  MetaRule rule({Interval(0, 100)}, { 50 }, 1., 1., 1.);
+  MetaRule rule(Rule({Interval(0, 100)}, { 50 }), Performance(1., 1., 1.));
   
   listener->on_rule_added(rule);
 
@@ -358,7 +358,7 @@ TEST(TestLogListener, test_on_rule_added)
 
 TEST(TestLogListener, test_on_rule_deleted)
 {
-  MetaRule rule({Interval(0, 100)}, { 50 }, 1., 1., 1.);
+  MetaRule rule(Rule({Interval(0, 100)}, { 50 }), Performance(1., 1., 1.));
   
   listener->on_rule_deleted(rule);
 
@@ -370,8 +370,8 @@ TEST(TestLogListener, test_on_rule_deleted)
 
 TEST(TestLogListener, test_on_breeding)
 {
-  MetaRule father({Interval(0, 50)}, { 50 }, 1., 1., 1.);
-  MetaRule mother({Interval(50, 75)}, { 67 }, 1., 1., 1.);
+  MetaRule father(Rule({Interval(0, 50)}, { 50 }), Performance(1., 1., 1.));
+  MetaRule mother(Rule({Interval(50, 75)}, { 67 }), Performance(1., 1., 1.));
   
   listener->on_breeding(father, mother);
 

@@ -117,7 +117,7 @@ namespace xcsf {
     virtual void create_rule_for(RuleSet& rules, const Vector& context) const;
 
     std::vector<MetaRule*> breed(const MetaRule& father, const MetaRule& mother) const;
-    MetaRule* decode(const Chromosome&, double fitness, double payoff, double error) const;
+    MetaRule* decode(const Chromosome&, const Performance&) const;
     Chromosome encode(const MetaRule& rule) const;
     
   private:

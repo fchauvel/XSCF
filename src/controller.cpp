@@ -186,7 +186,7 @@ BasicRuleFactory::initialise(RuleSet& rules) const
     unsigned int upper = 25 * index;
     int mode = (lower + upper) / 2;
       
-    MetaRule* rule = new MetaRule({ Interval(lower, upper) }, { mode }, 1., 1., 0.);
+    MetaRule* rule = new MetaRule(Rule({ Interval(lower, upper) }, { mode }), Performance(1., 1., 0.));
     rules.add(*rule);
     _rules.push_back(rule);
   }  

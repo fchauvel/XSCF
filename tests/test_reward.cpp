@@ -39,7 +39,8 @@ TEST_GROUP(TestNaiveReward)
   RewardFunction* reward;
   
   void setup(void) {
-    rule = new MetaRule({ Interval(0, 100) }, { 50 }, fitness, payoff, 0);
+    rule = new MetaRule(Rule({ Interval(0, 100) }, { 50 }),
+			Performance(fitness, payoff, 0));
     rules.add(*rule);
     reward = new NaiveReward(learning_rate);
   }
@@ -89,9 +90,11 @@ TEST_GROUP(TestNaiveRewardWithTwoRules)
   RewardFunction* reward;
   
   void setup(void) {
-    rule_1 = new MetaRule({ Interval(0, 100) }, { 50 }, fitness, payoff, 0);
+    rule_1 = new MetaRule(Rule({ Interval(0, 100) }, { 50 }),
+			  Performance(fitness, payoff, 0));
     rules.add(*rule_1);
-    rule_2 = new MetaRule({ Interval(0, 100) }, { 50 }, fitness, payoff, 0);
+    rule_2 = new MetaRule(Rule({ Interval(0, 100) }, { 50 }),
+			  Performance(fitness, payoff, 0));
     rules.add(*rule_2);
     reward = new NaiveReward(learning_rate);
   }

@@ -42,7 +42,7 @@ TEST_GROUP(OneRuleAgent)
   void setup(void)
   {
     reward = new WilsonReward(0.25, 500, 2);
-    rule = new MetaRule({Interval(0, 50)}, predictions, 1.0, 1.0, 1.0);
+    rule = new MetaRule(Rule({Interval(0, 50)}, predictions), Performance(1.0, 1.0, 1.0));
     factory.define(*rule);
     agent = new Agent(factory, *reward);
   }
@@ -96,10 +96,10 @@ TEST_GROUP(TwoRulesAgent)
   {
     reward = new WilsonReward(0.25, 500, 2);
     
-    rule_1 = new MetaRule({Interval(0, 49)}, { 4 }, 1.0, 1.0, 1.0);
+    rule_1 = new MetaRule(Rule({Interval(0, 49)}, { 4 }), Performance(1.0, 1.0, 1.0));
     factory.define(*rule_1);
     
-    rule_2 = new MetaRule({Interval(40, 100)}, { 3 }, 1.0, 1.0, 1.0);
+    rule_2 = new MetaRule(Rule({Interval(40, 100)}, { 3 }), Performance(1.0, 1.0, 1.0));
     factory.define(*rule_2);
     
     agent = new Agent(factory, *reward);
@@ -151,9 +151,9 @@ TEST_GROUP(OverlappingRulesAgent)
   void setup(void)
   {
     reward = new WilsonReward(0.25, 500, 2);
-    rule_1 = new MetaRule({Interval(0, 100)}, { 4 }, 1.0, 1.0, 1.0);
-    rule_2 = new MetaRule({Interval(0, 100)}, { 4 }, 0.8, 0.8, 1.0);
-    rule_3 = new MetaRule({Interval(0, 100)}, { 3 }, 0.5, 0.5, 1.0);
+    rule_1 = new MetaRule(Rule({Interval(0, 100)}, { 4 }), Performance(1.0, 1.0, 1.0));
+    rule_2 = new MetaRule(Rule({Interval(0, 100)}, { 4 }), Performance(0.8, 0.8, 1.0));
+    rule_3 = new MetaRule(Rule({Interval(0, 100)}, { 3 }), Performance(0.5, 0.5, 1.0));
     factory.define(*rule_1);
     factory.define(*rule_2);
     factory.define(*rule_3);
