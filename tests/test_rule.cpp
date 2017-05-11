@@ -498,7 +498,6 @@ TEST(TestMetaRulePool, test_releasing_twice_the_same_rule)
 
   CHECK_EQUAL(0, pool.active_rule_count());
   CHECK_EQUAL(1, pool.free_rule_count());
-  
 }
 
 

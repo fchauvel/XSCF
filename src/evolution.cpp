@@ -195,8 +195,6 @@ Evolution::remove(RuleSet& rules, unsigned int excess) const
 }
 
 
-
-
 void
 Evolution::create_rule_for(RuleSet& rules, const Vector& context) const
 {

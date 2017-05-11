@@ -41,6 +41,9 @@ namespace xcsf {
   public:
     Dimensions(unsigned int input_count, unsigned int output_count);
 
+    unsigned int input_count(void) const;
+    unsigned int output_count(void) const;
+
     void validate_inputs(const Vector& input) const;
 
     bool operator == (const Dimensions& other) const;
@@ -137,9 +140,10 @@ namespace xcsf {
   class RuleSet
   {
   public:
-    RuleSet();
+    RuleSet(const Dimensions& dimensions=Dimensions(1, 1));
     virtual ~RuleSet(void);
-    
+
+    const Dimensions& dimensions(void) const;
     bool operator == (const RuleSet& rules) const;
     MetaRule& operator [] (unsigned int index) const;
 
@@ -160,6 +164,7 @@ namespace xcsf {
   private:
     void validate(unsigned int index) const;
 
+    Dimensions _dimensions;
     vector<MetaRule*> _rules;
   };
 
@@ -220,6 +225,7 @@ namespace xcsf {
   class MetaRulePool
   {
   public:
+    MetaRulePool();
     ~MetaRulePool();
 
     MetaRule* acquire(const Rule& rule, const Performance& performance);
@@ -232,6 +238,9 @@ namespace xcsf {
     unsigned int free_rule_count(void) const;
     
   private:
+    MetaRulePool(const MetaRulePool&);
+    MetaRulePool& operator = (const MetaRulePool&);
+    
     std::list<MetaRule*> _active_rules;
     std::list<MetaRule*> _free_rules;
 

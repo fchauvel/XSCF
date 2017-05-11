@@ -27,10 +27,37 @@
 namespace xcsf
 {
 
-  class Covering
+  class AbstractCovering
   {
-    virtual ~Covering();
+  public:
+    virtual ~AbstractCovering();
+
+    virtual void operator () (RuleSet& rules, const Vector& context) = 0;
+
+  protected:
+    AbstractCovering(MetaRulePool& pool, unsigned int strength=1);
+
+    unsigned int strength(void) const;
+    MetaRulePool& rule_pool(void) const;
+
+  private:
+    MetaRulePool& _rule_pool;
+    unsigned int _strength;
     
+  };
+
+
+  class RandomCovering
+    : public AbstractCovering
+  {
+  public:
+    RandomCovering(MetaRulePool& pool, unsigned int strength, const Randomizer& randomizer);
+
+    virtual void operator () (RuleSet& rules, const Vector& context);
+    
+  private:
+    const Randomizer& _generate;
+
   };
   
 }

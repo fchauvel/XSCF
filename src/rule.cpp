@@ -42,6 +42,20 @@ Dimensions::Dimensions(unsigned int input_count, unsigned int output_count)
 }
 
 
+unsigned int
+Dimensions::input_count(void) const
+{
+  return _input_count;
+}
+
+
+unsigned int
+Dimensions::output_count(void) const
+{
+  return _output_count;
+}
+
+
 void
 Dimensions::validate_inputs(const Vector& input) const
 {
@@ -335,15 +349,21 @@ xcsf::operator << (ostream& out, const MetaRule& rule)
 
 
 
-
-
-RuleSet::RuleSet()
-  : _rules()
+RuleSet::RuleSet(const Dimensions& dimensions)
+  : _dimensions(dimensions)
+  , _rules()
 {}
 
 
 RuleSet::~RuleSet()
 {}
+
+
+const Dimensions&
+RuleSet::dimensions(void) const
+{
+  return _dimensions;
+}
 
 
 bool
@@ -587,6 +607,12 @@ Formatter::format(const Rule& rule, const Performance& performance)
   _out << std::left << rule;
   _out << endl;
 }
+
+
+MetaRulePool::MetaRulePool()
+  : _active_rules()
+  , _free_rules()
+{}
 
 
 MetaRulePool::~MetaRulePool()
