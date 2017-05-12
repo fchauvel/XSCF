@@ -16,6 +16,7 @@
  *
  */
 
+
 #include <cassert>
 #include <sstream>
 #include <stdexcept>
@@ -31,6 +32,7 @@ Remover::Remover(MetaRulePool& pool, Selector selector)
   , _select_from(selector)
 {}
 
+
 Remover::~Remover()
 {}
 
@@ -40,7 +42,7 @@ Remover::operator () (RuleSet& rule_set, unsigned int count)
 {
   if (count > rule_set.size()) {
     stringstream message;
-    message << "Impossible to remove " << count
+    message << "Cannot remove " << count << "rules "
 	    << "from a rule set that contains only " << rule_set.size() << "!";
     throw std::invalid_argument(message.str());
   }
@@ -52,4 +54,11 @@ Remover::operator () (RuleSet& rule_set, unsigned int count)
     //    _listener.on_rule_deleted(rule);
   }
   
+}
+
+
+unsigned int
+Remover::select_first(RuleSet* rule_set)
+{
+  return 0;
 }

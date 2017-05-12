@@ -34,18 +34,20 @@ namespace xcsf {
   class Remover
   {
   public:
-    Remover(MetaRulePool& pool, Selector selector);
+    Remover(MetaRulePool& pool, Selector selector=&select_first);
     virtual ~Remover();
 
     virtual void operator () (RuleSet& rule_set, unsigned int count=1);
 
   private:
+    static unsigned int select_first(RuleSet* rule_set);
+    
     MetaRulePool& _pool;
     Selector _select_from;
     
   };
   
-};
+}
 
 
 #endif

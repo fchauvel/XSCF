@@ -64,7 +64,7 @@ namespace xcsf {
     Rule(const vector<Interval>& premises, const Vector& conclusion);
 
     const Dimensions& dimensions(void) const;
-    const Vector& conclusion() const;
+    const Vector& conclusion(void) const;
     
     bool is_triggered_by(const Vector& context) const;
     bool subsumes(const Rule& rule) const;
