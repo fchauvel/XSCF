@@ -48,6 +48,8 @@ namespace xcsf {
 
     bool operator == (const Dimensions& other) const;
     bool operator != (const Dimensions& other) const;
+
+    friend std::ostream& operator << (std::ostream& out, const Dimensions& dimensions);
     
   private:
     unsigned int _input_count;
@@ -61,7 +63,9 @@ namespace xcsf {
   public:
     Rule(const vector<Interval>& premises, const Vector& conclusion);
 
+    const Dimensions& dimensions(void) const;
     const Vector& conclusion() const;
+    
     bool is_triggered_by(const Vector& context) const;
     bool subsumes(const Rule& rule) const;
       
@@ -117,7 +121,8 @@ namespace xcsf {
     
     // Conversions
     vector<unsigned int> as_vector(void) const;
-    
+
+    const Dimensions& dimensions(void) const;
     double fitness(void) const;
     double error(void) const;
     double payoff(void) const;
@@ -144,8 +149,10 @@ namespace xcsf {
     virtual ~RuleSet(void);
 
     const Dimensions& dimensions(void) const;
-    unsigned int capacity(void) const;
 
+    unsigned int capacity(void) const;
+    unsigned int remaining_capacity(void) const;
+    
     bool is_empty(void) const;
     bool is_full(void) const;
     

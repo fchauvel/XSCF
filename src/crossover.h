@@ -35,7 +35,8 @@ namespace xcsf
   {
   public:
     virtual ~Crossover();
-    
+
+    virtual unsigned int children_count(void) const = 0;
     virtual void operator () (const Chromosome& father, const Chromosome& mother, vector<Chromosome>& children) const = 0;
   
   };
@@ -48,6 +49,7 @@ namespace xcsf
     TwoPointCrossover(const TwoPointCrossover& other);
     ~TwoPointCrossover();
 
+    virtual unsigned int children_count(void) const;
     virtual void operator () (const Chromosome& father, const Chromosome& mother, vector<Chromosome>& children) const;
 
   private:

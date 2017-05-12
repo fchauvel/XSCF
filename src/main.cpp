@@ -31,9 +31,6 @@ main(int argc, char** argv)
   cout << APPLICATION << " v" << VERSION << endl;
 
   const std::string LOG_FILE("evolution.log");
-  const unsigned int INPUT_COUNT(1);
-  const unsigned int OUTPUT_COUNT(1);
-  const unsigned int CAPACITY(100);
   const double EVOLUTION_PROBABILITY(0.25);
   const double MUTATION_PROBABILITY(0.1);
 
@@ -51,11 +48,8 @@ main(int argc, char** argv)
 		      crossover,
 		      selection,
 		      mutation,
-		      listener,
-		      INPUT_COUNT,
-		      OUTPUT_COUNT,
-		      CAPACITY);
-
+		      listener);
+  
   //NaiveReward reward(0.25);
   WilsonReward reward(0.25, 500, 2);
   

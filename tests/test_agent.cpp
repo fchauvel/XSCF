@@ -214,10 +214,7 @@ TEST_GROUP(TestAgentEvolution)
 			      *crossover,
 			      *selection,
 			      *mutation,
-			      *listener,
-			      1,
-			      1,
-			      10);
+			      *listener);
     agent = new Agent(*evolution, *reward);
   }
 

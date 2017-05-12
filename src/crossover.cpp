@@ -30,6 +30,7 @@ using namespace xcsf;
 Crossover::~Crossover()
 {};
 
+
 TwoPointCrossover::TwoPointCrossover(const Randomizer& randomizer)
   : Crossover()
   , _generate(randomizer)
@@ -62,6 +63,12 @@ validate(const Chromosome father, const Chromosome& mother)
   }  
 }
 
+
+unsigned int
+TwoPointCrossover::children_count(void) const
+{
+  return 2;
+}
 
 void
 TwoPointCrossover::operator()(const Chromosome& father, const Chromosome& mother, vector<Chromosome>& children) const

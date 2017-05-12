@@ -43,6 +43,7 @@ RouletteWheel::RouletteWheel(const Randomizer& randomizer)
 RouletteWheel::~RouletteWheel()
 {}
 
+
 vector<MetaRule*>
 RouletteWheel::operator () (const RuleSet& rules) const
 {
@@ -93,6 +94,12 @@ DummySelection::~DummySelection()
 vector<MetaRule*>
 DummySelection::operator () (const RuleSet& rules) const
 {
+  if (rules.size() < 2) {
+    stringstream message;
+    message << "Impossible selection! The rule set contains only "
+	    << rules.size() << " rule(s).";
+    throw std::invalid_argument(message.str());
+  }
   vector<MetaRule*> selection;
   selection.push_back(&rules[0]);
   selection.push_back(&rules[1]);

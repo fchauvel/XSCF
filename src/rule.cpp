@@ -85,6 +85,17 @@ Dimensions::operator != (const Dimensions& other) const
 }
 
 
+std::ostream&
+xcsf::operator << (std::ostream& out, const Dimensions& dimensions)
+{
+  out << "(" << dimensions.input_count()
+      << ", " << dimensions.output_count()
+      << ")";
+  return out;
+}
+
+
+
 
 Rule::Rule(const vector<Interval>& premises, const Vector& conclusion)
   : _premises(premises)
@@ -129,6 +140,13 @@ const Vector&
 Rule::conclusion() const
 {
   return _conclusion;
+}
+
+
+const Dimensions&
+Rule::dimensions(void) const
+{
+  return _dimensions;
 }
 
 
@@ -300,6 +318,12 @@ MetaRule::update(double fitness, double payoff, double error) {
 }
 
 
+const Dimensions&
+MetaRule::dimensions(void) const
+{
+  return _rule.dimensions();
+}
+
 
 double
 MetaRule::fitness(void) const
@@ -374,6 +398,13 @@ unsigned int
 RuleSet::capacity(void) const
 {
   return _capacity;
+}
+
+
+unsigned int
+RuleSet::remaining_capacity(void) const
+{
+  return _capacity - size();
 }
 
 

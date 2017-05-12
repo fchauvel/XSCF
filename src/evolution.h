@@ -109,20 +109,20 @@ namespace xcsf {
   class Evolution: public RuleFactory
   {
   public:
-    Evolution(const Decision& decisions, const Crossover& crossover, const Selection& selection, const AlleleMutation& mutation, const EvolutionListener& listener, unsigned int input=1, unsigned int output=1, unsigned int capacity=100);
+    Evolution(const Decision& decisions, const Crossover& crossover, const Selection& selection, const AlleleMutation& mutation, const EvolutionListener& listener);
 
     virtual void initialise(RuleSet& rule_set) const;
     virtual void evolve(RuleSet& rules) const;
     virtual void create_rule_for(RuleSet& rules, const Vector& context) const;
 
     std::vector<MetaRule*> breed(const MetaRule& father, const MetaRule& mother) const;
-    MetaRule* decode(const Chromosome&, const Performance&) const;
+    MetaRule* decode(const Dimensions& dimensions, const Chromosome&, const Performance&) const;
     Chromosome encode(const MetaRule& rule) const;
     
   private:
     void mutate(Chromosome& child) const;
     void remove(RuleSet& rules, unsigned int excess) const;
-    void enforce_capacity(RuleSet& rules) const;
+    void enforce_capacity(RuleSet& rules, unsigned int count) const;
     void create_rule(RuleSet& rules, const Vector& seed, const Value& tolerance, const Value& prediction) const;
     MetaRule* make_rule(std::vector<Interval>, std::vector<unsigned int>) const;
 
@@ -131,9 +131,6 @@ namespace xcsf {
     const Selection& _select_parents;
     const AlleleMutation& _mutate;
     const EvolutionListener& _listener;
-    unsigned int _input_count;
-    unsigned int _output_count;
-    const unsigned int _capacity;
     mutable MetaRulePool _rules;
   };
 

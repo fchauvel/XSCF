@@ -94,6 +94,12 @@ public:
 
   virtual ~FakeCrossover()
   {};
+
+  virtual unsigned int
+  children_count(void) const
+  {
+    return 1;
+  };
   
   virtual void
   operator ()(const Chromosome& father, const Chromosome& mother, vector<Chromosome>& children) const
@@ -172,7 +178,7 @@ TEST_GROUP(TestEvolution)
     crossover = new FakeCrossover(child);
     rule_1 = new MetaRule(Rule({Interval(0, 50)}, { 4 }), Performance(1.0, 1.0, 1.0));
     rule_2 = new MetaRule(Rule({Interval(50, 100)}, { 2 }), Performance(1.0, 1.0, 1.0));
-    rules = new RuleSet();
+    rules = new RuleSet(Dimensions(1, 1), 10);
     rules->add(*rule_1);
     rules->add(*rule_2);
     selection = new DummySelection();
@@ -252,61 +258,19 @@ TEST(TestEvolution, test_evolution_with_mutation)
 }
 
 
-TEST(TestEvolution, test_evolution_with_population_at_capacity)
-{
-  mock().expectOneCall("on_rule_added");
-  mock().expectOneCall("on_breeding");
-  mock().expectOneCall("on_rule_deleted");
-  mock().expectNCalls(3, "on_mutation");
- 
-  const unsigned int CAPACITY = 2;
-  
-  RuleSet before_evolution(*rules);
-  FixedDecision decision(EVOLUTION, MUTATION);
-  Evolution evolution(decision, *crossover, *selection, *mutations, *listener, 1, 1, CAPACITY);
-
-  evolution.evolve(*rules);
-
-  CHECK_EQUAL(CAPACITY, rules->size());
-
-  mock().checkExpectations();
-}
-
-
 TEST(TestEvolution, test_creating_rules_for_unknown_contexts)
 {
   mock().expectOneCall("on_rule_added");
   
   RuleSet before_evolution(*rules);
   FixedDecision decision(EVOLUTION, MUTATION);
-  Evolution evolution(decision, *crossover, *selection, *mutations, *listener, 1, 1);
+  Evolution evolution(decision, *crossover, *selection, *mutations, *listener);
 
   Vector context = { 80 };
   evolution.create_rule_for(*rules, context);
 
   CHECK_EQUAL(before_evolution.size()+1, rules->size());
   mock().checkExpectations();
-}
-
-
-TEST(TestEvolution, test_creating_rules_for_unknown_contexts_at_capacity)
-{
-  mock().expectOneCall("on_rule_added");
-  mock().expectOneCall("on_rule_deleted");
-  
-  const unsigned int CAPACITY = 2;
-  
-  RuleSet before_evolution(*rules);
-  FixedDecision decision(EVOLUTION, MUTATION);
-  Evolution evolution(decision, *crossover, *selection, *mutations, *listener, 1, 1, CAPACITY);
-
-  Vector context = { 80 };
-  evolution.create_rule_for(*rules, context);
-
-  CHECK_EQUAL(before_evolution.size(), rules->size());
-  mock().checkExpectations();
-
-  CHECK(&(*rules)[0] != rule_1 or &(*rules)[1] != rule_2);
 }
 
 
@@ -318,12 +282,94 @@ TEST(TestEvolution, test_listening)
    
   RuleSet before_evolution(*rules);
   FixedDecision decision(EVOLUTION, MUTATION);
-  Evolution evolution(decision, *crossover, *selection, *mutations, *listener, 1, 1, 100);
+  Evolution evolution(decision, *crossover, *selection, *mutations, *listener);
 
   evolution.evolve(*rules);
 
   mock().checkExpectations();
 }
+
+
+TEST_GROUP(TestEvolutionAtCapacity)
+{
+  unsigned int capacity = 3;
+  MetaRulePool pool;
+  Chromosome child = { 5, 10, 20 };
+  MetaRule *rule_1, *rule_2, *rule_3;
+  RuleSet *rules;
+  AlleleMutation *mutations;
+  Crossover *crossover;
+  Selection *selection;
+  EvolutionListener *listener;
+  
+  void setup(void)
+  {
+    rules = new RuleSet(Dimensions(1, 1), capacity);
+    
+    rule_1 = pool.acquire(Rule({Interval(0, 50)}, { 4 }));
+    rules->add(*rule_1);
+
+    rule_2 = pool.acquire(Rule({Interval(0, 50)}, { 5 }));
+    rules->add(*rule_2);
+
+    rule_3 = pool.acquire(Rule({Interval(0, 50)}, { 6 }));
+    rules->add(*rule_3);
+          
+    crossover = new FakeCrossover(child);
+    selection = new DummySelection();
+    mutations = new FakeAlleleMutation(77);
+    listener = new FakeListener();
+  }
+
+  void teardown(void)
+  {
+    delete rules;
+    delete crossover;
+    delete selection;
+    delete mutations;
+    delete listener;
+    mock().clear();
+  }
+  
+};
+
+
+TEST(TestEvolutionAtCapacity, test_creating_rules_for_unknown_contexts)
+{
+  mock().expectOneCall("on_rule_added");
+  mock().expectOneCall("on_rule_deleted");
+  
+  RuleSet before_evolution(*rules);
+  FixedDecision decision(EVOLUTION, MUTATION);
+  Evolution evolution(decision, *crossover, *selection, *mutations, *listener);
+
+  Vector context = { 80 };
+  evolution.create_rule_for(*rules, context);
+
+  CHECK_EQUAL(before_evolution.size(), rules->size());
+  mock().checkExpectations();
+
+  CHECK(&(*rules)[0] != rule_1 or &(*rules)[1] != rule_2);
+}
+
+
+TEST(TestEvolutionAtCapacity, test_evolution)
+{
+  mock().expectOneCall("on_rule_added");
+  mock().expectOneCall("on_breeding");
+  mock().expectOneCall("on_rule_deleted");
+  mock().expectNCalls(3, "on_mutation");
+ 
+  FixedDecision decision(EVOLUTION, MUTATION);
+  Evolution evolution(decision, *crossover, *selection, *mutations, *listener);
+
+  evolution.evolve(*rules);
+
+  CHECK_EQUAL(rules->capacity(), rules->size());
+
+  mock().checkExpectations();
+}
+
 
 
 TEST_GROUP(TestLogListener)

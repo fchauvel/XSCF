@@ -67,8 +67,20 @@ TEST(TestRouletteWheel, test_empty_rule_set)
   RuleSet empty;
   
   CHECK_THROWS(std::invalid_argument, {selection(empty);});
-
 }
+
+
+TEST(TestRouletteWheel, test_one_rule_rule_set)
+{
+  RouletteWheel selection(*randomizer);
+
+  RuleSet one_rule;
+  MetaRule rule(Rule( { Interval(23, 45) }, { 29 }), Performance(0, 0, 0));
+  one_rule.add(rule);
+  
+  CHECK_THROWS(std::invalid_argument, {selection(one_rule);});
+}
+
 
 TEST(TestRouletteWheel, test_simple)
 {

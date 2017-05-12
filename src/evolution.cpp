@@ -137,18 +137,12 @@ Evolution::Evolution(const Decision& decision,
 		     const Crossover& crossover,
 		     const Selection& selection,
 		     const AlleleMutation& mutation,
-		     const EvolutionListener& listener,
-		     unsigned int input_count,
-		     unsigned int output_count,
-		     unsigned int capacity)
+		     const EvolutionListener& listener)
   : _decision(decision)
   , _crossover(crossover)
   , _select_parents(selection)
   , _mutate(mutation)
   , _listener(listener)
-  , _input_count(input_count)
-  , _output_count(output_count)
-  , _capacity(capacity)
   , _rules()
 {}
 
@@ -159,7 +153,9 @@ Evolution::evolve(RuleSet& rules) const
   if (not _decision.shall_evolve()) return;
 
   assert (not rules.is_empty() && "Impossible evolution, no rules");
-  
+
+  enforce_capacity(rules, _crossover.children_count());
+
   vector<MetaRule*> parents = _select_parents(rules);
   
   vector<MetaRule*> children = breed(*parents[0], *parents[1]);
@@ -167,18 +163,17 @@ Evolution::evolve(RuleSet& rules) const
     rules.add(*each_child);
   }
 
-  enforce_capacity(rules);
 }
 
 
 void
-Evolution::enforce_capacity(RuleSet& rules) const
+Evolution::enforce_capacity(RuleSet& rules, unsigned int count) const
 {
-  unsigned int size = rules.size(); 
-  if (size > _capacity) {
-    unsigned int excess = size - _capacity;
+  if (rules.remaining_capacity() < count) {
+    unsigned int excess = count - rules.remaining_capacity();
     remove(rules, excess);
   }
+  
 }
 
 
@@ -186,7 +181,7 @@ void
 Evolution::remove(RuleSet& rules, unsigned int excess) const
 {
   assert(excess < rules.size() && "Invalid excess!");
-  
+
   for (unsigned int i=0 ; i<excess ; ++i) {
     unsigned int worst_rule = rules.worst();
     MetaRule& rule = rules.remove(worst_rule);
@@ -198,7 +193,7 @@ Evolution::remove(RuleSet& rules, unsigned int excess) const
 void
 Evolution::create_rule_for(RuleSet& rules, const Vector& context) const
 {
-  if (rules.size() == _capacity) {
+  if (rules.is_full()) {
     remove(rules, 1);
   }
   create_rule(rules, context, 10, 50);
@@ -222,12 +217,12 @@ void
 Evolution::create_rule(RuleSet& rules, const Vector& seed, const Value& tolerance, const Value& prediction) const
 {
   vector<Interval> constraints;
-  for (unsigned int index=0 ; index<_input_count ; ++index) {
+  for (unsigned int index=0 ; index<rules.dimensions().input_count() ; ++index) {
     constraints.push_back(Interval(seed[index]-tolerance, seed[index]+tolerance));
   }
 
   vector<unsigned int> predictions;
-  for (unsigned int index=0 ; index<_output_count ; ++index) {
+  for (unsigned int index=0 ; index<rules.dimensions().output_count() ; ++index) {
     predictions.push_back(static_cast<unsigned int>(prediction));
   }
 
@@ -255,21 +250,21 @@ Evolution::encode(const MetaRule& rule) const
 
 
 MetaRule*
-Evolution::decode(const Chromosome& values, const Performance& performance) const
+Evolution::decode(const Dimensions& dimensions, const Chromosome& values, const Performance& performance) const
 {
   using namespace std;
 
-  if (values.size() != 2 * _input_count + _output_count) {
+  if (values.size() != 2 * dimensions.input_count() + dimensions.output_count()) {
     ostringstream error;
-    error << "Input and output size ("
-	  << _input_count << " & " << _output_count
-	  << ") do not match the given vector size ("
+    error << "Input and output sizes "
+	  << dimensions
+	  << " do not match the given vector size ("
 	  << values.size() << ")!";
     throw invalid_argument(error.str());
   }
 
   vector<Interval> constraints;
-  for (unsigned int index=0 ; index < _input_count ; ++index) {
+  for (unsigned int index=0 ; index < dimensions.input_count() ; ++index) {
     unsigned int lower_bound = values[index * 2];
     unsigned int upper_bound = values[index * 2 + 1];
     if (lower_bound > upper_bound) {
@@ -279,7 +274,7 @@ Evolution::decode(const Chromosome& values, const Performance& performance) cons
   }
 
   vector<unsigned int> prediction;
-  for (unsigned int index=_input_count*2 ; index<values.size() ; ++index) {
+  for (unsigned int index=dimensions.input_count()*2 ; index<values.size() ; ++index) {
     prediction.push_back(values[index]);
   }
 
@@ -305,7 +300,7 @@ Evolution::breed(const MetaRule& father, const MetaRule& mother) const
   vector<MetaRule*> children_rules;
   for (auto each_child: children) {
       mutate(each_child);
-      MetaRule *rule = decode(each_child, performance);
+      MetaRule *rule = decode(father.dimensions(), each_child, performance);
       children_rules.push_back(rule);
       _listener.on_rule_added(*rule);
   }
@@ -317,8 +312,7 @@ Evolution::breed(const MetaRule& father, const MetaRule& mother) const
 void
 Evolution::mutate(Chromosome& child) const
 {
-  unsigned int length = _input_count * 2 + _output_count;
-  for(Allele each_locus=0 ; each_locus<length ; ++each_locus) {
+  for(Allele each_locus=0 ; each_locus<child.size() ; ++each_locus) {
     if (_decision.shall_mutate()) {
       _mutate(child, each_locus);
       _listener.on_mutation(child, each_locus);
