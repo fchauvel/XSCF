@@ -158,7 +158,7 @@ Evolution::evolve(RuleSet& rules) const
 {
   if (not _decision.shall_evolve()) return;
 
-  assert (not rules.empty() && "Impossible evolution, no rules");
+  assert (not rules.is_empty() && "Impossible evolution, no rules");
   
   vector<MetaRule*> parents = _select_parents(rules);
   

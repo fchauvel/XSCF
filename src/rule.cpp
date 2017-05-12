@@ -16,6 +16,7 @@
  *
  */
 
+
 #include <algorithm>
 #include <sstream>
 #include <cmath>
@@ -68,6 +69,7 @@ Dimensions::validate_inputs(const Vector& input) const
   
 }
 
+
 bool
 Dimensions::operator == (const Dimensions& other) const
 {
@@ -75,11 +77,13 @@ Dimensions::operator == (const Dimensions& other) const
     and _output_count == other._output_count;
 }
 
+
 bool
 Dimensions::operator != (const Dimensions& other) const
 {
   return not (*this == other);
 }
+
 
 
 Rule::Rule(const vector<Interval>& premises, const Vector& conclusion)
@@ -126,6 +130,7 @@ Rule::conclusion() const
 {
   return _conclusion;
 }
+
 
 const Vector&
 Rule::operator () (const Vector& context) const
@@ -347,10 +352,9 @@ xcsf::operator << (ostream& out, const MetaRule& rule)
 
 
 
-
-
-RuleSet::RuleSet(const Dimensions& dimensions)
+RuleSet::RuleSet(const Dimensions& dimensions, unsigned int capacity)
   : _dimensions(dimensions)
+  , _capacity(capacity)
   , _rules()
 {}
 
@@ -363,6 +367,13 @@ const Dimensions&
 RuleSet::dimensions(void) const
 {
   return _dimensions;
+}
+
+
+unsigned int
+RuleSet::capacity(void) const
+{
+  return _capacity;
 }
 
 
@@ -394,6 +405,7 @@ RuleSet::accept(Formatter& formatter) const
   formatter.format(_rules);
 }
 
+
 void
 RuleSet::validate(unsigned int index) const
 {
@@ -407,18 +419,33 @@ RuleSet::validate(unsigned int index) const
 
 
 bool
-RuleSet::empty(void) const
+RuleSet::is_empty(void) const
 {
   return _rules.size() == 0;
+}
+
+
+bool
+RuleSet::is_full(void) const
+{
+  return _rules.size() >= _capacity;
 }
 
 
 RuleSet&
 RuleSet::add(MetaRule& rule)
 {
+  if (is_full()) {
+    stringstream message;
+    message << "RuleSet cannot accept rule '" << rule
+	    << "', it has reach its capacity '" << _capacity  << "'.";
+    throw std::invalid_argument(message.str());
+  }
+  
   _rules.push_back(&rule);
   return *this;
 }
+
 
 MetaRule&
 RuleSet::remove(unsigned int index)

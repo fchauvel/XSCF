@@ -140,16 +140,21 @@ namespace xcsf {
   class RuleSet
   {
   public:
-    RuleSet(const Dimensions& dimensions=Dimensions(1, 1));
+    RuleSet(const Dimensions& dimensions=Dimensions(1, 1), unsigned int capacity=100);
     virtual ~RuleSet(void);
 
     const Dimensions& dimensions(void) const;
+    unsigned int capacity(void) const;
+
+    bool is_empty(void) const;
+    bool is_full(void) const;
+    
     bool operator == (const RuleSet& rules) const;
     MetaRule& operator [] (unsigned int index) const;
 
     void accept(Formatter& visitor) const;
     
-    bool empty(void) const;
+
     RuleSet& add(MetaRule& rule);
     MetaRule& remove(unsigned int index);
 
@@ -165,6 +170,7 @@ namespace xcsf {
     void validate(unsigned int index) const;
 
     Dimensions _dimensions;
+    unsigned int _capacity;
     vector<MetaRule*> _rules;
   };
 
@@ -196,6 +202,7 @@ namespace xcsf {
   };
 
 
+  // TODO: Remove, it should directly the evolution class.
   class RuleFactory
   {
   public:
@@ -221,14 +228,15 @@ namespace xcsf {
     
   };
 
-  
+
+  // TODO: Rename MetaRuleAllocator
   class MetaRulePool
   {
   public:
     MetaRulePool();
     ~MetaRulePool();
 
-    MetaRule* acquire(const Rule& rule, const Performance& performance);
+    MetaRule* acquire(const Rule& rule, const Performance& performance=Performance(0,0,0));
     void release(MetaRule *rule);
 
     bool is_active(MetaRule *rule) const;

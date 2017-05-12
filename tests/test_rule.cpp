@@ -367,7 +367,9 @@ TEST(Test3DRule, test_as_vector)
 
 TEST_GROUP(TestRuleSet)
 {
-  RuleSet rules;
+  MetaRulePool pool;
+  unsigned int capacity = 3;
+  RuleSet *rules;
   MetaRule *rule_1;
   double r1_fitness = 12, r2_fitness = 14;
   double r1_payoff = 2, r2_payoff = 3;
@@ -375,50 +377,74 @@ TEST_GROUP(TestRuleSet)
   MetaRule *rule_2;
 
   void setup(void) {
+    rules = new RuleSet(Dimensions(1, 1), capacity);
+    
     rule_1 = new MetaRule(Rule({ Interval(0, 25) }, { 12 }),
 			  Performance(r1_fitness, r1_payoff, r1_error));
-    rules.add(*rule_1);
+    rules->add(*rule_1);
 
     rule_2 = new MetaRule(Rule({ Interval(25, 50) }, { 37 }),
 			  Performance(r2_fitness, r2_payoff, r2_error));
-    rules.add(*rule_2);
+    rules->add(*rule_2);
   }
 
 
   void teardown(void) {
     delete rule_1;
     delete rule_2;
+    delete rules;
   }
 };
 
+
 TEST(TestRuleSet, test_remove_last_rule_added)
 {
-  MetaRule& deleted = rules.remove(1);
-  CHECK_EQUAL(1, rules.size());
-  CHECK(rules[0] == *rule_1);
+  MetaRule& deleted = rules->remove(1);
+  CHECK_EQUAL(1, rules->size());
+  CHECK((*rules)[0] == *rule_1);
 }
 
 
 TEST(TestRuleSet, test_worst)
 {
-  unsigned int worst_rule = rules.worst();
+  unsigned int worst_rule = rules->worst();
 
-  CHECK(rule_1 == &(rules[worst_rule]));
+  CHECK(rule_1 == &((*rules)[worst_rule]));
 }
 
 
 TEST(TestRuleSet, test_total_fitness)
 {
-  double total_fitness = rules.total_fitness();
+  double total_fitness = rules->total_fitness();
   DOUBLES_EQUAL(r1_fitness + r2_fitness, total_fitness, 1e-6);
 }
 
 TEST(TestRuleSet, test_total_weighted_payoff)
 {
   double expected = r1_fitness * r1_payoff + r2_fitness * r2_payoff;
-  double actual = rules.total_weighted_payoff();
+  double actual = rules->total_weighted_payoff();
 
   DOUBLES_EQUAL(expected, actual, 1e-6);
+}
+
+
+TEST(TestRuleSet, test_capacity)
+{
+  CHECK_EQUAL(capacity, rules->capacity());
+}
+
+
+TEST(TestRuleSet, test_add_beyond_capacity)
+{
+  MetaRule *rule_3 = pool.acquire(Rule({ Interval(40, 50) }, { 43 }));
+  rules->add(*rule_3);
+
+  MetaRule *rule_4 = pool.acquire(Rule({ Interval(50, 60) }, { 53 }));
+  CHECK_THROWS(std::invalid_argument,
+	       {
+		 rules->add(*rule_4);
+	       });		  
+
 }
 
 
@@ -426,7 +452,7 @@ TEST(TestRuleSet, test_rule_printer)
 {
   stringstream out;
   Formatter formatter(out);
-  rules.accept(formatter);
+  rules->accept(formatter);
 
   stringstream expected;
   expected << "    F.    P.    E.   Rule" << endl
