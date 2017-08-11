@@ -6,7 +6,7 @@ build:
     - script:
         name: Install Debian packages
         code: |
-	  apt-get install git make g++=4:4.9.2-2 cpputest=3.4-3 lcov python3 python3-pip curl
+          apt-get install git make g++=4:4.9.2-2 cpputest=3.4-3 lcov python3 python3-pip curl
     - script:
         name: Install Python Packages
         code: |
