@@ -11,7 +11,7 @@ XCSF
    :target: https://www.codacy.com/app/fchauvel/XSCF
 
 This is a simple C++ implementation of accuracy-based learning
-classifiers systems, which operate on real-valued domains, following
+classifiers systems, which operate on real-valued domain, inspired by
 S. Wilson's approach [Wilson_2002]_.
 
 Building the Binaries
@@ -21,7 +21,7 @@ To build XCSF from the source code, you only need a C++ compiler, and
 Make, a tool to automate compulation. As both are on most
 repositories, you may use commands such as (on Debian):
 
-.. code-block: console
+.. code-block:: console
 
    $ apt-get install g++
    $ apt-get install make
