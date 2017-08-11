@@ -21,7 +21,7 @@ build:
     # http://devcenter.wercker.com/docs/steps/index.html
   steps:
     - install-packages:
-        packages: git make g++ cpputest lcov python3 python3-pip curl
+        packages: git make=4.0-8.1 g++=4:4.9.2-2 cpputest=3.4-3 lcov python3 python3-pip curl
     - script:
         name: Install Python Packages
         code: |
