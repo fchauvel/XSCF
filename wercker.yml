@@ -1,31 +1,16 @@
-# This references a standard debian container from the
-# Docker Hub https://registry.hub.docker.com/_/debian/
-# Read more about containers on our dev center
-# http://devcenter.wercker.com/docs/containers/index.html
-box: debian
-# You can also use services such as databases. Read more on our dev center:
-# http://devcenter.wercker.com/docs/services/index.html
-# services:
-    # - postgres
-    # http://devcenter.wercker.com/docs/services/postgresql.html
 
-    # - mongo
-    # http://devcenter.wercker.com/docs/services/mongodb.html
+box: debian:8.9
 
-# This is the build pipeline. Pipelines are the core of wercker
-# Read more about pipelines on our dev center
-# http://devcenter.wercker.com/docs/pipelines/index.html
 build:
-    # Steps make up the actions in your pipeline
-    # Read more about steps on our dev center:
-    # http://devcenter.wercker.com/docs/steps/index.html
   steps:
-    - install-packages:
-        packages: git make=4.0-8.1 g++=4:4.9.2-2 cpputest=3.4-3 lcov python3 python3-pip curl
+    - script:
+        name: Install Debian packages
+        code: |
+	  apt-get install git make g++=4:4.9.2-2 cpputest=3.4-3 lcov python3 python3-pip curl
     - script:
         name: Install Python Packages
         code: |
-          pip3 install requests          
+          pip3 install requests
     - script:
         name: run tests
         code: |
