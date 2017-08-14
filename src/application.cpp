@@ -23,10 +23,13 @@
 using namespace xcsf;
 
 
-Application::Application(istream& input, ostream& output, const RuleFactory& factory, const RewardFunction& reward)
-  :_encoder(new Encoder(output))
-  ,_controller(new AgentController(*_encoder, factory, reward))
-  ,_decoder(new Decoder(input, *_controller))
+Application::Application(istream&		input,
+			 ostream&		output,
+			 const Evolution&	evolution,
+			 const RewardFunction&	reward)
+  : _encoder(new Encoder(output))
+  , _controller(new AgentController(*_encoder, evolution, reward))
+  , _decoder(new Decoder(input, *_controller))
 {
 }
 

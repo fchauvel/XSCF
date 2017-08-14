@@ -22,8 +22,8 @@
 
 
 TestRuleFactory::TestRuleFactory()
-  :RuleFactory(),
-   _rules()
+  : Evolution()
+  , _rules()
 {}
 
 
@@ -56,7 +56,7 @@ TestRuleFactory::create_rule_for(RuleSet& rules, const Vector& context) const
   _rules.push_back(covering_rule);
   rules.add(*covering_rule);
 }
- 
+
 
 void
 TestRuleFactory::define(MetaRule& rule)
@@ -67,9 +67,9 @@ TestRuleFactory::define(MetaRule& rule)
 
 
 TestableRandomizer::TestableRandomizer(vector<double> sequence)
-  :Randomizer()
-  ,_sequence(sequence)
-  ,_next(0)
+  : Randomizer()
+  , _sequence(sequence)
+  , _next(0)
 {};
 
 
@@ -97,7 +97,7 @@ TestableRandomizer::sequence(vector<double> sequence)
 FixedDecision::FixedDecision(bool evolution, bool allele)
   : Decision()
   , _evolution(evolution)
-  , _allele(allele) 
+  , _allele(allele)
 {}
 
 FixedDecision::~FixedDecision()
@@ -112,4 +112,3 @@ bool
 FixedDecision::shall_mutate(void) const {
   return _allele;
 }
-

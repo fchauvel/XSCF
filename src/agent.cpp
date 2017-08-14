@@ -24,16 +24,17 @@
 using namespace xcsf;
 
 
-Agent::Agent(const RuleFactory& factory, const RewardFunction& reward)
-  : _factory(factory)
-  , _reward(reward)   
+Agent::Agent(const Evolution& evolution,
+	     const RewardFunction& reward)
+  : _evolution(evolution)
+  , _reward(reward)
   , _rules()
   , _rules_to_reward()
 {
-  _factory.initialise(_rules);
+  _evolution.initialise(_rules);
 }
 
-   	    
+
 Agent::~Agent()
 {}
 
@@ -43,13 +44,13 @@ Agent::predict(const Vector& input)
 {
   ActivationGroup active_rules(_rules, input);
   if (active_rules.is_empty()) {
-    _factory.create_rule_for(_rules, input);
+    _evolution.create_rule_for(_rules, input);
     active_rules = ActivationGroup(_rules, input);
   }
 
   PredictionGroup predictions(active_rules);
   _rules_to_reward = predictions.rules_to_reward();
-  _factory.evolve(_rules);
+  _evolution.evolve(_rules);
   return predictions.most_rewarding();
 }
 

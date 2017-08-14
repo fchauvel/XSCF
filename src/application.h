@@ -30,15 +30,18 @@ namespace xcsf {
   class Application
   {
   public:
-    Application(istream& input, ostream& output, const RuleFactory& factory, const RewardFunction& reward);
+    Application(istream&		input,
+		ostream&		output,
+		const Evolution&	evolution,
+		const RewardFunction&	reward);
     ~Application();
     
     void run(void) const;
     
   private:
-    Encoder* const _encoder;
-    Controller* const _controller;
-    Decoder* const _decoder;
+    Encoder* const	_encoder;
+    Controller* const	_controller;
+    Decoder* const	_decoder;
   };
   
   

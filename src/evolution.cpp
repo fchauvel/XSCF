@@ -133,11 +133,17 @@ LogListener::on_mutation(const Chromosome& subject, const Allele& locus) const
 }
 
 
-Evolution::Evolution(const Decision& decision,
-		     const Crossover& crossover,
-		     const Selection& selection,
-		     const AlleleMutation& mutation,
-		     const EvolutionListener& listener)
+
+Evolution::~Evolution()
+{}
+
+
+
+DefaultEvolution::DefaultEvolution(const Decision& decision,
+				   const Crossover& crossover,
+				   const Selection& selection,
+				   const AlleleMutation& mutation,
+				   const EvolutionListener& listener)
   : _decision(decision)
   , _crossover(crossover)
   , _select_parents(selection)
@@ -147,8 +153,12 @@ Evolution::Evolution(const Decision& decision,
 {}
 
 
+DefaultEvolution::~DefaultEvolution()
+{}
+
+
 void
-Evolution::evolve(RuleSet& rules) const
+DefaultEvolution::evolve(RuleSet& rules) const
 {
   if (not _decision.shall_evolve()) return;
 
@@ -157,7 +167,7 @@ Evolution::evolve(RuleSet& rules) const
   enforce_capacity(rules, _crossover.children_count());
 
   vector<MetaRule*> parents = _select_parents(rules);
-  
+
   vector<MetaRule*> children = breed(*parents[0], *parents[1]);
   for (auto each_child: children) {
     rules.add(*each_child);
@@ -167,18 +177,18 @@ Evolution::evolve(RuleSet& rules) const
 
 
 void
-Evolution::enforce_capacity(RuleSet& rules, unsigned int count) const
+DefaultEvolution::enforce_capacity(RuleSet& rules, unsigned int count) const
 {
   if (rules.remaining_capacity() < count) {
     unsigned int excess = count - rules.remaining_capacity();
     remove(rules, excess);
   }
-  
+
 }
 
 
 void
-Evolution::remove(RuleSet& rules, unsigned int excess) const
+DefaultEvolution::remove(RuleSet& rules, unsigned int excess) const
 {
   assert(excess < rules.size() && "Invalid excess!");
 
@@ -191,7 +201,7 @@ Evolution::remove(RuleSet& rules, unsigned int excess) const
 
 
 void
-Evolution::create_rule_for(RuleSet& rules, const Vector& context) const
+DefaultEvolution::create_rule_for(RuleSet& rules, const Vector& context) const
 {
   if (rules.is_full()) {
     remove(rules, 1);
@@ -201,28 +211,32 @@ Evolution::create_rule_for(RuleSet& rules, const Vector& context) const
 
 
 void
-Evolution::initialise(RuleSet& rules) const
+DefaultEvolution::initialise(RuleSet& rules) const
 {
   const Value delta(25);
 
   Vector rule_1 = { 25 };
   create_rule(rules, rule_1, delta, 25);
-  
+
   Vector rule_2 = { 75 };
   create_rule(rules, rule_2, delta, 75);
 }
 
 
 void
-Evolution::create_rule(RuleSet& rules, const Vector& seed, const Value& tolerance, const Value& prediction) const
+DefaultEvolution::create_rule(RuleSet& rules, const Vector& seed, const Value& tolerance, const Value& prediction) const
 {
   vector<Interval> constraints;
-  for (unsigned int index=0 ; index<rules.dimensions().input_count() ; ++index) {
+  for (unsigned int index=0 ;
+       index<rules.dimensions().input_count() ;
+       ++index) {
     constraints.push_back(Interval(seed[index]-tolerance, seed[index]+tolerance));
   }
 
   vector<unsigned int> predictions;
-  for (unsigned int index=0 ; index<rules.dimensions().output_count() ; ++index) {
+  for (unsigned int index=0 ;
+       index<rules.dimensions().output_count() ;
+       ++index) {
     predictions.push_back(static_cast<unsigned int>(prediction));
   }
 
@@ -234,7 +248,7 @@ Evolution::create_rule(RuleSet& rules, const Vector& seed, const Value& toleranc
 const Performance DEFAULT(0, 0, 0);
 
 MetaRule*
-Evolution::make_rule(std::vector<Interval> constraints, std::vector<unsigned int> predictions) const
+DefaultEvolution::make_rule(std::vector<Interval> constraints, std::vector<unsigned int> predictions) const
 {
   MetaRule* rule = _rules.acquire(Rule(constraints, predictions), DEFAULT);
   _listener.on_rule_added(*rule);
@@ -243,14 +257,16 @@ Evolution::make_rule(std::vector<Interval> constraints, std::vector<unsigned int
 
 
 Chromosome
-Evolution::encode(const MetaRule& rule) const
+DefaultEvolution::encode(const MetaRule& rule) const
 {
   return Chromosome(rule.as_vector());
 }
 
 
 MetaRule*
-Evolution::decode(const Dimensions& dimensions, const Chromosome& values, const Performance& performance) const
+DefaultEvolution::decode(const Dimensions&	dimensions,
+		  const Chromosome&	values,
+		  const Performance& performance)const
 {
   using namespace std;
 
@@ -281,11 +297,11 @@ Evolution::decode(const Dimensions& dimensions, const Chromosome& values, const 
   Vector p = Vector(prediction);
   MetaRule *result = _rules.acquire(Rule(constraints, p), performance);
   return result;
-}  
+}
 
 
 vector<MetaRule*>
-Evolution::breed(const MetaRule& father, const MetaRule& mother) const
+DefaultEvolution::breed(const MetaRule& father, const MetaRule& mother) const
 {
   vector<Chromosome> children;
   _crossover(encode(father), encode(mother), children);
@@ -295,8 +311,8 @@ Evolution::breed(const MetaRule& father, const MetaRule& mother) const
   Performance performance = Performance((father.fitness() + mother.fitness()) / 2,
 					(father.payoff() + mother.payoff()) / 2,
 					(father.error() + mother.error()) / 2);
-  
-  
+
+
   vector<MetaRule*> children_rules;
   for (auto each_child: children) {
       mutate(each_child);
@@ -304,13 +320,13 @@ Evolution::breed(const MetaRule& father, const MetaRule& mother) const
       children_rules.push_back(rule);
       _listener.on_rule_added(*rule);
   }
-  
+
   return children_rules;
 }
 
 
 void
-Evolution::mutate(Chromosome& child) const
+DefaultEvolution::mutate(Chromosome& child) const
 {
   for(Allele each_locus=0 ; each_locus<child.size() ; ++each_locus) {
     if (_decision.shall_mutate()) {

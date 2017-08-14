@@ -209,19 +209,6 @@ namespace xcsf {
   };
 
 
-  // TODO: Remove, it should directly the evolution class.
-  class RuleFactory
-  {
-  public:
-    virtual ~RuleFactory();
-    
-    virtual void initialise(RuleSet& rules) const = 0;
-    virtual void evolve(RuleSet& rules) const = 0;
-    virtual void create_rule_for(RuleSet& rules, const Vector& context) const = 0;
-    
-  };
-
-
   class Formatter
   {
   public:

@@ -31,7 +31,7 @@
 
 namespace xcsf {
 
-  
+
   class Decision
   {
   public:
@@ -54,12 +54,12 @@ namespace xcsf {
 
     virtual bool shall_evolve(void) const;
     virtual bool shall_mutate(void) const;
-    
+
   private:
     const Randomizer& _generator;
     const double _evolution_probability;
     const double _allele_mutation_probability;
-    
+
   };
 
 
@@ -67,7 +67,7 @@ namespace xcsf {
   {
   public:
     virtual ~EvolutionListener(void);
-    
+
     virtual void on_rule_added(const MetaRule& rule) const = 0;
     virtual void on_rule_deleted(const MetaRule& rule) const = 0;
     virtual void on_breeding(const MetaRule& father, const MetaRule& mother) const = 0;
@@ -77,7 +77,7 @@ namespace xcsf {
 
   class NoListener
     : public EvolutionListener
-  { 
+  {
   public:
     virtual ~NoListener();
 
@@ -102,23 +102,67 @@ namespace xcsf {
 
   private:
     std::ostream& _out;
-    
-  };  
-  
-    
-  class Evolution: public RuleFactory
+
+  };
+
+
+
+  /**
+   * Standard behaviour of Evolution object, that is, to support rule
+   * set initialisation and evolution
+   */
+  class Evolution
   {
   public:
-    Evolution(const Decision& decisions, const Crossover& crossover, const Selection& selection, const AlleleMutation& mutation, const EvolutionListener& listener);
+    virtual ~Evolution();
 
-    virtual void initialise(RuleSet& rule_set) const;
-    virtual void evolve(RuleSet& rules) const;
-    virtual void create_rule_for(RuleSet& rules, const Vector& context) const;
+    virtual void
+      initialise(RuleSet& rule_set) const = 0;
 
-    std::vector<MetaRule*> breed(const MetaRule& father, const MetaRule& mother) const;
-    MetaRule* decode(const Dimensions& dimensions, const Chromosome&, const Performance&) const;
-    Chromosome encode(const MetaRule& rule) const;
-    
+    virtual void
+      evolve(RuleSet& rules) const = 0;
+
+    // FIXME: Should be removed, as it is now the responsibility of
+    // the Covering objects
+    virtual void
+      create_rule_for(RuleSet& rules, const Vector& context) const = 0;
+
+  };
+
+
+
+  class DefaultEvolution
+    : public Evolution
+  {
+  public:
+    DefaultEvolution(const Decision&		decisions,
+		     const Crossover&		crossover,
+		     const Selection&		selection,
+		     const AlleleMutation&	mutation,
+		     const EvolutionListener&	listener);
+
+    virtual ~DefaultEvolution();
+
+    virtual void
+      initialise(RuleSet& rule_set) const;
+
+    virtual void
+      evolve(RuleSet& rules) const;
+
+    virtual void
+      create_rule_for(RuleSet& rules, const Vector& context) const;
+
+    std::vector<MetaRule*>
+      breed(const MetaRule& father, const MetaRule& mother) const;
+
+    MetaRule*
+      decode(const Dimensions& dimensions,
+	     const Chromosome&,
+	     const Performance&) const;
+
+    Chromosome
+      encode(const MetaRule& rule) const;
+
   private:
     void mutate(Chromosome& child) const;
     void remove(RuleSet& rules, unsigned int excess) const;
@@ -134,7 +178,7 @@ namespace xcsf {
     mutable MetaRulePool _rules;
   };
 
-  
+
 }
 
 #endif

@@ -15,7 +15,7 @@ using namespace xcsf;
 
 
 class TestRuleFactory
-  : public RuleFactory
+  : public Evolution
 {
 public:
   TestRuleFactory();

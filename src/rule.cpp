@@ -108,14 +108,14 @@ bool
 Rule::is_triggered_by(const Vector& context) const
 {
   _dimensions.validate_inputs(context);
-  
+
   for (unsigned int i=0 ; i<_premises.size() ; ++i) {
     const Interval& any_interval = _premises[i];
     if ( not any_interval.contains(context[i]) ) {
       return false;
     }
   }
-  
+
   return true;
 }
 
@@ -131,7 +131,7 @@ Rule::subsumes(const Rule& other) const
       return false;
     }
   }
-  
+
   return true;
 }
 
@@ -175,7 +175,7 @@ Rule::operator != (const Rule& other) const
 {
   return not Rule::operator == (other);
 }
- 
+
 
 std::ostream&
 xcsf::operator << (std::ostream& out, const Rule& rule)
@@ -207,16 +207,16 @@ xcsf::operator << (std::ostream& out, const Rule& rule)
 Rule::operator vector<unsigned int> () const
 {
   vector<unsigned int> result;
-  
+
   for (auto each_constraint: _premises) {
     result.push_back(static_cast<unsigned int>(each_constraint.lower()));
     result.push_back(static_cast<unsigned int>(each_constraint.upper()));
   }
-  
+
   for (unsigned int index=0 ; index<_conclusion.size() ; ++index) {
     result.push_back(static_cast<unsigned int>(_conclusion[index]));
   }
-  
+
   return result;
 }
 
@@ -270,7 +270,7 @@ xcsf::operator << (ostream& out, const Performance performance)
       << " ; P = " <<  performance._payoff
       << " ; E = " <<  performance._error
       << " }";
-    
+
   return out;
 }
 
@@ -280,6 +280,7 @@ MetaRule::MetaRule(const Rule& rule, const Performance& performance)
   : _rule(rule)
   , _performance(performance)
 {}
+
 
 bool
 MetaRule::operator == (const MetaRule& other) const
@@ -472,7 +473,7 @@ RuleSet::add(MetaRule& rule)
 	    << "', it has reach its capacity '" << _capacity  << "'.";
     throw std::invalid_argument(message.str());
   }
-  
+
   _rules.push_back(&rule);
   return *this;
 }
@@ -482,10 +483,10 @@ MetaRule&
 RuleSet::remove(unsigned int index)
 {
   validate(index);
-  
+
   MetaRule& removed = *_rules[index];
   _rules.erase(_rules.begin() + index);
-  
+
   return removed;
 }
 
@@ -502,7 +503,7 @@ RuleSet::worst(void) const
       worst = index;
     }
   }
-  
+
   return worst;
 }
 
@@ -624,9 +625,6 @@ PredictionGroup::rules_to_reward(void) const {
 }
 
 
-RuleFactory::~RuleFactory()
-{}
-
 
 Formatter::Formatter(std::ostream& out)
   : _out(out)
@@ -711,23 +709,25 @@ MetaRulePool::release(MetaRule *rule)
     _free_rules.push_back(rule);
     return;
   }
-  
+
   stringstream message;
   message << "Rule at address " << rule << " is not managed by this pool!";
-  throw std::invalid_argument(message.str()); 
+  throw std::invalid_argument(message.str());
 }
 
 
 bool
 MetaRulePool::is_active(MetaRule* rule) const
 {
-  return std::find(_active_rules.begin(), _active_rules.end(), rule) != std::end(_active_rules);
+  return std::find(_active_rules.begin(), _active_rules.end(), rule)
+    != std::end(_active_rules);
 }
 
 bool
 MetaRulePool::is_free(MetaRule* rule) const
 {
-  return std::find(_free_rules.begin(), _free_rules.end(), rule) != std::end(_free_rules);
+  return std::find(_free_rules.begin(), _free_rules.end(), rule)
+    != std::end(_free_rules);
 }
 
 

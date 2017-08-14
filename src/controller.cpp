@@ -48,7 +48,7 @@ parse(const string& text)
   if (text == "S") return Show;
   throw invalid_argument("Unknown command!");
 }
-  
+
 
 void
 validate(const string& line, size_t position)
@@ -89,7 +89,7 @@ Decoder::decode(void)
       break;
     }
   }
-  
+
 }
 
 
@@ -115,14 +115,16 @@ Encoder::show(const Agent& agent)
 }
 
 
-AgentController::AgentController(Encoder& encoder, const RuleFactory& factory, const RewardFunction& reward)
+AgentController::AgentController(Encoder&		encoder,
+				 const Evolution&	evolution,
+				 const RewardFunction&	reward)
   : Controller()
   , _encoder(encoder)
-  , _factory(factory)
+  , _evolution(evolution)
   , _reward(reward)
   , _agents()
 {
-  _agents.push_back(new Agent(_factory, _reward));
+  _agents.push_back(new Agent(_evolution, _reward));
 }
 
 
@@ -161,33 +163,4 @@ void
 AgentController::show(void) const
 {
   _encoder.show(*_agents[0]);
-}
-
-
-BasicRuleFactory::BasicRuleFactory()
-  :RuleFactory()
-  ,_rules()
-{};
-
-
-BasicRuleFactory::~BasicRuleFactory()
-{
-  for (auto each_rule: _rules) {
-    delete each_rule;
-  }
-}
-
-
-void
-BasicRuleFactory::initialise(RuleSet& rules) const
-{
-  for (unsigned int index=1 ; index<5 ; index++) {
-    unsigned int lower = 25 * (index - 1);
-    unsigned int upper = 25 * index;
-    int mode = (lower + upper) / 2;
-      
-    MetaRule* rule = new MetaRule(Rule({ Interval(lower, upper) }, { mode }), Performance(1., 1., 0.));
-    rules.add(*rule);
-    _rules.push_back(rule);
-  }  
 }

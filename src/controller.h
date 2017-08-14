@@ -71,7 +71,7 @@ namespace xcsf {
   class AgentController: public Controller
   {
   public:
-    AgentController(Encoder& encoder, const RuleFactory& factory, const RewardFunction& reward);
+    AgentController(Encoder& encoder, const Evolution& evolution, const RewardFunction& reward);
     ~AgentController();
   
     void select_action(const Vector& input) const;
@@ -82,24 +82,10 @@ namespace xcsf {
   
   private:
     Encoder& _encoder;
-    const RuleFactory& _factory;
+    const Evolution& _evolution;
     const RewardFunction& _reward;
     vector<Agent*> _agents;
     
-  };
-
-
-  class BasicRuleFactory: public RuleFactory
-  {
-  public:
-    BasicRuleFactory();
-    ~BasicRuleFactory();
-
-    virtual void initialise(RuleSet& rule_set) const;
-
-  private:
-    mutable vector<MetaRule*> _rules;
-
   };
 
 }

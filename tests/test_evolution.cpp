@@ -163,7 +163,7 @@ public:
 };
 
 
-TEST_GROUP(TestEvolution)
+TEST_GROUP(TestDefaultEvolution)
 {
   Chromosome child = { 5, 10, 20 };
   MetaRule *rule_1, *rule_2;
@@ -201,13 +201,13 @@ TEST_GROUP(TestEvolution)
 };
 
 
-TEST(TestEvolution, test_no_evolution)
+TEST(TestDefaultEvolution, test_no_evolution)
 {  
   mock().expectNCalls(0, "on_rule_added");
  
   RuleSet before_evolution(*rules);
   FixedDecision decision(NO_EVOLUTION, NO_MUTATION);
-  Evolution evolution(decision, *crossover, *selection, *mutations, *listener);
+  DefaultEvolution evolution(decision, *crossover, *selection, *mutations, *listener);
   
   evolution.evolve(*rules);
   
@@ -216,14 +216,14 @@ TEST(TestEvolution, test_no_evolution)
 }
 
 
-TEST(TestEvolution, test_evolution_without_mutation)
+TEST(TestDefaultEvolution, test_evolution_without_mutation)
 {
   mock().expectOneCall("on_rule_added");
   mock().expectOneCall("on_breeding");
     
   RuleSet before_evolution(*rules);
   FixedDecision decision(EVOLUTION, NO_MUTATION);
-  Evolution evolution(decision, *crossover, *selection, *mutations, *listener);
+  DefaultEvolution evolution(decision, *crossover, *selection, *mutations, *listener);
 
   evolution.evolve(*rules);
 
@@ -236,7 +236,7 @@ TEST(TestEvolution, test_evolution_without_mutation)
 }
 
 
-TEST(TestEvolution, test_evolution_with_mutation)
+TEST(TestDefaultEvolution, test_evolution_with_mutation)
 {
   mock().expectOneCall("on_rule_added");
   mock().expectOneCall("on_breeding");
@@ -244,7 +244,7 @@ TEST(TestEvolution, test_evolution_with_mutation)
   
   RuleSet before_evolution(*rules);
   FixedDecision decision(EVOLUTION, MUTATION);
-  Evolution evolution(decision, *crossover, *selection, *mutations, *listener);
+  DefaultEvolution evolution(decision, *crossover, *selection, *mutations, *listener);
 
   evolution.evolve(*rules);
 
@@ -258,13 +258,13 @@ TEST(TestEvolution, test_evolution_with_mutation)
 }
 
 
-TEST(TestEvolution, test_creating_rules_for_unknown_contexts)
+TEST(TestDefaultEvolution, test_creating_rules_for_unknown_contexts)
 {
   mock().expectOneCall("on_rule_added");
   
   RuleSet before_evolution(*rules);
   FixedDecision decision(EVOLUTION, MUTATION);
-  Evolution evolution(decision, *crossover, *selection, *mutations, *listener);
+  DefaultEvolution evolution(decision, *crossover, *selection, *mutations, *listener);
 
   Vector context = { 80 };
   evolution.create_rule_for(*rules, context);
@@ -274,7 +274,7 @@ TEST(TestEvolution, test_creating_rules_for_unknown_contexts)
 }
 
 
-TEST(TestEvolution, test_listening)
+TEST(TestDefaultEvolution, test_listening)
 {
   mock().expectOneCall("on_rule_added");
   mock().expectOneCall("on_breeding");
@@ -282,7 +282,7 @@ TEST(TestEvolution, test_listening)
    
   RuleSet before_evolution(*rules);
   FixedDecision decision(EVOLUTION, MUTATION);
-  Evolution evolution(decision, *crossover, *selection, *mutations, *listener);
+  DefaultEvolution evolution(decision, *crossover, *selection, *mutations, *listener);
 
   evolution.evolve(*rules);
 
@@ -290,7 +290,7 @@ TEST(TestEvolution, test_listening)
 }
 
 
-TEST_GROUP(TestEvolutionAtCapacity)
+TEST_GROUP(TestDefaultEvolutionAtCapacity)
 {
   unsigned int capacity = 3;
   MetaRulePool pool;
@@ -334,14 +334,14 @@ TEST_GROUP(TestEvolutionAtCapacity)
 };
 
 
-TEST(TestEvolutionAtCapacity, test_creating_rules_for_unknown_contexts)
+TEST(TestDefaultEvolutionAtCapacity, test_creating_rules_for_unknown_contexts)
 {
   mock().expectOneCall("on_rule_added");
   mock().expectOneCall("on_rule_deleted");
   
   RuleSet before_evolution(*rules);
   FixedDecision decision(EVOLUTION, MUTATION);
-  Evolution evolution(decision, *crossover, *selection, *mutations, *listener);
+  DefaultEvolution evolution(decision, *crossover, *selection, *mutations, *listener);
 
   Vector context = { 80 };
   evolution.create_rule_for(*rules, context);
@@ -353,7 +353,7 @@ TEST(TestEvolutionAtCapacity, test_creating_rules_for_unknown_contexts)
 }
 
 
-TEST(TestEvolutionAtCapacity, test_evolution)
+TEST(TestDefaultEvolutionAtCapacity, test_evolution)
 {
   mock().expectOneCall("on_rule_added");
   mock().expectOneCall("on_breeding");
@@ -361,7 +361,7 @@ TEST(TestEvolutionAtCapacity, test_evolution)
   mock().expectNCalls(3, "on_mutation");
  
   FixedDecision decision(EVOLUTION, MUTATION);
-  Evolution evolution(decision, *crossover, *selection, *mutations, *listener);
+  DefaultEvolution evolution(decision, *crossover, *selection, *mutations, *listener);
 
   evolution.evolve(*rules);
 

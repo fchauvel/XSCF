@@ -61,7 +61,7 @@ TEST(OneRuleAgent, test_predict_the_single_active_rule)
   const Vector context({ 1 });
 
   const Vector& actual = agent->predict(context);
-  
+
   CHECK(Vector(predictions) == actual);
 }
 
@@ -69,10 +69,10 @@ TEST(OneRuleAgent, test_predict_the_single_active_rule)
 TEST(OneRuleAgent, test_reward)
 {
   const Vector context({ 1 });
-  
+
   agent->predict(context);
   agent->reward(10);
-  
+
   DOUBLES_EQUAL(3.25, rule->weighted_payoff(), 1e-6);
 }
 
@@ -198,10 +198,10 @@ TEST_GROUP(TestAgentEvolution)
   Selection *selection;
   Crossover *crossover;
   AlleleMutation *mutation;
-  Evolution *evolution;
+  DefaultEvolution *evolution;
   EvolutionListener *listener;
   Agent *agent;
-  
+
   void setup(void)
   {
     reward = new WilsonReward(0.25, 500, 2);
@@ -209,12 +209,12 @@ TEST_GROUP(TestAgentEvolution)
     selection = new RouletteWheel(randomizer);
     crossover = new TwoPointCrossover(randomizer);
     mutation = new RandomAlleleMutation(randomizer);
-    listener = new LogListener(cout); 
-    evolution = new Evolution(*decisions,
-			      *crossover,
-			      *selection,
-			      *mutation,
-			      *listener);
+    listener = new LogListener(cout);
+    evolution = new DefaultEvolution(*decisions,
+				     *crossover,
+				     *selection,
+				     *mutation,
+				     *listener);
     agent = new Agent(*evolution, *reward);
   }
 
@@ -232,13 +232,13 @@ TEST_GROUP(TestAgentEvolution)
 
   static constexpr double MAX_REWARD = 100;
   static constexpr double TOLERANCE = 25;
-  
+
   double compute_reward(double expected, double actual)
   {
     double error = expected - actual;
-    return MAX_REWARD * exp(-pow(error, 2) / (2 * pow(TOLERANCE, 2)));  
+    return MAX_REWARD * exp(-pow(error, 2) / (2 * pow(TOLERANCE, 2)));
   }
-  
+
 };
 
 
@@ -254,7 +254,3 @@ IGNORE_TEST(TestAgentEvolution, test_long_run)
     }
   }
 }
-
-
-
-

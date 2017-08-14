@@ -43,16 +43,15 @@ main(int argc, char** argv)
   std::ofstream log;
   log.open(LOG_FILE, std::ofstream::out);
   LogListener listener(log);
-  
-  Evolution evolution(decisions,
-		      crossover,
-		      selection,
-		      mutation,
-		      listener);
-  
+
+  DefaultEvolution evolution(decisions,
+			     crossover,
+			     selection,
+			     mutation,
+			     listener);
+
   //NaiveReward reward(0.25);
   WilsonReward reward(0.25, 500, 2);
-  
   Application application(cin, cout, evolution, reward);
   application.run();
 
