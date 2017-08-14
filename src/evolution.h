@@ -171,7 +171,8 @@ namespace xcsf {
     : public Evolution
   {
   public:
-    DefaultEvolution(const Decision&		decisions,
+    DefaultEvolution(MetaRulePool&		rules,
+		     const Decision&		decisions,
 		     const Crossover&		crossover,
 		     const Selection&		selection,
 		     const AlleleMutation&	mutation,
@@ -223,7 +224,7 @@ namespace xcsf {
     const Selection&		_select_parents;
     const AlleleMutation&	_mutate;
     const EvolutionListener&	_listener;
-    mutable MetaRulePool	_rules;
+    MetaRulePool&	_rules;
   };
 
 

@@ -139,17 +139,18 @@ Evolution::~Evolution()
 
 
 
-DefaultEvolution::DefaultEvolution(const Decision& decision,
-				   const Crossover& crossover,
-				   const Selection& selection,
-				   const AlleleMutation& mutation,
-				   const EvolutionListener& listener)
+DefaultEvolution::DefaultEvolution(MetaRulePool&		rules,
+				   const Decision&		decision,
+				   const Crossover&		crossover,
+				   const Selection&		selection,
+				   const AlleleMutation&	mutation,
+				   const EvolutionListener&	listener)
   : _decision(decision)
   , _crossover(crossover)
   , _select_parents(selection)
   , _mutate(mutation)
   , _listener(listener)
-  , _rules()
+  , _rules(rules)
 {}
 
 
@@ -224,13 +225,17 @@ DefaultEvolution::initialise(RuleSet& rules) const
 
 
 void
-DefaultEvolution::create_rule(RuleSet& rules, const Vector& seed, const Value& tolerance, const Value& prediction) const
+DefaultEvolution::create_rule(RuleSet&		rules,
+			      const Vector&	seed,
+			      const Value&	tolerance,
+			      const Value&	prediction) const
 {
   vector<Interval> constraints;
   for (unsigned int index=0 ;
        index<rules.dimensions().input_count() ;
        ++index) {
-    constraints.push_back(Interval(seed[index]-tolerance, seed[index]+tolerance));
+    constraints.push_back(Interval(seed[index]-tolerance,
+				   seed[index]+tolerance));
   }
 
   vector<unsigned int> predictions;
@@ -248,7 +253,8 @@ DefaultEvolution::create_rule(RuleSet& rules, const Vector& seed, const Value& t
 const Performance DEFAULT(0, 0, 0);
 
 MetaRule*
-DefaultEvolution::make_rule(std::vector<Interval> constraints, std::vector<unsigned int> predictions) const
+DefaultEvolution::make_rule(std::vector<Interval>	constraints,
+			    std::vector<unsigned int>	predictions) const
 {
   MetaRule* rule = _rules.acquire(Rule(constraints, predictions), DEFAULT);
   _listener.on_rule_added(*rule);
@@ -270,7 +276,8 @@ DefaultEvolution::decode(const Dimensions&	dimensions,
 {
   using namespace std;
 
-  if (values.size() != 2 * dimensions.input_count() + dimensions.output_count()) {
+  if (values.size() !=
+      2 * dimensions.input_count() + dimensions.output_count()) {
     ostringstream error;
     error << "Input and output sizes "
 	  << dimensions
@@ -290,7 +297,9 @@ DefaultEvolution::decode(const Dimensions&	dimensions,
   }
 
   vector<unsigned int> prediction;
-  for (unsigned int index=dimensions.input_count()*2 ; index<values.size() ; ++index) {
+  for (unsigned int index=dimensions.input_count()*2
+	 ; index<values.size()
+	 ; ++index) {
     prediction.push_back(values[index]);
   }
 
@@ -308,10 +317,10 @@ DefaultEvolution::breed(const MetaRule& father, const MetaRule& mother) const
 
   _listener.on_breeding(father, mother);
 
-  Performance performance = Performance((father.fitness() + mother.fitness()) / 2,
-					(father.payoff() + mother.payoff()) / 2,
-					(father.error() + mother.error()) / 2);
-
+  Performance performance
+    = Performance((father.fitness() + mother.fitness()) / 2,
+		  (father.payoff() + mother.payoff()) / 2,
+		  (father.error() + mother.error()) / 2);
 
   vector<MetaRule*> children_rules;
   for (auto each_child: children) {

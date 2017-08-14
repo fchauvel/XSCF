@@ -39,7 +39,7 @@ TEST_GROUP(TestRandomDecision)
   const double mutation = 0.2;
   TestableRandomizer* randomizer;
   RandomDecision *decision;
-  
+
   void setup(void)
   {
     randomizer = new TestableRandomizer({ 0 });
@@ -100,13 +100,15 @@ public:
   {
     return 1;
   };
-  
+
   virtual void
-  operator ()(const Chromosome& father, const Chromosome& mother, vector<Chromosome>& children) const
+  operator () (const Chromosome&	father,
+	       const Chromosome&	mother,
+	       vector<Chromosome>&	children) const
   {
     children.push_back(_child);
   };
-  
+
 private:
   const Chromosome& _child;
 
@@ -117,8 +119,9 @@ class FakeAlleleMutation: public AlleleMutation
 {
 public:
   FakeAlleleMutation(const Allele& mutated):_mutated(mutated){};
+
   virtual ~FakeAlleleMutation(){};
-  
+
   virtual void operator () (Chromosome& subject, const Allele& target) const
   {
     subject[target] = _mutated;
@@ -126,7 +129,7 @@ public:
 
 private:
   const Allele& _mutated;
-  
+
 };
 
 
@@ -157,14 +160,15 @@ public:
   virtual void on_mutation(const Chromosome& subject, const Allele& locus) const
   {
     mock().actualCall("on_mutation");
-  };    
-  
-  
+  };
+
+
 };
 
 
 TEST_GROUP(TestDefaultEvolution)
 {
+  MetaRulePool pool;
   Chromosome child = { 5, 10, 20 };
   MetaRule *rule_1, *rule_2;
   RuleSet *rules;
@@ -172,12 +176,14 @@ TEST_GROUP(TestDefaultEvolution)
   Crossover *crossover;
   Selection *selection;
   EvolutionListener *listener;
-  
+
   void setup(void)
   {
     crossover = new FakeCrossover(child);
-    rule_1 = new MetaRule(Rule({Interval(0, 50)}, { 4 }), Performance(1.0, 1.0, 1.0));
-    rule_2 = new MetaRule(Rule({Interval(50, 100)}, { 2 }), Performance(1.0, 1.0, 1.0));
+    rule_1 = pool.acquire(Rule({Interval(0, 50)}, { 4 }),
+			  Performance(1.0, 1.0, 1.0));
+    rule_2 = pool.acquire(Rule({Interval(50, 100)}, { 2 }),
+			  Performance(1.0, 1.0, 1.0));
     rules = new RuleSet(Dimensions(1, 1), 10);
     rules->add(*rule_1);
     rules->add(*rule_2);
@@ -190,27 +196,30 @@ TEST_GROUP(TestDefaultEvolution)
   {
     delete rules;
     delete crossover;
-    delete rule_1;
-    delete rule_2;
     delete selection;
     delete mutations;
     delete listener;
     mock().clear();
   }
-  
+
 };
 
 
 TEST(TestDefaultEvolution, test_no_evolution)
-{  
+{
   mock().expectNCalls(0, "on_rule_added");
- 
+
   RuleSet before_evolution(*rules);
   FixedDecision decision(NO_EVOLUTION, NO_MUTATION);
-  DefaultEvolution evolution(decision, *crossover, *selection, *mutations, *listener);
-  
+  DefaultEvolution evolution(pool,
+			     decision,
+			     *crossover,
+			     *selection,
+			     *mutations,
+			     *listener);
+
   evolution.evolve(*rules);
-  
+
   CHECK(*rules == before_evolution);
   mock().checkExpectations();
 }
@@ -220,10 +229,15 @@ TEST(TestDefaultEvolution, test_evolution_without_mutation)
 {
   mock().expectOneCall("on_rule_added");
   mock().expectOneCall("on_breeding");
-    
+
   RuleSet before_evolution(*rules);
   FixedDecision decision(EVOLUTION, NO_MUTATION);
-  DefaultEvolution evolution(decision, *crossover, *selection, *mutations, *listener);
+  DefaultEvolution evolution(pool,
+			     decision,
+			     *crossover,
+			     *selection,
+			     *mutations,
+			     *listener);
 
   evolution.evolve(*rules);
 
@@ -241,10 +255,15 @@ TEST(TestDefaultEvolution, test_evolution_with_mutation)
   mock().expectOneCall("on_rule_added");
   mock().expectOneCall("on_breeding");
   mock().expectNCalls(3, "on_mutation");
-  
+
   RuleSet before_evolution(*rules);
   FixedDecision decision(EVOLUTION, MUTATION);
-  DefaultEvolution evolution(decision, *crossover, *selection, *mutations, *listener);
+  DefaultEvolution evolution(pool,
+			     decision,
+			     *crossover,
+			     *selection,
+			     *mutations,
+			     *listener);
 
   evolution.evolve(*rules);
 
@@ -261,10 +280,15 @@ TEST(TestDefaultEvolution, test_evolution_with_mutation)
 TEST(TestDefaultEvolution, test_creating_rules_for_unknown_contexts)
 {
   mock().expectOneCall("on_rule_added");
-  
+
   RuleSet before_evolution(*rules);
   FixedDecision decision(EVOLUTION, MUTATION);
-  DefaultEvolution evolution(decision, *crossover, *selection, *mutations, *listener);
+  DefaultEvolution evolution(pool,
+			     decision,
+			     *crossover,
+			     *selection,
+			     *mutations,
+			     *listener);
 
   Vector context = { 80 };
   evolution.create_rule_for(*rules, context);
@@ -279,10 +303,15 @@ TEST(TestDefaultEvolution, test_listening)
   mock().expectOneCall("on_rule_added");
   mock().expectOneCall("on_breeding");
   mock().expectNCalls(3, "on_mutation");
-   
+
   RuleSet before_evolution(*rules);
   FixedDecision decision(EVOLUTION, MUTATION);
-  DefaultEvolution evolution(decision, *crossover, *selection, *mutations, *listener);
+  DefaultEvolution evolution(pool,
+			     decision,
+			     *crossover,
+			     *selection,
+			     *mutations,
+			     *listener);
 
   evolution.evolve(*rules);
 
@@ -301,11 +330,11 @@ TEST_GROUP(TestDefaultEvolutionAtCapacity)
   Crossover *crossover;
   Selection *selection;
   EvolutionListener *listener;
-  
+
   void setup(void)
   {
     rules = new RuleSet(Dimensions(1, 1), capacity);
-    
+
     rule_1 = pool.acquire(Rule({Interval(0, 50)}, { 4 }));
     rules->add(*rule_1);
 
@@ -314,7 +343,7 @@ TEST_GROUP(TestDefaultEvolutionAtCapacity)
 
     rule_3 = pool.acquire(Rule({Interval(0, 50)}, { 6 }));
     rules->add(*rule_3);
-          
+
     crossover = new FakeCrossover(child);
     selection = new DummySelection();
     mutations = new FakeAlleleMutation(77);
@@ -330,7 +359,7 @@ TEST_GROUP(TestDefaultEvolutionAtCapacity)
     delete listener;
     mock().clear();
   }
-  
+
 };
 
 
@@ -338,10 +367,15 @@ TEST(TestDefaultEvolutionAtCapacity, test_creating_rules_for_unknown_contexts)
 {
   mock().expectOneCall("on_rule_added");
   mock().expectOneCall("on_rule_deleted");
-  
+
   RuleSet before_evolution(*rules);
   FixedDecision decision(EVOLUTION, MUTATION);
-  DefaultEvolution evolution(decision, *crossover, *selection, *mutations, *listener);
+  DefaultEvolution evolution(pool,
+			     decision,
+			     *crossover,
+			     *selection,
+			     *mutations,
+			     *listener);
 
   Vector context = { 80 };
   evolution.create_rule_for(*rules, context);
@@ -359,9 +393,14 @@ TEST(TestDefaultEvolutionAtCapacity, test_evolution)
   mock().expectOneCall("on_breeding");
   mock().expectOneCall("on_rule_deleted");
   mock().expectNCalls(3, "on_mutation");
- 
+
   FixedDecision decision(EVOLUTION, MUTATION);
-  DefaultEvolution evolution(decision, *crossover, *selection, *mutations, *listener);
+  DefaultEvolution evolution(pool,
+			     decision,
+			     *crossover,
+			     *selection,
+			     *mutations,
+			     *listener);
 
   evolution.evolve(*rules);
 
@@ -376,7 +415,7 @@ TEST_GROUP(TestLogListener)
 {
   stringstream out;
   EvolutionListener *listener;
-  
+
   void setup(void)
   {
     listener = new LogListener(out);
@@ -386,14 +425,14 @@ TEST_GROUP(TestLogListener)
   {
     delete listener;
   }
-  
+
 };
 
 
 TEST(TestLogListener, test_on_rule_added)
 {
   MetaRule rule(Rule({Interval(0, 100)}, { 50 }), Performance(1., 1., 1.));
-  
+
   listener->on_rule_added(rule);
 
   stringstream expected;
@@ -405,7 +444,7 @@ TEST(TestLogListener, test_on_rule_added)
 TEST(TestLogListener, test_on_rule_deleted)
 {
   MetaRule rule(Rule({Interval(0, 100)}, { 50 }), Performance(1., 1., 1.));
-  
+
   listener->on_rule_deleted(rule);
 
   stringstream expected;
@@ -418,7 +457,7 @@ TEST(TestLogListener, test_on_breeding)
 {
   MetaRule father(Rule({Interval(0, 50)}, { 50 }), Performance(1., 1., 1.));
   MetaRule mother(Rule({Interval(50, 75)}, { 67 }), Performance(1., 1., 1.));
-  
+
   listener->on_breeding(father, mother);
 
   stringstream expected;
@@ -434,8 +473,8 @@ TEST(TestLogListener, test_on_mutation)
 {
   Chromosome individual({ 10, 20, 30, 40 });
   Allele locus(2);
-  
-  listener->on_mutation(individual, locus); 
+
+  listener->on_mutation(individual, locus);
 
   stringstream expected;
   expected << "Mutation of " << individual << " at " << locus << endl;

@@ -35,7 +35,7 @@ TEST_GROUP(OneRuleAgent)
 {
   Covering *covering;
   RewardFunction *reward;
-  TestRuleFactory factory;
+  TestRuleFactory evolution;
   Agent* agent;
   vector<int> predictions = { 4 };
   MetaRule *rule;
@@ -46,8 +46,8 @@ TEST_GROUP(OneRuleAgent)
     reward = new WilsonReward(0.25, 500, 2);
     rule = new MetaRule(Rule({Interval(0, 50)}, predictions),
 			Performance(1.0, 1.0, 1.0));
-    factory.define(*rule);
-    agent = new Agent(factory, *covering, *reward);
+    evolution.define(*rule);
+    agent = new Agent(evolution, *covering, *reward);
   }
 
   void teardown(void)
@@ -93,7 +93,7 @@ TEST_GROUP(TwoRulesAgent)
 {
   Covering *covering;
   RewardFunction *reward;
-  TestRuleFactory factory;
+  TestRuleFactory evolution;
   Agent* agent;
   MetaRule *rule_1, *rule_2;
 
@@ -104,13 +104,13 @@ TEST_GROUP(TwoRulesAgent)
 
     rule_1 = new MetaRule(Rule({Interval(0, 49)}, { 4 }),
 			  Performance(1.0, 1.0, 1.0));
-    factory.define(*rule_1);
+    evolution.define(*rule_1);
 
     rule_2 = new MetaRule(Rule({Interval(40, 100)}, { 3 }),
 			  Performance(1.0, 1.0, 1.0));
-    factory.define(*rule_2);
+    evolution.define(*rule_2);
 
-    agent = new Agent(factory, *covering, *reward);
+    agent = new Agent(evolution, *covering, *reward);
   }
 
   void teardown(void)
@@ -154,7 +154,7 @@ TEST_GROUP(OverlappingRulesAgent)
 {
   Covering *covering;
   RewardFunction *reward; 
-  TestRuleFactory factory;
+  TestRuleFactory evolution;
   Agent *agent;
   MetaRule *rule_1, *rule_2, *rule_3;
 
@@ -168,10 +168,10 @@ TEST_GROUP(OverlappingRulesAgent)
 			  Performance(0.8, 0.8, 1.0));
     rule_3 = new MetaRule(Rule({Interval(0, 100)}, { 3 }),
 			  Performance(0.5, 0.5, 1.0));
-    factory.define(*rule_1);
-    factory.define(*rule_2);
-    factory.define(*rule_3);
-    agent = new Agent(factory, *covering, *reward);
+    evolution.define(*rule_1);
+    evolution.define(*rule_2);
+    evolution.define(*rule_3);
+    agent = new Agent(evolution, *covering, *reward);
   }
 
   void teardown(void)
@@ -207,6 +207,7 @@ TEST(OverlappingRulesAgent, test_reward)
 
 TEST_GROUP(TestAgentEvolution)
 {
+  MetaRulePool pool;
   RewardFunction *reward;
   Randomizer randomizer;
   Decision *decisions;
@@ -226,7 +227,8 @@ TEST_GROUP(TestAgentEvolution)
     crossover = new TwoPointCrossover(randomizer);
     mutation = new RandomAlleleMutation(randomizer);
     listener = new LogListener(cout);
-    evolution = new DefaultEvolution(*decisions,
+    evolution = new DefaultEvolution(pool,
+				     *decisions,
 				     *crossover,
 				     *selection,
 				     *mutation,

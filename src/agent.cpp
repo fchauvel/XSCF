@@ -47,6 +47,7 @@ Agent::predict(const Vector& input)
   ActivationGroup active_rules(_rules, input);
   if (active_rules.is_empty()) {
     _evolution.create_rule_for(_rules, input);
+    //_cover_for(_rules, input);
     active_rules = ActivationGroup(_rules, input);
   }
 

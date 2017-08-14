@@ -50,14 +50,14 @@ namespace xcsf {
     bool operator != (const Dimensions& other) const;
 
     friend std::ostream& operator << (std::ostream& out, const Dimensions& dimensions);
-    
+
   private:
     unsigned int _input_count;
     unsigned int _output_count;
 
   };
-  
-    
+
+
   class Rule
   {
   public:
@@ -65,25 +65,25 @@ namespace xcsf {
 
     const Dimensions& dimensions(void) const;
     const Vector& conclusion(void) const;
-    
+
     bool is_triggered_by(const Vector& context) const;
     bool subsumes(const Rule& rule) const;
-      
+
     const Vector& operator () (const Vector& context) const;
-    
+
     bool operator == (const Rule& other) const;
     bool operator != (const Rule& other) const;
-    
+
     friend std::ostream& operator << (std::ostream& out, const Rule& rule);
 
     explicit operator vector<unsigned int> () const;
 
-    
+
   private:
     vector<Interval> _premises;
     Vector _conclusion;
     Dimensions _dimensions;
-    
+
   };
 
 
@@ -91,7 +91,7 @@ namespace xcsf {
   {
   public:
     Performance(double fitness=0.0, double payoff=0.0, double error=0.0);
-    
+
     bool operator == (const Performance& other) const;
     bool operator != (const Performance& other) const;
 
@@ -100,25 +100,25 @@ namespace xcsf {
     double error(void) const;
 
     friend std::ostream& operator << (std::ostream& out, const Performance performance);
-    
+
   private:
     double _fitness;
     double _payoff;
     double _error;
-    
+
   };
-    
-  
+
+
   class MetaRule
   {
   public:
     MetaRule(const Rule& rule, const Performance& performance);
-    
+
     bool operator == (const MetaRule& other_rule) const;
     bool operator != (const MetaRule& other_rule) const;
 
     void accept(Formatter& visitor) const;
-    
+
     // Conversions
     vector<unsigned int> as_vector(void) const;
 
@@ -127,21 +127,21 @@ namespace xcsf {
     double error(void) const;
     double payoff(void) const;
     double weighted_payoff(void) const;
-    
+
     void update(double payoff, double error, double fitness);
-    
+
     bool match(const Vector& input) const;
     const Vector& outputs(void) const;
-    
+
   private:
     friend std::ostream& operator << (std::ostream& out, const MetaRule& rule);
 
     Rule _rule;
     Performance _performance;
-    
+
   };
 
-  
+
   class RuleSet
   {
   public:
@@ -152,15 +152,15 @@ namespace xcsf {
 
     unsigned int capacity(void) const;
     unsigned int remaining_capacity(void) const;
-    
+
     bool is_empty(void) const;
     bool is_full(void) const;
-    
+
     bool operator == (const RuleSet& rules) const;
     MetaRule& operator [] (unsigned int index) const;
 
     void accept(Formatter& visitor) const;
-    
+
 
     RuleSet& add(MetaRule& rule);
     MetaRule& remove(unsigned int index);
@@ -168,7 +168,7 @@ namespace xcsf {
     unsigned int worst(void) const;
     double total_fitness(void) const; // TODO delete!
     double total_weighted_payoff(void) const;
-    
+
     std::size_t size(void) const;
     bool rewards_more_than(const RuleSet& other) const;
     double average_payoff(void) const;
@@ -187,7 +187,7 @@ namespace xcsf {
   public:
     ActivationGroup(RuleSet& rules, const Vector& context);
     virtual ~ActivationGroup();
-    
+
   };
 
 
@@ -216,10 +216,10 @@ namespace xcsf {
 
     void format(const vector<MetaRule*>& rules);
     void format(const Rule& rule, const Performance& performance);
-    
+
   private:
     ostream& _out;
-    
+
   };
 
 
@@ -235,14 +235,14 @@ namespace xcsf {
 
     bool is_active(MetaRule *rule) const;
     bool is_free(MetaRule *rule) const;
-    
+
     unsigned int active_rule_count(void) const;
     unsigned int free_rule_count(void) const;
-    
+
   private:
     MetaRulePool(const MetaRulePool&);
     MetaRulePool& operator = (const MetaRulePool&);
-    
+
     std::list<MetaRule*> _active_rules;
     std::list<MetaRule*> _free_rules;
 
