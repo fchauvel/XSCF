@@ -156,11 +156,6 @@ namespace xcsf {
     virtual void
       evolve(RuleSet& rules) const = 0;
 
-    // FIXME: Should be removed, as it is now the responsibility of
-    // the Covering objects
-    virtual void
-      create_rule_for(RuleSet& rules, const Vector& context) const = 0;
-
   };
 
 
@@ -185,9 +180,6 @@ namespace xcsf {
 
     virtual void
       evolve(RuleSet& rules) const;
-
-    virtual void
-      create_rule_for(RuleSet& rules, const Vector& context) const;
 
     std::vector<MetaRule*>
       breed(const MetaRule& father, const MetaRule& mother) const;

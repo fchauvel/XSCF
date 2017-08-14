@@ -81,13 +81,6 @@ TEST(OneRuleAgent, test_reward)
 }
 
 
-TEST(OneRuleAgent, test_covering)
-{
-  const Vector context({ 55 });
-  agent->predict(context);
-}
-
-
 
 TEST_GROUP(TwoRulesAgent)
 {

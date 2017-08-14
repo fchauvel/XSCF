@@ -277,27 +277,6 @@ TEST(TestDefaultEvolution, test_evolution_with_mutation)
 }
 
 
-TEST(TestDefaultEvolution, test_creating_rules_for_unknown_contexts)
-{
-  mock().expectOneCall("on_rule_added");
-
-  RuleSet before_evolution(*rules);
-  FixedDecision decision(EVOLUTION, MUTATION);
-  DefaultEvolution evolution(pool,
-			     decision,
-			     *crossover,
-			     *selection,
-			     *mutations,
-			     *listener);
-
-  Vector context = { 80 };
-  evolution.create_rule_for(*rules, context);
-
-  CHECK_EQUAL(before_evolution.size()+1, rules->size());
-  mock().checkExpectations();
-}
-
-
 TEST(TestDefaultEvolution, test_listening)
 {
   mock().expectOneCall("on_rule_added");
@@ -361,30 +340,6 @@ TEST_GROUP(TestDefaultEvolutionAtCapacity)
   }
 
 };
-
-
-TEST(TestDefaultEvolutionAtCapacity, test_creating_rules_for_unknown_contexts)
-{
-  mock().expectOneCall("on_rule_added");
-  mock().expectOneCall("on_rule_deleted");
-
-  RuleSet before_evolution(*rules);
-  FixedDecision decision(EVOLUTION, MUTATION);
-  DefaultEvolution evolution(pool,
-			     decision,
-			     *crossover,
-			     *selection,
-			     *mutations,
-			     *listener);
-
-  Vector context = { 80 };
-  evolution.create_rule_for(*rules, context);
-
-  CHECK_EQUAL(before_evolution.size(), rules->size());
-  mock().checkExpectations();
-
-  CHECK(&(*rules)[0] != rule_1 or &(*rules)[1] != rule_2);
-}
 
 
 TEST(TestDefaultEvolutionAtCapacity, test_evolution)

@@ -201,14 +201,14 @@ DefaultEvolution::remove(RuleSet& rules, unsigned int excess) const
 }
 
 
-void
-DefaultEvolution::create_rule_for(RuleSet& rules, const Vector& context) const
-{
-  if (rules.is_full()) {
-    remove(rules, 1);
-  }
-  create_rule(rules, context, 10, 50);
-}
+// void
+// DefaultEvolution::create_rule_for(RuleSet& rules, const Vector& context) const
+// {
+//   if (rules.is_full()) {
+//     remove(rules, 1);
+//   }
+//   create_rule(rules, context, 10, 50);
+// }
 
 
 void

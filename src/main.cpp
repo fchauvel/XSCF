@@ -35,7 +35,13 @@ main(int argc, char** argv)
   const double MUTATION_PROBABILITY(0.1);
 
   Randomizer randomizer;
-  RandomDecision decisions(randomizer, EVOLUTION_PROBABILITY, MUTATION_PROBABILITY);
+
+  MetaRulePool pool;
+  RandomCovering covering(pool, 1, randomizer);
+
+  RandomDecision decisions(randomizer,
+			   EVOLUTION_PROBABILITY,
+			   MUTATION_PROBABILITY);
   RouletteWheel selection(randomizer);
   TwoPointCrossover crossover(randomizer);
   RandomAlleleMutation mutation(randomizer, 10);
@@ -44,7 +50,8 @@ main(int argc, char** argv)
   log.open(LOG_FILE, std::ofstream::out);
   LogListener listener(log);
 
-  DefaultEvolution evolution(decisions,
+  DefaultEvolution evolution(pool,
+			     decisions,
 			     crossover,
 			     selection,
 			     mutation,
@@ -52,7 +59,7 @@ main(int argc, char** argv)
 
   //NaiveReward reward(0.25);
   WilsonReward reward(0.25, 500, 2);
-  Application application(cin, cout, evolution, reward);
+  Application application(cin, cout, evolution, covering, reward);
   application.run();
 
   log.close();
