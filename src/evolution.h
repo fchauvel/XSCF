@@ -47,18 +47,20 @@ namespace xcsf {
   class RandomDecision: public Decision
   {
   public:
-    RandomDecision(const Randomizer& generator,
-		   double evolution_probability,
-		   double allele_mutation_probability);
+    RandomDecision(const Randomizer&	generator,
+		   double		evolution_probability,
+		   double		allele_mutation_probability);
+
     virtual ~RandomDecision(void);
 
     virtual bool shall_evolve(void) const;
+
     virtual bool shall_mutate(void) const;
 
   private:
-    const Randomizer& _generator;
-    const double _evolution_probability;
-    const double _allele_mutation_probability;
+    const Randomizer&	_generator;
+    const double	_evolution_probability;
+    const double	_allele_mutation_probability;
 
   };
 
@@ -68,10 +70,23 @@ namespace xcsf {
   public:
     virtual ~EvolutionListener(void);
 
-    virtual void on_rule_added(const MetaRule& rule) const = 0;
-    virtual void on_rule_deleted(const MetaRule& rule) const = 0;
-    virtual void on_breeding(const MetaRule& father, const MetaRule& mother) const = 0;
-    virtual void on_mutation(const Chromosome& chromosome, const Allele& locus) const = 0;
+    virtual void
+      on_rule_added(const MetaRule& rule)
+      const = 0;
+
+    virtual void
+      on_rule_deleted(const MetaRule& rule)
+      const = 0;
+
+    virtual void
+      on_breeding(const MetaRule& father,
+		  const MetaRule& mother)
+      const = 0;
+
+    virtual void
+      on_mutation(const Chromosome&	chromosome,
+		  const Allele&	locus)
+      const = 0;
   };
 
 
@@ -81,10 +96,21 @@ namespace xcsf {
   public:
     virtual ~NoListener();
 
-    virtual void on_rule_added(const MetaRule& rule) const;
-    virtual void on_breeding(const MetaRule& father, const MetaRule& mother) const;
-    virtual void on_rule_deleted(const MetaRule& rule) const;
-    virtual void on_mutation(const Chromosome& chromosome, const Allele& locus) const;
+    virtual void
+      on_rule_added(const MetaRule& rule)
+      const;
+
+    virtual void
+      on_breeding(const MetaRule& father, const MetaRule& mother)
+      const;
+
+    virtual void
+      on_rule_deleted(const MetaRule& rule)
+      const;
+
+    virtual void
+      on_mutation(const Chromosome& chromosome, const Allele& locus)
+      const;
   };
 
 
@@ -93,12 +119,20 @@ namespace xcsf {
   {
   public:
     explicit LogListener(std::ostream& out);
+
     virtual ~LogListener();
 
-    virtual void on_rule_added(const MetaRule& rule) const;
-    virtual void on_breeding(const MetaRule& father, const MetaRule& mother) const;
-    virtual void on_rule_deleted(const MetaRule& rule) const;
-    virtual void on_mutation(const Chromosome& chromosome, const Allele& locus) const;
+    virtual void
+      on_rule_added(const MetaRule& rule) const;
+
+    virtual void
+      on_breeding(const MetaRule& father, const MetaRule& mother) const;
+
+    virtual void
+      on_rule_deleted(const MetaRule& rule) const;
+
+    virtual void
+      on_mutation(const Chromosome& chromosome, const Allele& locus) const;
 
   private:
     std::ostream& _out;
@@ -130,7 +164,9 @@ namespace xcsf {
   };
 
 
-
+  /**
+   * Default implementation of the Evolution interface.
+   */
   class DefaultEvolution
     : public Evolution
   {
@@ -164,18 +200,30 @@ namespace xcsf {
       encode(const MetaRule& rule) const;
 
   private:
-    void mutate(Chromosome& child) const;
-    void remove(RuleSet& rules, unsigned int excess) const;
-    void enforce_capacity(RuleSet& rules, unsigned int count) const;
-    void create_rule(RuleSet& rules, const Vector& seed, const Value& tolerance, const Value& prediction) const;
-    MetaRule* make_rule(std::vector<Interval>, std::vector<unsigned int>) const;
+    void
+      mutate(Chromosome& child) const;
 
-    const Decision& _decision;
-    const Crossover& _crossover;
-    const Selection& _select_parents;
-    const AlleleMutation& _mutate;
-    const EvolutionListener& _listener;
-    mutable MetaRulePool _rules;
+    void
+      remove(RuleSet& rules, unsigned int excess) const;
+
+    void
+      enforce_capacity(RuleSet& rules, unsigned int count) const;
+
+    void
+      create_rule(RuleSet&	rules,
+		  const Vector& seed,
+		  const Value&	tolerance,
+		  const Value&  prediction) const;
+
+    MetaRule*
+      make_rule(std::vector<Interval>, std::vector<unsigned int>) const;
+
+    const Decision&		_decision;
+    const Crossover&		_crossover;
+    const Selection&		_select_parents;
+    const AlleleMutation&	_mutate;
+    const EvolutionListener&	_listener;
+    mutable MetaRulePool	_rules;
   };
 
 

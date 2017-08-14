@@ -26,9 +26,10 @@ using namespace xcsf;
 Application::Application(istream&		input,
 			 ostream&		output,
 			 const Evolution&	evolution,
+			 const Covering&	covering,
 			 const RewardFunction&	reward)
   : _encoder(new Encoder(output))
-  , _controller(new AgentController(*_encoder, evolution, reward))
+  , _controller(new AgentController(*_encoder, evolution, covering, reward))
   , _decoder(new Decoder(input, *_controller))
 {
 }

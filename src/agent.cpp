@@ -24,9 +24,11 @@
 using namespace xcsf;
 
 
-Agent::Agent(const Evolution& evolution,
-	     const RewardFunction& reward)
+Agent::Agent(const Evolution&		evolution,
+	     const Covering&		convering,
+	     const RewardFunction&	reward)
   : _evolution(evolution)
+  , _cover_for(convering)
   , _reward(reward)
   , _rules()
   , _rules_to_reward()

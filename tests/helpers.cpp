@@ -21,6 +21,16 @@
 #include "helpers.h"
 
 
+FakeCovering::~FakeCovering()
+{}
+
+
+void
+FakeCovering::operator () (RuleSet& rules, const Vector& context) const
+{}
+
+
+
 TestRuleFactory::TestRuleFactory()
   : Evolution()
   , _rules()

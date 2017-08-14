@@ -23,6 +23,10 @@
 using namespace xcsf;
 
 
+Covering::~Covering()
+{}
+
+
 AbstractCovering::AbstractCovering(MetaRulePool& pool, unsigned int strength)
   : _rule_pool(pool)
   , _strength(strength)
@@ -49,14 +53,16 @@ AbstractCovering::rule_pool(void) const
 
 
 
-RandomCovering::RandomCovering(MetaRulePool& pool, unsigned int strength, const Randomizer& randomizer)
+RandomCovering::RandomCovering(MetaRulePool&		pool,
+			       unsigned int		strength,
+			       const Randomizer&	randomizer)
   : AbstractCovering(pool, strength)
   , _generate(randomizer)
 {}
 
 
 void
-RandomCovering::operator () (RuleSet& rules, const Vector& context)
+RandomCovering::operator () (RuleSet& rules, const Vector& context) const
 {
   for (unsigned int i=0 ; i<strength() ; ++i) {
 
@@ -66,7 +72,7 @@ RandomCovering::operator () (RuleSet& rules, const Vector& context)
       Value upper = context[index] + _generate.unsigned_int(0, 20);
       premises.push_back(Interval(lower, upper));
     }
-    
+
     vector<unsigned int> conclusion;
     for (unsigned int index=0 ; index<rules.dimensions().output_count() ; ++index) {
       conclusion.push_back(_generate.unsigned_int(0, Value::MAXIMUM));
@@ -75,5 +81,5 @@ RandomCovering::operator () (RuleSet& rules, const Vector& context)
     MetaRule *rule = rule_pool().acquire(Rule(premises, conclusion), Performance(0, 0, 0));
     rules.add(*rule);
   }
-  
+
 }

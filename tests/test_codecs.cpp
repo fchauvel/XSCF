@@ -49,8 +49,8 @@ class TestController: public Controller
   virtual void predict(const Vector& context)
   {
     mock()
-      .actualCall("predict").
-      onObject(this)
+      .actualCall("predict")
+      .onObject(this)
       .withParameterOfType("Vector", "context", (void*) &context);
   }
 
@@ -59,11 +59,12 @@ class TestController: public Controller
     mock().
       actualCall("show");
   }
-  
+
 };
 
 
-class VectorComparator : public MockNamedValueComparator
+class VectorComparator
+  : public MockNamedValueComparator
 {
 public:
   virtual bool isEqual(void* object1, void* object2)
@@ -72,11 +73,12 @@ public:
     Vector right = *(Vector*) (object2);
     return left == right;
   }
-  
+
   virtual SimpleString valueToString(void* object)
   {
     return StringFrom(object);
   }
+
 };
 
 
@@ -86,10 +88,10 @@ TEST_GROUP(TestReader)
   stringstream input;
   Controller *target;
   Decoder *reader;
-  
+
   void setup(void) {
     mock().installComparator("Vector", comparator);
-    
+
     target = new TestController();
     reader = new Decoder(input, *target);
   }
@@ -100,13 +102,13 @@ TEST_GROUP(TestReader)
     mock().removeAllComparators();
     mock().clear();
   }
-  
+
 };
 
 TEST(TestReader, test_reading_show)
 {
   mock().expectOneCall("show");
-  
+
   input << "S:";
   reader->decode();
 
@@ -118,7 +120,7 @@ TEST(TestReader, test_reading_invalid_command)
 {
   mock().expectNCalls(0, "reward");
   mock().expectNCalls(0, "predict");
-  
+
   input << "UNKNOWN_COMMAND:(13,34,234)" << endl;
   CHECK_THROWS(std::invalid_argument, {reader->decode();});
 
@@ -132,7 +134,7 @@ TEST(TestReader, test_reading_reward)
 
   input << "R:23.5" << endl;
   reader->decode();
-  
+
   mock().checkExpectations();
 }
 
@@ -162,8 +164,11 @@ TEST(TestReader, test_reading_invalid_reward)
 TEST(TestReader, test_reading_input)
 {
   Vector expected = { 10, 20, 30 };
-  mock().expectOneCall("predict").onObject(target).withParameterOfType("Vector", "context", &expected);
-  
+  mock()
+    .expectOneCall("predict")
+    .onObject(target)
+    .withParameterOfType("Vector", "context", &expected);
+
   input << "P:(10, 20, 30)" << endl;
   reader->decode();
 
@@ -184,9 +189,8 @@ TEST_GROUP(TestEncoder)
   void teardown(void) {
     delete encoder;
   }
-  
-};
 
+};
 
 
 TEST(TestEncoder, test_show_prediction)
@@ -203,7 +207,8 @@ TEST(TestEncoder, test_show_agent)
 {
   WilsonReward reward(0.25, 500, 2);
   TestRuleFactory factory;
-  Agent agent(factory, reward);
+  FakeCovering covering;
+  Agent agent(factory, covering, reward);
 
   encoder->show(agent);
 

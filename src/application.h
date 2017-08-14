@@ -33,18 +33,20 @@ namespace xcsf {
     Application(istream&		input,
 		ostream&		output,
 		const Evolution&	evolution,
+		const Covering&	convering,
 		const RewardFunction&	reward);
+
     ~Application();
-    
+
     void run(void) const;
-    
+
   private:
     Encoder* const	_encoder;
     Controller* const	_controller;
     Decoder* const	_decoder;
   };
-  
-  
+
+
 }
 
 

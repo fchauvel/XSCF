@@ -117,14 +117,16 @@ Encoder::show(const Agent& agent)
 
 AgentController::AgentController(Encoder&		encoder,
 				 const Evolution&	evolution,
+				 const Covering&	covering,
 				 const RewardFunction&	reward)
   : Controller()
   , _encoder(encoder)
   , _evolution(evolution)
+  , _covering(covering)
   , _reward(reward)
   , _agents()
 {
-  _agents.push_back(new Agent(_evolution, _reward));
+  _agents.push_back(new Agent(_evolution, _covering, _reward));
 }
 
 

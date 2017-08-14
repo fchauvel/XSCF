@@ -33,6 +33,7 @@ using namespace xcsf;
 
 TEST_GROUP(OneRuleAgent)
 {
+  Covering *covering;
   RewardFunction *reward;
   TestRuleFactory factory;
   Agent* agent;
@@ -41,16 +42,19 @@ TEST_GROUP(OneRuleAgent)
 
   void setup(void)
   {
+    covering = new FakeCovering();
     reward = new WilsonReward(0.25, 500, 2);
-    rule = new MetaRule(Rule({Interval(0, 50)}, predictions), Performance(1.0, 1.0, 1.0));
+    rule = new MetaRule(Rule({Interval(0, 50)}, predictions),
+			Performance(1.0, 1.0, 1.0));
     factory.define(*rule);
-    agent = new Agent(factory, *reward);
+    agent = new Agent(factory, *covering, *reward);
   }
 
   void teardown(void)
   {
     delete agent;
     delete reward;
+    delete covering;
   }
 
 };
@@ -80,35 +84,40 @@ TEST(OneRuleAgent, test_reward)
 TEST(OneRuleAgent, test_covering)
 {
   const Vector context({ 55 });
-  agent->predict(context);  
+  agent->predict(context);
 }
 
 
 
 TEST_GROUP(TwoRulesAgent)
 {
-  RewardFunction *reward; 
+  Covering *covering;
+  RewardFunction *reward;
   TestRuleFactory factory;
   Agent* agent;
   MetaRule *rule_1, *rule_2;
 
   void setup(void)
   {
+    covering = new FakeCovering();
     reward = new WilsonReward(0.25, 500, 2);
-    
-    rule_1 = new MetaRule(Rule({Interval(0, 49)}, { 4 }), Performance(1.0, 1.0, 1.0));
+
+    rule_1 = new MetaRule(Rule({Interval(0, 49)}, { 4 }),
+			  Performance(1.0, 1.0, 1.0));
     factory.define(*rule_1);
-    
-    rule_2 = new MetaRule(Rule({Interval(40, 100)}, { 3 }), Performance(1.0, 1.0, 1.0));
+
+    rule_2 = new MetaRule(Rule({Interval(40, 100)}, { 3 }),
+			  Performance(1.0, 1.0, 1.0));
     factory.define(*rule_2);
-    
-    agent = new Agent(factory, *reward);
+
+    agent = new Agent(factory, *covering, *reward);
   }
 
   void teardown(void)
   {
     delete agent;
     delete reward;
+    delete covering;
   }
 
 };
@@ -123,7 +132,7 @@ TEST(TwoRulesAgent, test_display)
   expected << "    F.    P.    E.   Rule" << endl
 	   << "---------------------------------------------" << endl
 	   << "   1.0   1.0   1.0   ([  0,  49]) => (  4)" << endl
-    	   << "   1.0   1.0   1.0   ([ 40, 100]) => (  3)" << endl
+	   << "   1.0   1.0   1.0   ([ 40, 100]) => (  3)" << endl
 	   << "---------------------------------------------" << endl
 	   << "2 rule(s)." << endl;
 
@@ -143,6 +152,7 @@ TEST(TwoRulesAgent, test_predict_active_rule)
 
 TEST_GROUP(OverlappingRulesAgent)
 {
+  Covering *covering;
   RewardFunction *reward; 
   TestRuleFactory factory;
   Agent *agent;
@@ -150,19 +160,24 @@ TEST_GROUP(OverlappingRulesAgent)
 
   void setup(void)
   {
+    covering = new FakeCovering();
     reward = new WilsonReward(0.25, 500, 2);
-    rule_1 = new MetaRule(Rule({Interval(0, 100)}, { 4 }), Performance(1.0, 1.0, 1.0));
-    rule_2 = new MetaRule(Rule({Interval(0, 100)}, { 4 }), Performance(0.8, 0.8, 1.0));
-    rule_3 = new MetaRule(Rule({Interval(0, 100)}, { 3 }), Performance(0.5, 0.5, 1.0));
+    rule_1 = new MetaRule(Rule({Interval(0, 100)}, { 4 }),
+			  Performance(1.0, 1.0, 1.0));
+    rule_2 = new MetaRule(Rule({Interval(0, 100)}, { 4 }),
+			  Performance(0.8, 0.8, 1.0));
+    rule_3 = new MetaRule(Rule({Interval(0, 100)}, { 3 }),
+			  Performance(0.5, 0.5, 1.0));
     factory.define(*rule_1);
     factory.define(*rule_2);
     factory.define(*rule_3);
-    agent = new Agent(factory, *reward);
+    agent = new Agent(factory, *covering, *reward);
   }
 
   void teardown(void)
   {
     delete agent;
+    delete covering;
     delete reward;
   }
 
@@ -172,7 +187,7 @@ TEST_GROUP(OverlappingRulesAgent)
 TEST(OverlappingRulesAgent, test_predict_the_most_relevant_rule)
 {
   const Vector& actual = agent->predict(Vector({ 50 }));
-  
+
   CHECK(Vector({ 4 }) == actual);
 }
 
@@ -180,10 +195,10 @@ TEST(OverlappingRulesAgent, test_predict_the_most_relevant_rule)
 TEST(OverlappingRulesAgent, test_reward)
 {
   const Vector context({ 50 });
-  
+
   agent->predict(context);
   agent->reward(10);
-  
+
   DOUBLES_EQUAL(2.84375, rule_1->weighted_payoff(), 1e-6);
   DOUBLES_EQUAL(2.2475, rule_2->weighted_payoff(), 1e-6);
 }
@@ -200,6 +215,7 @@ TEST_GROUP(TestAgentEvolution)
   AlleleMutation *mutation;
   DefaultEvolution *evolution;
   EvolutionListener *listener;
+  Covering *covering;
   Agent *agent;
 
   void setup(void)
@@ -215,7 +231,8 @@ TEST_GROUP(TestAgentEvolution)
 				     *selection,
 				     *mutation,
 				     *listener);
-    agent = new Agent(*evolution, *reward);
+    covering = new FakeCovering();
+    agent = new Agent(*evolution, *covering, *reward);
   }
 
   void teardown(void)
@@ -227,6 +244,7 @@ TEST_GROUP(TestAgentEvolution)
     delete listener;
     delete evolution;
     delete agent;
+    delete covering;
     delete reward;
   }
 
