@@ -197,12 +197,6 @@ namespace xcsf {
       mutate(Chromosome& child) const;
 
     void
-      remove(RuleSet& rules, unsigned int excess) const;
-
-    void
-      enforce_capacity(RuleSet& rules, unsigned int count) const;
-
-    void
       create_rule(RuleSet&	rules,
 		  const Vector& seed,
 		  const Value&	tolerance,

@@ -396,28 +396,19 @@ TEST_GROUP(TestRuleSet)
   }
 };
 
-
-TEST(TestRuleSet, test_remove_last_rule_added)
+TEST(TestRuleSet, test_remove_the_worst_rule)
 {
-  MetaRule& deleted = rules->remove(1);
+  rules->remove(Comparators::with_lower_weighted_payoff, 1);
   CHECK_EQUAL(1, rules->size());
-  CHECK((*rules)[0] == *rule_1);
+  CHECK((*rules)[0] == *rule_2);
 }
-
-
-TEST(TestRuleSet, test_worst)
-{
-  unsigned int worst_rule = rules->worst();
-
-  CHECK(rule_1 == &((*rules)[worst_rule]));
-}
-
 
 TEST(TestRuleSet, test_total_fitness)
 {
   double total_fitness = rules->total_fitness();
   DOUBLES_EQUAL(r1_fitness + r2_fitness, total_fitness, 1e-6);
 }
+
 
 TEST(TestRuleSet, test_total_weighted_payoff)
 {

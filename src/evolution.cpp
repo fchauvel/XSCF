@@ -165,7 +165,8 @@ DefaultEvolution::evolve(RuleSet& rules) const
 
   assert (not rules.is_empty() && "Impossible evolution, no rules");
 
-  enforce_capacity(rules, _crossover.children_count());
+  rules.enforce_capacity(_crossover.children_count(),
+			 Comparators::with_lower_weighted_payoff);
 
   vector<MetaRule*> parents = _select_parents(rules);
 
@@ -174,30 +175,6 @@ DefaultEvolution::evolve(RuleSet& rules) const
     rules.add(*each_child);
   }
 
-}
-
-
-void
-DefaultEvolution::enforce_capacity(RuleSet& rules, unsigned int count) const
-{
-  if (rules.remaining_capacity() < count) {
-    unsigned int excess = count - rules.remaining_capacity();
-    remove(rules, excess);
-  }
-
-}
-
-
-void
-DefaultEvolution::remove(RuleSet& rules, unsigned int excess) const
-{
-  assert(excess < rules.size() && "Invalid excess!");
-
-  for (unsigned int i=0 ; i<excess ; ++i) {
-    unsigned int worst_rule = rules.worst();
-    MetaRule& rule = rules.remove(worst_rule);
-    _listener.on_rule_deleted(rule);
-  }
 }
 
 

@@ -376,6 +376,12 @@ xcsf::operator << (ostream& out, const MetaRule& rule)
 }
 
 
+bool
+Comparators::with_lower_weighted_payoff(const MetaRule* left, const MetaRule* right)
+{
+  return left->weighted_payoff() >= right->weighted_payoff();
+}
+
 
 RuleSet::RuleSet(const Dimensions& dimensions, unsigned int capacity)
   : _dimensions(dimensions)
@@ -406,6 +412,16 @@ unsigned int
 RuleSet::remaining_capacity(void) const
 {
   return _capacity - size();
+}
+
+
+void
+RuleSet::enforce_capacity(unsigned int count, Comparator comparator)
+{
+  if (remaining_capacity() < count) {
+    unsigned int excess = count - remaining_capacity();
+    remove(comparator, excess);
+  }
 }
 
 
@@ -479,33 +495,29 @@ RuleSet::add(MetaRule& rule)
 }
 
 
-MetaRule&
-RuleSet::remove(unsigned int index)
+void
+RuleSet::remove(Comparator comparator, unsigned int count)
 {
-  validate(index);
-
-  MetaRule& removed = *_rules[index];
-  _rules.erase(_rules.begin() + index);
-
-  return removed;
+  std::sort(_rules.begin(), _rules.end(), *comparator);
+  _rules.erase(_rules.end() - count, _rules.end());
 }
 
 
-unsigned int
-RuleSet::worst(void) const
-{
-  if (_rules.empty())
-    throw std::invalid_argument("Unable to find the worst rule: The rule set is empty.");
+// unsigned int
+// RuleSet::worst(void) const
+// {
+//   if (_rules.empty())
+//     throw std::invalid_argument("Unable to find the worst rule: The rule set is empty.");
 
-  unsigned int worst = 0;
-  for (unsigned int index=1 ; index<_rules.size() ; ++index) {
-    if (_rules[worst]->weighted_payoff() > _rules[index]->weighted_payoff()) {
-      worst = index;
-    }
-  }
+//   unsigned int worst = 0;
+//   for (unsigned int index=1 ; index<_rules.size() ; ++index) {
+//     if (_rules[worst]->weighted_payoff() > _rules[index]->weighted_payoff()) {
+//       worst = index;
+//     }
+//   }
 
-  return worst;
-}
+//   return worst;
+// }
 
 
 double

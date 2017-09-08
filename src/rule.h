@@ -23,7 +23,7 @@
 #include <list>
 #include <vector>
 #include <map>
-
+#include <algorithm>
 
 #include "context.h"
 #include "utils.h"
@@ -141,7 +141,17 @@ namespace xcsf {
 
   };
 
+  
+  typedef bool (*Comparator) (const MetaRule* left, const MetaRule* right);
 
+  
+  struct Comparators
+  {
+    static bool with_lower_weighted_payoff(const MetaRule* left, const MetaRule* right);
+    
+  };
+  
+  
   class RuleSet
   {
   public:
@@ -152,6 +162,7 @@ namespace xcsf {
 
     unsigned int capacity(void) const;
     unsigned int remaining_capacity(void) const;
+    void enforce_capacity(unsigned int count, Comparator comparator);
 
     bool is_empty(void) const;
     bool is_full(void) const;
@@ -161,11 +172,9 @@ namespace xcsf {
 
     void accept(Formatter& visitor) const;
 
-
     RuleSet& add(MetaRule& rule);
-    MetaRule& remove(unsigned int index);
+    void remove(Comparator comparator, unsigned int count);
 
-    unsigned int worst(void) const;
     double total_fitness(void) const; // TODO delete!
     double total_weighted_payoff(void) const;
 
