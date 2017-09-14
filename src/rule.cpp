@@ -415,13 +415,14 @@ RuleSet::remaining_capacity(void) const
 }
 
 
-void
+std::vector<MetaRule*>
 RuleSet::enforce_capacity(unsigned int count, Comparator comparator)
 {
   if (remaining_capacity() < count) {
     unsigned int excess = count - remaining_capacity();
-    remove(comparator, excess);
+    return remove(comparator, excess);
   }
+  return std::vector<MetaRule*>();
 }
 
 
@@ -495,11 +496,13 @@ RuleSet::add(MetaRule& rule)
 }
 
 
-void
+std::vector<MetaRule*>
 RuleSet::remove(Comparator comparator, unsigned int count)
 {
-  std::sort(_rules.begin(), _rules.end(), *comparator);
+  std::sort(_rules.begin(), _rules.end(), comparator);
+  std::vector<MetaRule*> selected_for_removal(_rules.end() - count, _rules.end());
   _rules.erase(_rules.end() - count, _rules.end());
+  return selected_for_removal;
 }
 
 

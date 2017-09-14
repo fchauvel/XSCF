@@ -16,6 +16,7 @@
  *
  */
 
+
 #ifndef XCSF_RULE_H
 #define XCSF_RULE_H
 
@@ -24,6 +25,7 @@
 #include <vector>
 #include <map>
 #include <algorithm>
+#include <functional>
 
 #include "context.h"
 #include "utils.h"
@@ -141,14 +143,15 @@ namespace xcsf {
 
   };
 
-  
-  typedef bool (*Comparator) (const MetaRule* left, const MetaRule* right);
+ 
+  typedef
+    std::function<bool (const MetaRule*, const MetaRule*)>
+    Comparator;
 
   
   struct Comparators
   {
-    static bool with_lower_weighted_payoff(const MetaRule* left, const MetaRule* right);
-    
+    static bool with_lower_weighted_payoff(const MetaRule* left, const MetaRule* right);  
   };
   
   
@@ -162,7 +165,7 @@ namespace xcsf {
 
     unsigned int capacity(void) const;
     unsigned int remaining_capacity(void) const;
-    void enforce_capacity(unsigned int count, Comparator comparator);
+    std::vector<MetaRule*> enforce_capacity(unsigned int count, Comparator comparator);
 
     bool is_empty(void) const;
     bool is_full(void) const;
@@ -173,7 +176,7 @@ namespace xcsf {
     void accept(Formatter& visitor) const;
 
     RuleSet& add(MetaRule& rule);
-    void remove(Comparator comparator, unsigned int count);
+    std::vector<MetaRule*> remove(Comparator comparator, unsigned int count);
 
     double total_fitness(void) const; // TODO delete!
     double total_weighted_payoff(void) const;

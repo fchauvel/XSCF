@@ -165,12 +165,15 @@ DefaultEvolution::evolve(RuleSet& rules) const
 
   assert (not rules.is_empty() && "Impossible evolution, no rules");
 
-  rules.enforce_capacity(_crossover.children_count(),
-			 Comparators::with_lower_weighted_payoff);
+  auto deleted_rules = rules.enforce_capacity(_crossover.children_count(),
+					       Comparators::with_lower_weighted_payoff);
+  for(auto each : deleted_rules) {
+    _listener.on_rule_deleted(*each);
+  }
 
-  vector<MetaRule*> parents = _select_parents(rules);
+  auto parents = _select_parents(rules);
 
-  vector<MetaRule*> children = breed(*parents[0], *parents[1]);
+  auto children = breed(*parents[0], *parents[1]);
   for (auto each_child: children) {
     rules.add(*each_child);
   }

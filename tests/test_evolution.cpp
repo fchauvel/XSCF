@@ -346,7 +346,7 @@ TEST(TestDefaultEvolutionAtCapacity, test_evolution)
 {
   mock().expectOneCall("on_rule_added");
   mock().expectOneCall("on_breeding");
-  // FIXME! mock().expectOneCall("on_rule_deleted");
+  mock().expectOneCall("on_rule_deleted");
   mock().expectNCalls(3, "on_mutation");
 
   FixedDecision decision(EVOLUTION, MUTATION);
