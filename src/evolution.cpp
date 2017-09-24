@@ -20,6 +20,7 @@
 #include <sstream>
 #include <cassert>
 
+
 #include "evolution.h"
 
 
@@ -151,6 +152,7 @@ DefaultEvolution::DefaultEvolution(MetaRulePool&		rules,
   , _mutate(mutation)
   , _listener(listener)
   , _rules(rules)
+  , _codec(rules)
 {}
 
 
@@ -179,16 +181,6 @@ DefaultEvolution::evolve(RuleSet& rules) const
   }
 
 }
-
-
-// void
-// DefaultEvolution::create_rule_for(RuleSet& rules, const Vector& context) const
-// {
-//   if (rules.is_full()) {
-//     remove(rules, 1);
-//   }
-//   create_rule(rules, context, 10, 50);
-// }
 
 
 void
@@ -242,58 +234,13 @@ DefaultEvolution::make_rule(std::vector<Interval>	constraints,
 }
 
 
-Chromosome
-DefaultEvolution::encode(const MetaRule& rule) const
-{
-  return Chromosome(rule.as_vector());
-}
-
-
-MetaRule*
-DefaultEvolution::decode(const Dimensions&	dimensions,
-		  const Chromosome&	values,
-		  const Performance& performance)const
-{
-  using namespace std;
-
-  if (values.size() !=
-      2 * dimensions.input_count() + dimensions.output_count()) {
-    ostringstream error;
-    error << "Input and output sizes "
-	  << dimensions
-	  << " do not match the given vector size ("
-	  << values.size() << ")!";
-    throw invalid_argument(error.str());
-  }
-
-  vector<Interval> constraints;
-  for (unsigned int index=0 ; index < dimensions.input_count() ; ++index) {
-    unsigned int lower_bound = values[index * 2];
-    unsigned int upper_bound = values[index * 2 + 1];
-    if (lower_bound > upper_bound) {
-      std::swap(lower_bound, upper_bound);
-    }
-    constraints.push_back(Interval(lower_bound, upper_bound));
-  }
-
-  vector<unsigned int> prediction;
-  for (unsigned int index=dimensions.input_count()*2
-	 ; index<values.size()
-	 ; ++index) {
-    prediction.push_back(values[index]);
-  }
-
-  Vector p = Vector(prediction);
-  MetaRule *result = _rules.acquire(Rule(constraints, p), performance);
-  return result;
-}
-
-
 vector<MetaRule*>
 DefaultEvolution::breed(const MetaRule& father, const MetaRule& mother) const
 {
   vector<Chromosome> children;
-  _crossover(encode(father), encode(mother), children);
+  _crossover(_codec.encode(father),
+	     _codec.encode(mother),
+	     children);
 
   _listener.on_breeding(father, mother);
 
@@ -305,7 +252,7 @@ DefaultEvolution::breed(const MetaRule& father, const MetaRule& mother) const
   vector<MetaRule*> children_rules;
   for (auto each_child: children) {
       mutate(each_child);
-      MetaRule *rule = decode(father.dimensions(), each_child, performance);
+      MetaRule *rule = _codec.decode(father.dimensions(), each_child, performance);
       children_rules.push_back(rule);
       _listener.on_rule_added(*rule);
   }

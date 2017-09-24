@@ -181,18 +181,11 @@ namespace xcsf {
     virtual void
       evolve(RuleSet& rules) const;
 
+
+  private:
     std::vector<MetaRule*>
       breed(const MetaRule& father, const MetaRule& mother) const;
 
-    MetaRule*
-      decode(const Dimensions& dimensions,
-	     const Chromosome&,
-	     const Performance&) const;
-
-    Chromosome
-      encode(const MetaRule& rule) const;
-
-  private:
     void
       mutate(Chromosome& child) const;
 
@@ -211,6 +204,7 @@ namespace xcsf {
     const AlleleMutation&	_mutate;
     const EvolutionListener&	_listener;
     MetaRulePool&	_rules;
+    Codec _codec;
   };
 
 

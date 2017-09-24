@@ -24,16 +24,41 @@
 #include <vector>
 #include <iostream>
 
-using namespace std;
+#include "rule.h"
 
 
 namespace xcsf {
+
   
   typedef unsigned int Allele;
 
   typedef std::vector<Allele> Chromosome;
 
-  ostream& operator << (ostream& out, const Chromosome& chromosome);
+  std::ostream&
+    operator << (std::ostream& out, const Chromosome& chromosome);
+
+
+  /**
+   * Convert a MetaRule back and forth to a chromosome
+   */
+  class Codec
+  {
+    
+  public:
+    Codec(MetaRulePool& rules);
+
+    Chromosome
+      encode(const MetaRule& rule) const;
+
+    MetaRule*
+      decode(const Dimensions& dimensions,
+	     const Chromosome& chromosome,
+	     const Performance& performance) const;
+    
+  private:
+    MetaRulePool& _rules;
+
+  };
   
 }
 
