@@ -141,18 +141,19 @@ Evolution::~Evolution()
 
 
 DefaultEvolution::DefaultEvolution(MetaRulePool&		rules,
+				   Codec&			codec,
 				   const Decision&		decision,
 				   const Crossover&		crossover,
 				   const Selection&		selection,
 				   const AlleleMutation&	mutation,
 				   const EvolutionListener&	listener)
-  : _decision(decision)
+  : _rules(rules)
+  , _codec(codec)
+  , _decision(decision)
   , _crossover(crossover)
   , _select_parents(selection)
   , _mutate(mutation)
   , _listener(listener)
-  , _rules(rules)
-  , _codec(rules)
 {}
 
 

@@ -168,32 +168,35 @@ public:
 
 TEST_GROUP(TestDefaultEvolution)
 {
-  MetaRulePool pool;
-  Chromosome child = { 5, 10, 20 };
-  MetaRule *rule_1, *rule_2;
-  RuleSet *rules;
-  AlleleMutation *mutations;
-  Crossover *crossover;
-  Selection *selection;
-  EvolutionListener *listener;
+  MetaRulePool		 pool;
+  Chromosome		 child = { 5, 10, 20 };
+  MetaRule		*rule_1, *rule_2;
+  RuleSet		*rules;
+  AlleleMutation	*mutations;
+  Crossover		*crossover;
+  Selection		*selection;
+  EvolutionListener	*listener;
+  Codec			*codec;
 
   void setup(void)
   {
     crossover = new FakeCrossover(child);
-    rule_1 = pool.acquire(Rule({Interval(0, 50)}, { 4 }),
+    rule_1    = pool.acquire(Rule({Interval(0, 50)}, { 4 }),
 			  Performance(1.0, 1.0, 1.0));
-    rule_2 = pool.acquire(Rule({Interval(50, 100)}, { 2 }),
+    rule_2    = pool.acquire(Rule({Interval(50, 100)}, { 2 }),
 			  Performance(1.0, 1.0, 1.0));
-    rules = new RuleSet(Dimensions(1, 1), 10);
+    rules     = new RuleSet(Dimensions(1, 1), 10);
     rules->add(*rule_1);
     rules->add(*rule_2);
     selection = new DummySelection();
     mutations = new FakeAlleleMutation(77);
-    listener = new FakeListener();
+    listener  = new FakeListener();
+    codec     = new Codec(pool);
   }
 
   void teardown(void)
   {
+    delete codec;
     delete rules;
     delete crossover;
     delete selection;
@@ -209,9 +212,10 @@ TEST(TestDefaultEvolution, test_no_evolution)
 {
   mock().expectNCalls(0, "on_rule_added");
 
-  RuleSet before_evolution(*rules);
+  RuleSet	before_evolution(*rules);
   FixedDecision decision(NO_EVOLUTION, NO_MUTATION);
   DefaultEvolution evolution(pool,
+			     *codec,
 			     decision,
 			     *crossover,
 			     *selection,
@@ -230,9 +234,10 @@ TEST(TestDefaultEvolution, test_evolution_without_mutation)
   mock().expectOneCall("on_rule_added");
   mock().expectOneCall("on_breeding");
 
-  RuleSet before_evolution(*rules);
+  RuleSet	before_evolution(*rules);
   FixedDecision decision(EVOLUTION, NO_MUTATION);
   DefaultEvolution evolution(pool,
+			     *codec,
 			     decision,
 			     *crossover,
 			     *selection,
@@ -243,7 +248,7 @@ TEST(TestDefaultEvolution, test_evolution_without_mutation)
 
   CHECK_EQUAL(before_evolution.size() + 1, rules->size());
 
-  vector<unsigned int> expected_new_rule({ 5, 10, 20 });
+  vector<unsigned int>	expected_new_rule({ 5, 10, 20 });
   CHECK(expected_new_rule == (*rules)[2].as_vector());
 
   mock().checkExpectations();
@@ -256,9 +261,10 @@ TEST(TestDefaultEvolution, test_evolution_with_mutation)
   mock().expectOneCall("on_breeding");
   mock().expectNCalls(3, "on_mutation");
 
-  RuleSet before_evolution(*rules);
+  RuleSet	before_evolution(*rules);
   FixedDecision decision(EVOLUTION, MUTATION);
   DefaultEvolution evolution(pool,
+			     *codec,
 			     decision,
 			     *crossover,
 			     *selection,
@@ -269,7 +275,7 @@ TEST(TestDefaultEvolution, test_evolution_with_mutation)
 
   CHECK_EQUAL(before_evolution.size() + 1, rules->size());
 
-  vector<unsigned int> expected_new_rule({ 77, 77, 77 });
+  vector<unsigned int>	expected_new_rule({ 77, 77, 77 });
   CHECK(expected_new_rule == (*rules)[2].as_vector());
 
 
@@ -283,9 +289,10 @@ TEST(TestDefaultEvolution, test_listening)
   mock().expectOneCall("on_breeding");
   mock().expectNCalls(3, "on_mutation");
 
-  RuleSet before_evolution(*rules);
+  RuleSet	before_evolution(*rules);
   FixedDecision decision(EVOLUTION, MUTATION);
   DefaultEvolution evolution(pool,
+			     *codec,
 			     decision,
 			     *crossover,
 			     *selection,
@@ -300,15 +307,16 @@ TEST(TestDefaultEvolution, test_listening)
 
 TEST_GROUP(TestDefaultEvolutionAtCapacity)
 {
-  unsigned int capacity = 3;
-  MetaRulePool pool;
-  Chromosome child = { 5, 10, 20 };
-  MetaRule *rule_1, *rule_2, *rule_3;
-  RuleSet *rules;
-  AlleleMutation *mutations;
-  Crossover *crossover;
-  Selection *selection;
-  EvolutionListener *listener;
+  unsigned int		 capacity = 3;
+  MetaRulePool		 pool;
+  Chromosome		 child	  = { 5, 10, 20 };
+  MetaRule		*rule_1, *rule_2, *rule_3;
+  RuleSet		*rules;
+  AlleleMutation	*mutations;
+  Crossover		*crossover;
+  Selection		*selection;
+  EvolutionListener	*listener;
+  Codec			*codec;
 
   void setup(void)
   {
@@ -327,10 +335,12 @@ TEST_GROUP(TestDefaultEvolutionAtCapacity)
     selection = new DummySelection();
     mutations = new FakeAlleleMutation(77);
     listener = new FakeListener();
+    codec = new Codec(pool);
   }
 
   void teardown(void)
   {
+    delete codec;
     delete rules;
     delete crossover;
     delete selection;
@@ -351,6 +361,7 @@ TEST(TestDefaultEvolutionAtCapacity, test_evolution)
 
   FixedDecision decision(EVOLUTION, MUTATION);
   DefaultEvolution evolution(pool,
+			     *codec,
 			     decision,
 			     *crossover,
 			     *selection,

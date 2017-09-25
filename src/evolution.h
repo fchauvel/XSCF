@@ -123,16 +123,20 @@ namespace xcsf {
     virtual ~LogListener();
 
     virtual void
-      on_rule_added(const MetaRule& rule) const;
+      on_rule_added(const MetaRule& rule)
+      const;
 
     virtual void
-      on_breeding(const MetaRule& father, const MetaRule& mother) const;
+      on_breeding(const MetaRule& father, const MetaRule& mother)
+      const;
 
     virtual void
-      on_rule_deleted(const MetaRule& rule) const;
+      on_rule_deleted(const MetaRule& rule)
+      const;
 
     virtual void
-      on_mutation(const Chromosome& chromosome, const Allele& locus) const;
+      on_mutation(const Chromosome& chromosome, const Allele& locus)
+      const;
 
   private:
     std::ostream& _out;
@@ -151,10 +155,12 @@ namespace xcsf {
     virtual ~Evolution();
 
     virtual void
-      initialise(RuleSet& rule_set) const = 0;
+      initialise(RuleSet& rule_set)
+      const = 0;
 
     virtual void
-      evolve(RuleSet& rules) const = 0;
+      evolve(RuleSet& rules)
+      const = 0;
 
   };
 
@@ -167,6 +173,7 @@ namespace xcsf {
   {
   public:
     DefaultEvolution(MetaRulePool&		rules,
+		     Codec&			codec,
 		     const Decision&		decisions,
 		     const Crossover&		crossover,
 		     const Selection&		selection,
@@ -176,35 +183,40 @@ namespace xcsf {
     virtual ~DefaultEvolution();
 
     virtual void
-      initialise(RuleSet& rule_set) const;
+      initialise(RuleSet& rule_set)
+      const;
 
     virtual void
-      evolve(RuleSet& rules) const;
+      evolve(RuleSet& rules)
+      const;
 
 
   private:
     std::vector<MetaRule*>
-      breed(const MetaRule& father, const MetaRule& mother) const;
+      breed(const MetaRule& father, const MetaRule& mother)
+      const;
 
     void
-      mutate(Chromosome& child) const;
+      mutate(Chromosome& child)
+      const;
 
     void
       create_rule(RuleSet&	rules,
 		  const Vector& seed,
 		  const Value&	tolerance,
-		  const Value&  prediction) const;
+		  const Value&  prediction)
+      const;
 
     MetaRule*
       make_rule(std::vector<Interval>, std::vector<unsigned int>) const;
 
+    MetaRulePool&		_rules;
+    Codec&			_codec;
     const Decision&		_decision;
     const Crossover&		_crossover;
     const Selection&		_select_parents;
     const AlleleMutation&	_mutate;
     const EvolutionListener&	_listener;
-    MetaRulePool&	_rules;
-    Codec _codec;
   };
 
 

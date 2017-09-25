@@ -145,26 +145,26 @@ TEST(TwoRulesAgent, test_predict_active_rule)
 
 TEST_GROUP(OverlappingRulesAgent)
 {
-  Covering *covering;
-  RewardFunction *reward; 
-  TestRuleFactory evolution;
-  Agent *agent;
-  MetaRule *rule_1, *rule_2, *rule_3;
+  Covering		*covering;
+  RewardFunction	*reward; 
+  TestRuleFactory	 evolution;
+  Agent			*agent;
+  MetaRule		*rule_1, *rule_2, *rule_3;
 
   void setup(void)
   {
     covering = new FakeCovering();
-    reward = new WilsonReward(0.25, 500, 2);
-    rule_1 = new MetaRule(Rule({Interval(0, 100)}, { 4 }),
+    reward   = new WilsonReward(0.25, 500, 2);
+    rule_1   = new MetaRule(Rule({Interval(0, 100)}, { 4 }),
 			  Performance(1.0, 1.0, 1.0));
-    rule_2 = new MetaRule(Rule({Interval(0, 100)}, { 4 }),
+    rule_2   = new MetaRule(Rule({Interval(0, 100)}, { 4 }),
 			  Performance(0.8, 0.8, 1.0));
-    rule_3 = new MetaRule(Rule({Interval(0, 100)}, { 3 }),
+    rule_3   = new MetaRule(Rule({Interval(0, 100)}, { 3 }),
 			  Performance(0.5, 0.5, 1.0));
     evolution.define(*rule_1);
     evolution.define(*rule_2);
     evolution.define(*rule_3);
-    agent = new Agent(evolution, *covering, *reward);
+    agent    = new Agent(evolution, *covering, *reward);
   }
 
   void teardown(void)
@@ -187,7 +187,7 @@ TEST(OverlappingRulesAgent, test_predict_the_most_relevant_rule)
 
 TEST(OverlappingRulesAgent, test_reward)
 {
-  const Vector context({ 50 });
+  const Vector	context({ 50 });
 
   agent->predict(context);
   agent->reward(10);
@@ -200,38 +200,42 @@ TEST(OverlappingRulesAgent, test_reward)
 
 TEST_GROUP(TestAgentEvolution)
 {
-  MetaRulePool pool;
-  RewardFunction *reward;
-  Randomizer randomizer;
-  Decision *decisions;
-  Selection *selection;
-  Crossover *crossover;
-  AlleleMutation *mutation;
-  DefaultEvolution *evolution;
-  EvolutionListener *listener;
-  Covering *covering;
-  Agent *agent;
+  MetaRulePool		 pool;
+  RewardFunction	*reward;
+  Randomizer		 randomizer;
+  Decision		*decisions;
+  Selection		*selection;
+  Crossover		*crossover;
+  AlleleMutation	*mutation;
+  DefaultEvolution	*evolution;
+  EvolutionListener	*listener;
+  Covering		*covering;
+  Agent			*agent;
+  Codec			*codec;
 
   void setup(void)
   {
-    reward = new WilsonReward(0.25, 500, 2);
+    reward    = new WilsonReward(0.25, 500, 2);
     decisions = new RandomDecision(randomizer, 0.25, 0.1);
     selection = new RouletteWheel(randomizer);
     crossover = new TwoPointCrossover(randomizer);
-    mutation = new RandomAlleleMutation(randomizer);
-    listener = new LogListener(cout);
+    mutation  = new RandomAlleleMutation(randomizer);
+    listener  = new LogListener(cout);
+    codec     = new Codec(pool);
     evolution = new DefaultEvolution(pool,
+				     *codec,
 				     *decisions,
 				     *crossover,
 				     *selection,
 				     *mutation,
 				     *listener);
-    covering = new FakeCovering();
-    agent = new Agent(*evolution, *covering, *reward);
+    covering  = new FakeCovering();
+    agent     = new Agent(*evolution, *covering, *reward);
   }
 
   void teardown(void)
   {
+    delete codec;
     delete decisions;
     delete selection;
     delete crossover;

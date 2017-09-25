@@ -50,7 +50,10 @@ main(int argc, char** argv)
   log.open(LOG_FILE, std::ofstream::out);
   LogListener listener(log);
 
+  Codec codec(pool);
+
   DefaultEvolution evolution(pool,
+			     codec,
 			     decisions,
 			     crossover,
 			     selection,
