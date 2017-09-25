@@ -173,7 +173,7 @@ namespace xcsf {
   {
   public:
     DefaultEvolution(MetaRulePool&		rules,
-		     Codec&			codec,
+		     const Codec&		codec,
 		     const Decision&		decisions,
 		     const Crossover&		crossover,
 		     const Selection&		selection,
@@ -211,7 +211,7 @@ namespace xcsf {
       make_rule(std::vector<Interval>, std::vector<unsigned int>) const;
 
     MetaRulePool&		_rules;
-    Codec&			_codec;
+    const Codec&		_codec;
     const Decision&		_decision;
     const Crossover&		_crossover;
     const Selection&		_select_parents;

@@ -141,7 +141,7 @@ Evolution::~Evolution()
 
 
 DefaultEvolution::DefaultEvolution(MetaRulePool&		rules,
-				   Codec&			codec,
+				   const Codec&			codec,
 				   const Decision&		decision,
 				   const Crossover&		crossover,
 				   const Selection&		selection,

@@ -48,7 +48,7 @@ main(int argc, char** argv)
 
   std::ofstream log;
   log.open(LOG_FILE, std::ofstream::out);
-  LogListener listener(log);
+  LogListener	listener(log);
 
   Codec codec(pool);
 
